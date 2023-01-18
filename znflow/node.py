@@ -56,13 +56,7 @@ class EdgeAttribute(zninit.Descriptor):
 
 
 class Node(zninit.ZnInit, NodeBaseMixin):
-    # TODO is _id_ a good name? It should be internal and can later be a combination
-    #  of node_name, rev, ...
-    _id_: str = zninit.Descriptor(None, use_repr=False)
-
     def __post_init__(self):
-        if self._id_ is None:
-            self._id_ = self.__class__.__name__
         if self._graph_ is not None:
             """Add the Node to the DiGraph upon instantiating."""
             self._graph_.add_node(self)

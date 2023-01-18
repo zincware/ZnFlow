@@ -26,12 +26,6 @@ def test_matmul():
         node @ 25
 
 
-def test_post_init():
-    """Test the post init method."""
-    assert MyNode()._id_ == "MyNode"
-    assert MyNode(_id_="HelloWorld")._id_ == "HelloWorld"
-
-
 class NodeWithAttribute(znflow.Node):
     """Custom Node."""
 
