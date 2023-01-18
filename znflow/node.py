@@ -54,6 +54,7 @@ class EdgeAttribute(zninit.Descriptor):
 
         super().__set__(instance, value)
 
+
 class Node(zninit.ZnInit, NodeBaseMixin):
     # TODO is _id_ a good name? It should be internal and can later be a combination
     #  of node_name, rev, ...
@@ -99,6 +100,7 @@ class Node(zninit.ZnInit, NodeBaseMixin):
 
 def nodify(function):
     """Decorator to create a Node from a function."""
+
     def wrapper(*args, **kwargs):
         """Wrapper function for the decorator."""
         dag = NodeBaseMixin._graph_
@@ -118,6 +120,7 @@ def nodify(function):
 
 class AddFunctionConnection(IterableHandler):
     """Connect 'FunctionConnector' or 'NodeConnector' to a given FunctionConnector."""
+
     def default(self, value, **kwargs):
         """Default method of IterableHandler."""
         connector: FunctionConnector = kwargs.pop("connector")
