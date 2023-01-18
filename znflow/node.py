@@ -20,7 +20,7 @@ class AddEdge(IterableHandler):
         if isinstance(value, NodeConnector):
             if value.graph is not None:
                 assert (
-                        value.graph == graph
+                    value.graph == graph
                 ), f"DiGraphs are not the same '{value.graph}' != '{graph}'"
             connector = NodeConnector(graph=graph, node=node, attribute=attribute_name)
             add_edge(connector, value)
