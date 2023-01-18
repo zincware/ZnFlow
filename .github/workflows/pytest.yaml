@@ -31,6 +31,4 @@ jobs:
           poetry install --no-interaction
       - name: Pytest
         run: |
-          poetry run coverage run -m pytest --benchmark-autosave
-          poetry run coverage xml
-          poetry run coverage lcov
+          poetry run coverage run -m pytest
