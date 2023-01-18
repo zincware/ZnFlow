@@ -4,7 +4,7 @@ import contextlib
 import functools
 
 
-def disable_dag(func):
+def disable_graph(func):
     """Decorator to disable DiGraph in 'NodeBaseMixin'."""
 
     @functools.wraps(func)
@@ -18,12 +18,12 @@ def disable_dag(func):
 @contextlib.contextmanager
 def update__graph_(value=None):
     """Temporarily update the DiGraph in 'NodeBaseMixin'."""
-    dag = NodeBaseMixin._graph_
+    graph = NodeBaseMixin._graph_
     NodeBaseMixin._graph_ = value
     try:
         yield
     finally:
-        NodeBaseMixin._graph_ = dag
+        NodeBaseMixin._graph_ = graph
 
 
 class NodeBaseMixin:

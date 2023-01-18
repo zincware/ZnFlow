@@ -38,7 +38,7 @@ def test_set_edge_attribute():
     assert node.inputs == "HelloWorld"
 
 
-def test_set_edge_attribute_dag():
+def test_set_edge_attribute_graph():
     """Check '__set__' and '__get__' of 'EdgeAttribute' inside a DiGraph."""
 
     magic_mock = mock.MagicMock()

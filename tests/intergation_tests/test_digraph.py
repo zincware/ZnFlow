@@ -40,11 +40,11 @@ class ComputeSum(znflow.Node):
 
 
 def test_combine_nodes():
-    with znflow.DiGraph() as dag:
+    with znflow.DiGraph() as graph:
         n1 = ComputeSum(inputs=(1, 2, 3))
         n2 = ComputeSum(inputs=(4, 5, 6))
         n3 = ComputeSum(inputs=(n1.outputs, n2.outputs))
 
-    dag.run()
+    graph.run()
 
     assert n3.outputs == 21

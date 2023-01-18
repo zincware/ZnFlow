@@ -17,12 +17,12 @@ def add(*args):
 
 
 def test_single_node_creation():
-    with znflow.DiGraph() as dag:
+    with znflow.DiGraph() as graph:
         node = Node(inputs=2)
         assert node.inputs == znflow.connectors.NodeConnector(
-            graph=dag, node=node, attribute="inputs"
+            graph=graph, node=node, attribute="inputs"
         )
-    assert node in dag
+    assert node in graph
     # access to the attribute outside the graph works just fine
     assert node.inputs == 2
     node.run()
@@ -35,13 +35,13 @@ def test_single_node_creation():
 
 
 def test_single_nodify_creation():
-    with znflow.DiGraph() as dag:
+    with znflow.DiGraph() as graph:
         func = add(1, 2, 3)
         assert isinstance(func, znflow.connectors.FunctionConnector)
-        assert func.graph == dag
+        assert func.graph == graph
         assert func.args == (1, 2, 3)
 
-    assert func in dag
+    assert func in graph
 
     assert func.get_result() == 6
     assert add(1, 2, 3) == 6

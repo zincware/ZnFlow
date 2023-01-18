@@ -26,10 +26,10 @@ def test_eager():
 
 
 def test_graph():
-    with znflow.DiGraph() as dag:
+    with znflow.DiGraph() as graph:
         node = Node(inputs=1)
 
-    dag.run()
+    graph.run()
     assert node.outputs == 2
 
 
@@ -42,11 +42,11 @@ def test_eager_connect():
 
 
 def test_graph_connect():
-    with znflow.DiGraph() as dag:
+    with znflow.DiGraph() as graph:
         node = Node(inputs=1)
         node2 = Node(inputs=node.outputs)
 
-    dag.run()
+    graph.run()
     assert node2.outputs == 4
 
 
@@ -71,10 +71,10 @@ def test_eager_multi():
 
 @pytest.mark.parametrize("size", range(1, 10))
 def test_graph_size(size: int):
-    with znflow.DiGraph() as dag:
+    with znflow.DiGraph() as graph:
         [Node(inputs=i) for i in range(size)]
 
-    assert len(dag) == size
+    assert len(graph) == size
 
 
 # @pytest.mark.parametrize("size", range(1, 10))
@@ -87,7 +87,7 @@ def test_graph_size(size: int):
 
 
 def test_graph_multi():
-    with znflow.DiGraph() as dag:
+    with znflow.DiGraph() as graph:
         node1 = Node(inputs=5)
         node2 = Node(inputs=10)
         node3 = Node(inputs=node1.outputs)
@@ -95,6 +95,6 @@ def test_graph_multi():
         node5 = SumNodes(inputs=[node3.outputs, node4.outputs])
         node6 = SumNodes(inputs=[node2.outputs, node5.outputs])
         node7 = SumNodes(inputs=[node6.outputs])
-    dag.run()
+    graph.run()
 
     assert node7.outputs == 80

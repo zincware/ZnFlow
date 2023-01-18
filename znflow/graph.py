@@ -10,9 +10,9 @@ class UpdateValueWithConnector(IterableHandler):
     def default(self, value, *args, **kwargs):
         node = kwargs.pop("node")
         attribute_name = kwargs.pop("attribute_name")
-        dag = kwargs.pop("graph")
+        graph = kwargs.pop("graph")
         if isinstance(value, NodeConnector):
-            NodeBaseMixin._graph_ = dag
+            NodeBaseMixin._graph_ = graph
             setattr(node, attribute_name, value)
             NodeBaseMixin._graph_ = None
 
@@ -20,7 +20,7 @@ class UpdateValueWithConnector(IterableHandler):
 class DiGraph(nx.MultiDiGraph):
     def __enter__(self):
         if NodeBaseMixin._graph_ is not None:
-            raise ValueError("DiGraph already exists. Nested DAGs are not supported.")
+            raise ValueError("DiGraph already exists. Nested Graphs are not supported.")
         NodeBaseMixin._graph_ = self
         return self
 

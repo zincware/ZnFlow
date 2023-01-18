@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import zninit
 
-from znflow.base import NodeBaseMixin, disable_dag
+from znflow.base import NodeBaseMixin, disable_graph
 from znflow.connectors import Connector, FunctionConnector, NodeConnector, add_edge
 from znflow.utils import IterableHandler
 
@@ -16,20 +16,20 @@ class AddEdge(IterableHandler):
     def default(self, value, *args, **kwargs):
         node = kwargs.pop("node")
         attribute_name = kwargs.pop("attribute_name")
-        dag = NodeBaseMixin._graph_
+        graph = NodeBaseMixin._graph_
         if isinstance(value, NodeConnector):
             if value.graph is not None:
                 assert (
-                    value.graph == dag
-                ), f"DAGs are not the same '{value.graph}' != '{dag}'"
-            connector = NodeConnector(graph=dag, node=node, attribute=attribute_name)
+                        value.graph == graph
+                ), f"DiGraphs are not the same '{value.graph}' != '{graph}'"
+            connector = NodeConnector(graph=graph, node=node, attribute=attribute_name)
             add_edge(connector, value)
         elif isinstance(value, NodeBaseMixin):
-            connector = NodeConnector(graph=dag, node=node, attribute=attribute_name)
-            node_connector = NodeConnector(dag=dag, node=value)
+            connector = NodeConnector(graph=graph, node=node, attribute=attribute_name)
+            node_connector = NodeConnector(graph=graph, node=value)
             add_edge(connector, node_connector)
         elif isinstance(value, FunctionConnector):
-            connector = NodeConnector(graph=dag, node=node, attribute=attribute_name)
+            connector = NodeConnector(graph=graph, node=node, attribute=attribute_name)
             add_edge(connector, value)
 
 
@@ -61,7 +61,7 @@ class Node(zninit.ZnInit, NodeBaseMixin):
             """Add the Node to the DiGraph upon instantiating."""
             self._graph_.add_node(self)
 
-    @disable_dag
+    @disable_graph
     def __repr__(self):
         """Get the representation.
 
@@ -97,12 +97,12 @@ def nodify(function):
 
     def wrapper(*args, **kwargs):
         """Wrapper function for the decorator."""
-        dag = NodeBaseMixin._graph_
-        if dag is not None:
+        graph = NodeBaseMixin._graph_
+        if graph is not None:
             connector = FunctionConnector(
-                func=function, args=args, kwargs=kwargs, graph=dag
+                func=function, args=args, kwargs=kwargs, graph=graph
             )
-            dag.add_node(connector)
+            graph.add_node(connector)
             AddFunctionConnection().handle(args, connector=connector)
             AddFunctionConnection().handle(kwargs, connector=connector)
 

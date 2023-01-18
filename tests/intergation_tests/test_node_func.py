@@ -29,11 +29,11 @@ def test_eager():
 
 
 def test_graph():
-    with znflow.DiGraph() as dag:
+    with znflow.DiGraph() as graph:
         n1 = random_number(5)
         n2 = random_number(10)
         compute_sum = ComputeSum(inputs=[n1, n2])
         n3 = random_number(compute_sum.outputs)
 
-    dag.run()
+    graph.run()
     assert n3.get_result() == 0.2903973544626711
