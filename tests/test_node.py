@@ -54,8 +54,8 @@ def test_get_node_attribute():
     """Check '__set__' and '__get__' of 'EdgeAttribute' inside a DiGraph."""
 
     with pytest.raises(AttributeError):
-        _ = NodeWithAttribute(inputs=42).dag
+        _ = NodeWithAttribute(inputs=42).does_not_exist
 
     with znflow.base.update__graph_(value=mock.MagicMock()):
         with pytest.raises(AttributeError):
-            _ = NodeWithAttribute(inputs=42).dag
+            _ = NodeWithAttribute(inputs=42).does_not_exist
