@@ -40,14 +40,14 @@ class DiGraph(nx.MultiDiGraph):
                     value, node=node, attribute_name=descriptor.name, graph=self
                 )
 
-    def sorted_iter(self):
+    def get_sorted_nodes(self):
         all_pipelines = []
         for stage in self.reverse():
             all_pipelines += nx.dfs_postorder_nodes(self.reverse(), stage)
         return list(dict.fromkeys(all_pipelines))  # remove duplicates but keep order
 
     def run(self, method="run"):  # TODO why is there a method argument?
-        for node in self.sorted_iter():
+        for node in self.get_sorted_nodes():
             from znflow.node import update_connectors_to_results
 
             update_connectors_to_results(node)
