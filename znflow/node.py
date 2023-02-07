@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import uuid
 
 from znflow.base import FunctionFuture, NodeBaseMixin, get_graph
@@ -25,6 +26,7 @@ class Node(NodeBaseMixin):
 def nodify(function):
     """Decorator to create a Node from a function."""
 
+    @functools.wraps(function)
     def wrapper(*args, **kwargs):
         """Wrapper function for the decorator."""
         graph = get_graph()
