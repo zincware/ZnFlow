@@ -24,4 +24,5 @@ class DiGraph(nx.MultiDiGraph):
         if isinstance(node_for_adding, NodeBaseMixin):
             super().add_node(node_for_adding.uuid, value=node_for_adding, **attr)
         else:
-            super().add_node(node_for_adding, **attr)
+            raise ValueError("Only Nodes are supported.")
+            # super().add_node(node_for_adding, **attr)
