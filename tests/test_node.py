@@ -22,13 +22,18 @@ class ZnInitNode(zninit.ZnInit, znflow.Node):
 
 @znflow.nodify
 def add(value):
-    return value + 1
+    return value
 
 
 @pytest.mark.parametrize("cls", [PlainNode, DataclassNode, ZnInitNode, add])
 def test_Node(cls):
     with znflow.DiGraph() as graph:
         node = cls(value=42)
+
+    if isinstance(node, (PlainNode, DataclassNode, ZnInitNode)):
+        assert node.value == 42
+    elif isinstance(node, znflow.FunctionFuture):
+        assert node.result() == 42
 
     assert node.uuid in graph
     assert graph.nodes[node.uuid]["value"] is node
