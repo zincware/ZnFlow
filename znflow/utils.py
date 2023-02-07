@@ -1,6 +1,31 @@
 """Utils of the 'ZnFlow' package."""
 import abc
+import contextlib
 import functools
+
+from znflow.graph import get_graph, set_graph
+
+
+@contextlib.contextmanager
+def update__graph_(value=None):
+    """Temporarily update the DiGraph in 'NodeBaseMixin'."""
+    graph = get_graph()
+    set_graph(value)
+    try:
+        yield
+    finally:
+        set_graph(graph)
+
+
+def disable_graph(func):
+    """Decorator to disable DiGraph in 'NodeBaseMixin'."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with update__graph_():
+            return func(*args, **kwargs)
+
+    return wrapper
 
 
 class IterableHandler(abc.ABC):

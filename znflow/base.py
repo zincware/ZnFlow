@@ -1,35 +1,48 @@
 from __future__ import annotations
 
-import contextlib
-import functools
-
-
-def disable_graph(func):
-    """Decorator to disable DiGraph in 'NodeBaseMixin'."""
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        with update__graph_():
-            return func(*args, **kwargs)
-
-    return wrapper
-
-
-@contextlib.contextmanager
-def update__graph_(value=None):
-    """Temporarily update the DiGraph in 'NodeBaseMixin'."""
-    graph = NodeBaseMixin._graph_
-    NodeBaseMixin._graph_ = value
-    try:
-        yield
-    finally:
-        NodeBaseMixin._graph_ = graph
+import dataclasses
+import typing
+from uuid import UUID
 
 
 class NodeBaseMixin:
     """A Parent for all Nodes.
 
     This class is used to globally access and change all classes that inherit from it.
+
+    Attributes
+    ----------
+    _graph_ : DiGraph
+    uuid : UUID
     """
 
     _graph_ = None
+    _uuid: UUID = None
+
+    @property
+    def uuid(self):
+        return self._uuid
+
+    @uuid.setter
+    def uuid(self, value):
+        if self._uuid is not None:
+            raise ValueError(f"{self} already has a uuid assigned.")
+        self._uuid = value
+
+
+def get_graph():
+    return NodeBaseMixin._graph_
+
+
+def set_graph(value):
+    NodeBaseMixin._graph_ = value
+
+
+@dataclasses.dataclass
+class FunctionFuture(NodeBaseMixin):
+    function: typing.Callable
+    args: typing.Tuple
+    kwargs: typing.Dict
+
+    def result(self):
+        return self.function(*self.args, **self.kwargs)
