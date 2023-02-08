@@ -25,11 +25,7 @@ class Node(NodeBaseMixin):
     def __getattribute__(self, item):
         value = super().__getattribute__(item)
         if get_graph() is not None:
-            if (
-                item not in type(self)._protected_
-                and not item.startswith("__")
-                and not item.startswith("_")
-            ):
+            if item not in type(self)._protected_ and not item.startswith("_"):
                 connector = Connection(instance=self, attribute=item)
                 return connector
         return value
