@@ -6,6 +6,8 @@ from znflow import utils
 from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph, set_graph
 from znflow.node import Node
 
+log = logging.getLogger(__name__)
+
 
 class _AttributeToConnection(utils.IterableHandler):
     def default(self, value, **kwargs):
@@ -37,9 +39,6 @@ class _AttributeToConnection(utils.IterableHandler):
         return value
 
 
-log = logging.getLogger(__name__)
-
-
 class DiGraph(nx.MultiDiGraph):
     def __enter__(self):
         if get_graph() is not None:
@@ -56,7 +55,7 @@ class DiGraph(nx.MultiDiGraph):
 
         for node in self.nodes:
             node_instance = self.nodes[node]["value"]
-            log.warning(f"Node {node} ({node_instance}) was added to the graph.")
+            log.debug(f"Node {node} ({node_instance}) was added to the graph.")
             if isinstance(node_instance, FunctionFuture):
                 node_instance.args = _AttributeToConnection()(
                     node_instance.args, node_instance=node_instance, graph=self
@@ -91,7 +90,7 @@ class DiGraph(nx.MultiDiGraph):
             # super().add_node(node_for_adding, **attr)
 
     def add_edge(self, u_of_edge, v_of_edge, **attr):
-        log.warning(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
+        log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             assert u_of_edge.uuid in self, f"'{u_of_edge.uuid=}' not in '{self=}'"
             assert v_of_edge.uuid in self, f"'{v_of_edge.uuid=}' not in '{self=}'"

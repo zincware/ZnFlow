@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
-import logging
 import typing
 from uuid import UUID
-
-log = logging.getLogger(__name__)
 
 
 class NodeBaseMixin:
