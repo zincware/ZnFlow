@@ -14,7 +14,8 @@ pip install znflow
 
 ### Connecting Functions
 
-With ZnFlow you can connect functions to each other by using the `nodify` decorator. Inside the ``znflow.DiGraph`` the decorator will return a `FunctionFuture` object that can be used to connect the function to other nodes. The `FunctionFuture` object will also be used to retrieve the result of the function.
+With ZnFlow you can connect functions to each other by using the `@nodify` decorator. Inside the ``znflow.DiGraph`` the decorator will return a `FunctionFuture` object that can be used to connect the function to other nodes. The `FunctionFuture` object will also be used to retrieve the result of the function.
+Outside the ``znflow.DiGraph`` the function behaves as a normal function.
 ```python
 import znflow
 
@@ -45,6 +46,9 @@ print(n3.get_result())
 ### Connecting Classes
 It is also possible to connect classes.
 They can be connected either directly or via class attributes.
+This is possible by returning ``znflow.Connections`` inside the ``znflow.DiGraph`` context manager.
+Outside the ``znflow.DiGraph`` the class behaves as a normal class.
+
 In the following example we use a dataclass, but it works with all Python classes that inherit from ``znflow.Node``.
 
 ```python
