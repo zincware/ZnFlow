@@ -69,8 +69,8 @@ def test_ConnectionNodeNode(cls1, cls2):
     edge: dict = graph.get_edge_data(node1.uuid, node2.uuid)
     assert edge is not None
     # we have one connection, so we use 0
-    assert edge[0]["i_attr"] == "value"
-    assert edge[0]["j_attr"] == "value"
+    assert edge[0]["u_attr"] == "value"
+    assert edge[0]["v_attr"] == "value"
 
 
 @pytest.mark.parametrize("cls2", [add])

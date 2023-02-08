@@ -127,9 +127,16 @@ class DiGraph(nx.MultiDiGraph):
                         value,
                     ),
                 )
-
-            _UpdateConnectors()(node)
             if isinstance(node, Node):
                 node.run()
             elif isinstance(node, FunctionFuture):
                 node.compute_result()
+
+    def write_graph(self, *args):
+        for node in args:
+            if isinstance(node, (list, tuple)):
+                self.write_graph(*node)
+            else:
+                self.add_node(node)
+        with self:
+            pass

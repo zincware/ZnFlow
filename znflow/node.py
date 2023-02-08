@@ -63,7 +63,7 @@ class Node(NodeBaseMixin):
                 ), f"'{self.uuid=}' not in '{self._graph_=}'"
                 assert value.uuid in self._graph_
                 self._graph_.add_edge(
-                    value.uuid, self.uuid, i_attr=value.attribute, j_attr=item
+                    value.uuid, self.uuid, u_attr=value.attribute, v_attr=item
                 )
         super().__setattr__(item, value)
 
