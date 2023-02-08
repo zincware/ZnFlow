@@ -4,7 +4,6 @@ import contextlib
 import functools
 
 
-
 @contextlib.contextmanager
 def update__graph_(value=None):
     """Temporarily update the DiGraph in 'NodeBaseMixin'."""

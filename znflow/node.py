@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 import uuid
 
-from znflow.base import FunctionFuture, NodeBaseMixin, get_graph
+from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph
 
 
 class Node(NodeBaseMixin):
@@ -21,6 +21,27 @@ class Node(NodeBaseMixin):
         if graph is not None:
             graph.add_node(instance)
         return instance
+
+    def __getattribute__(self, item):
+        value = super().__getattribute__(item)
+        if get_graph() is not None:
+            if (
+                item not in type(self)._protected_
+                and not item.startswith("__")
+                and not item.startswith("_")
+            ):
+                connector = Connection(instance=self, attribute=item)
+                return connector
+        return value
+
+    def __setattr__(self, item, value) -> None:
+        if isinstance(value, Connection):
+            assert self.uuid in self._graph_, f"'{self.uuid=}' not in '{self._graph_=}'"
+            assert value.uuid in self._graph_
+            self._graph_.add_edge(
+                value.uuid, self.uuid, i_attr=value.attribute, j_attr=item
+            )
+        super().__setattr__(item, value)
 
 
 def nodify(function):
