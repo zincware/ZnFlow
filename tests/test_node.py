@@ -47,7 +47,7 @@ def test_Node(cls):
     if isinstance(node, (PlainNode, DataclassNode, ZnInitNode)):
         assert node.value == 42
     elif isinstance(node, znflow.FunctionFuture):
-        assert node.result() == 42
+        assert node.result == 42
 
     assert node.uuid in graph
     assert graph.nodes[node.uuid]["value"] is node

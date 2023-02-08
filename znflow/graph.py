@@ -42,7 +42,7 @@ class _AttributeToConnection(utils.IterableHandler):
 class _UpdateConnectors(utils.IterableHandler):
     def default(self, value, **kwargs):
         if isinstance(value, Connection):
-            return value.result()
+            return value.result
         return value
 
 
@@ -136,4 +136,4 @@ class DiGraph(nx.MultiDiGraph):
             if isinstance(node, Node):
                 node.run()
             elif isinstance(node, FunctionFuture):
-                node.result()
+                node.compute_result()

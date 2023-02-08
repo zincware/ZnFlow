@@ -19,7 +19,12 @@ class NodeBaseMixin:
     _graph_ = None
     _uuid: UUID = None
 
-    _protected_ = ["_graph_", "uuid", "_uuid"]  # TODO consider addign regex patterns
+    _protected_ = [
+        "_graph_",
+        "uuid",
+        "_uuid",
+        "result",
+    ]  # TODO consider adding regex patterns
 
     @property
     def uuid(self):
@@ -57,6 +62,7 @@ class Connection:
     def uuid(self):
         return self.instance.uuid
 
+    @property
     def result(self):
         return getattr(self.instance, self.attribute)
 
@@ -71,7 +77,12 @@ class FunctionFuture(NodeBaseMixin):
 
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
+    def compute_result(self):
+        self._result = self.function(*self.args, **self.kwargs)
+
+    @property
     def result(self):
         if self._result is None:
-            self._result = self.function(*self.args, **self.kwargs)
+            self.compute_result()
+
         return self._result
