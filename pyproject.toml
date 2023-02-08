@@ -9,7 +9,6 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 networkx = "^2.8.8"
-matplotlib = "^3.6.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
