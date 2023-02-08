@@ -129,7 +129,6 @@ class DiGraph(nx.MultiDiGraph):
                 )
             node.run()
 
-
     def write_graph(self, *args):
         for node in args:
             if isinstance(node, (list, tuple)):
