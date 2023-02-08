@@ -10,6 +10,9 @@ class Node(NodeBaseMixin):
     def run(self):
         raise NotImplementedError
 
+    def __matmul__(self, other):
+        return Connection(self, other)
+
     def __new__(cls, *args, **kwargs):
         try:
             instance = super().__new__(cls, *args, **kwargs)
