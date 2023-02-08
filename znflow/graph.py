@@ -18,23 +18,23 @@ class _AttributeToConnection(utils.IterableHandler):
         if isinstance(value, FunctionFuture):
             connection = Connection(value, attribute="result")
             if v_attr is None:
-                graph.add_edge(connection, node_instance)
+                graph.add_connections(connection, node_instance)
             else:
-                graph.add_edge(connection, node_instance, v_attr=v_attr)
+                graph.add_connections(connection, node_instance, v_attr=v_attr)
 
             return connection
         elif isinstance(value, Node):
             connection = Connection(value, attribute=None)
             if v_attr is None:
-                graph.add_edge(connection, node_instance)
+                graph.add_connections(connection, node_instance)
             else:
-                graph.add_edge(connection, node_instance, v_attr=v_attr)
+                graph.add_connections(connection, node_instance, v_attr=v_attr)
             return connection
         elif isinstance(value, Connection):
             if v_attr is None:
-                graph.add_edge(value, node_instance)
+                graph.add_connections(value, node_instance)
             else:
-                graph.add_edge(value, node_instance, v_attr=v_attr)
+                graph.add_connections(value, node_instance, v_attr=v_attr)
             return value
         return value
 
@@ -89,16 +89,16 @@ class DiGraph(nx.MultiDiGraph):
             raise ValueError("Only Nodes are supported.")
             # super().add_node(node_for_adding, **attr)
 
-    def add_edge(self, u_of_edge, v_of_edge, **attr):
+    def add_connections(self, u_of_edge, v_of_edge, **attr):
         log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             assert u_of_edge.uuid in self, f"'{u_of_edge.uuid=}' not in '{self=}'"
             assert v_of_edge.uuid in self, f"'{v_of_edge.uuid=}' not in '{self=}'"
-            super().add_edge(
+            self.add_edge(
                 u_of_edge.uuid,
                 v_of_edge.uuid,
                 u_attr=u_of_edge.attribute,
                 **attr,
             )
         else:
-            super().add_edge(u_of_edge, v_of_edge, **attr)
+            raise ValueError("Only Connections and Nodes are supported.")
