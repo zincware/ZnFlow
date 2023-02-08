@@ -76,15 +76,20 @@ def test_ConnectionNodifyNodify(cls1, cls2):
     assert edge[0]["u_attr"] == "result"
 
 
-# def test_Connection():
-#     with znflow.DiGraph() as graph:
-#         node1 = PlainNode(value=42)
-#         node2 = PlainNode(value=node1)
-#
-#         # node1.value = node2.value
-#     assert isinstance(node2.value, znflow.Connection)
-#     assert node2.value.uuid == node1.uuid
-#     assert node2.value.attribute is None
-#
-#     assert node1.uuid in graph
-#     assert node2.uuid in graph
+def test_Connection():
+    with znflow.DiGraph() as graph:
+        node1 = PlainNode(value=42)
+        node2 = PlainNode(value=node1)
+
+        # node1.value = node2.value
+    assert isinstance(node2.value, znflow.Connection)
+    assert node2.value.uuid == node1.uuid
+    assert node2.value.attribute is None
+    #
+    assert node1.uuid in graph
+    assert node2.uuid in graph
+    #
+    edge: dict = graph.get_edge_data(node1.uuid, node2.uuid)
+    assert edge is not None
+    assert edge[0]["u_attr"] is None
+    assert edge[0]["v_attr"] == "value"

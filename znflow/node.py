@@ -35,12 +35,15 @@ class Node(NodeBaseMixin):
         return value
 
     def __setattr__(self, item, value) -> None:
-        if isinstance(value, Connection):
-            assert self.uuid in self._graph_, f"'{self.uuid=}' not in '{self._graph_=}'"
-            assert value.uuid in self._graph_
-            self._graph_.add_edge(
-                value.uuid, self.uuid, i_attr=value.attribute, j_attr=item
-            )
+        if get_graph() is not None:
+            if isinstance(value, Connection):
+                assert (
+                    self.uuid in self._graph_
+                ), f"'{self.uuid=}' not in '{self._graph_=}'"
+                assert value.uuid in self._graph_
+                self._graph_.add_edge(
+                    value.uuid, self.uuid, i_attr=value.attribute, j_attr=item
+                )
         super().__setattr__(item, value)
 
 

@@ -4,9 +4,10 @@ import networkx as nx
 
 from znflow import utils
 from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph, set_graph
+from znflow.node import Node
 
 
-class _FunctionFutureToConnection(utils.IterableHandler):
+class _AttributeToConnection(utils.IterableHandler):
     def default(self, value, **kwargs):
         if isinstance(value, FunctionFuture):
             node_instance = kwargs["node_instance"]
@@ -15,6 +16,13 @@ class _FunctionFutureToConnection(utils.IterableHandler):
 
             graph.add_edge(connection, node_instance)
 
+            return connection
+        elif isinstance(value, Node):
+            node_instance = kwargs["node_instance"]
+            graph = kwargs["graph"]
+            v_attr = kwargs["v_attr"]
+            connection = Connection(value, attribute=None)
+            graph.add_edge(connection, node_instance, v_attr=v_attr)
             return connection
         return value
 
@@ -40,12 +48,24 @@ class DiGraph(nx.MultiDiGraph):
             node_instance = self.nodes[node]["value"]
             log.warning(f"Node {node} ({node_instance}) was added to the graph.")
             if isinstance(node_instance, FunctionFuture):
-                node_instance.args = _FunctionFutureToConnection()(
+                node_instance.args = _AttributeToConnection()(
                     node_instance.args, node_instance=node_instance, graph=self
                 )
-                node_instance.kwargs = _FunctionFutureToConnection()(
+                node_instance.kwargs = _AttributeToConnection()(
                     node_instance.kwargs, node_instance=node_instance, graph=self
                 )
+            elif isinstance(node_instance, Node):
+                for attribute in dir(node_instance):
+                    if attribute.startswith("_") or attribute in Node._protected_:
+                        continue
+                    value = getattr(node_instance, attribute)
+                    setattr(
+                        node_instance,
+                        attribute,
+                        _AttributeToConnection()(
+                            value, node_instance=node_instance, graph=self, v_attr=attribute
+                        ),
+                    )
 
     def add_node(self, node_for_adding, **attr):
         if len(attr):
