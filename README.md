@@ -30,7 +30,7 @@ with znflow.DiGraph() as graph:
     mean = compute_mean(2, 8)
 
 graph.run()
-print(mean.get_result())
+print(mean.result)
 # >>> 5
 
 with znflow.DiGraph() as graph:
@@ -39,7 +39,7 @@ with znflow.DiGraph() as graph:
     n3 = compute_mean(n1, n2)
 
 graph.run()
-print(n3.get_result())
+print(n3.result)
 # >>> 7.5
 ```
 
