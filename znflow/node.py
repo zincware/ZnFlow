@@ -7,6 +7,8 @@ from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph
 
 
 class Node(NodeBaseMixin):
+    _in_construction = False
+
     def run(self):
         raise NotImplementedError
 
@@ -14,11 +16,26 @@ class Node(NodeBaseMixin):
         return Connection(self, other)
 
     def __new__(cls, *args, **kwargs):
+        cls._in_construction = True
         try:
             instance = super().__new__(cls, *args, **kwargs)
         except TypeError:  # e.g. in dataclasses the arguments are passed to __new__
             # print("TypeError: ...")
             instance = super().__new__(cls)
+        cls._in_construction = False
+
+        if "__init__" in dir(cls):
+
+            def wrap_init(func):
+                @functools.wraps(func)
+                def wrapper(*args, **kwargs):
+                    cls._in_construction = True
+                    func(*args, **kwargs)
+                    cls._in_construction = False
+
+                return wrapper
+
+            cls.__init__ = wrap_init(cls.__init__)
 
         instance.uuid = uuid.uuid4()
 
@@ -32,6 +49,8 @@ class Node(NodeBaseMixin):
         value = super().__getattribute__(item)
         if get_graph() is not None:
             if item not in type(self)._protected_ and not item.startswith("_"):
+                if self._in_construction:
+                    return value
                 connector = Connection(instance=self, attribute=item)
                 return connector
         return value
