@@ -1,4 +1,7 @@
 [![zincware](https://img.shields.io/badge/Powered%20by-zincware-darkcyan)](https://github.com/zincware)
+[![Coverage Status](https://coveralls.io/repos/github/zincware/ZnFlow/badge.svg?branch=main)](https://coveralls.io/github/zincware/ZnFlow?branch=main)
+[![PyPI version](https://badge.fury.io/py/znflow.svg)](https://badge.fury.io/py/znflow)
+
 # ZnFlow
 
 The `ZnFlow` package provides a basic structure for building computational graphs based on functions or classes. It is designed as a lightweight abstraction layer to 
