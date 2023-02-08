@@ -1,6 +1,25 @@
+import logging
+
 import networkx as nx
 
-from znflow.base import NodeBaseMixin, get_graph, set_graph
+from znflow import utils
+from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph, set_graph
+
+
+class _FunctionFutureToConnection(utils.IterableHandler):
+    def default(self, value, **kwargs):
+        if isinstance(value, FunctionFuture):
+            node_instance = kwargs["node_instance"]
+            graph = kwargs["graph"]
+            connection = Connection(value, attribute="result")
+
+            graph.add_edge(connection, node_instance)
+
+            return connection
+        return value
+
+
+log = logging.getLogger(__name__)
 
 
 class DiGraph(nx.MultiDiGraph):
@@ -17,6 +36,17 @@ class DiGraph(nx.MultiDiGraph):
             )
         set_graph(None)
 
+        for node in self.nodes:
+            node_instance = self.nodes[node]["value"]
+            log.warning(f"Node {node} ({node_instance}) was added to the graph.")
+            if isinstance(node_instance, FunctionFuture):
+                node_instance.args = _FunctionFutureToConnection()(
+                    node_instance.args, node_instance=node_instance, graph=self
+                )
+                node_instance.kwargs = _FunctionFutureToConnection()(
+                    node_instance.kwargs, node_instance=node_instance, graph=self
+                )
+
     def add_node(self, node_for_adding, **attr):
         if len(attr):
             raise ValueError("Attributes are not supported for Nodes.")
@@ -26,3 +56,16 @@ class DiGraph(nx.MultiDiGraph):
         else:
             raise ValueError("Only Nodes are supported.")
             # super().add_node(node_for_adding, **attr)
+
+    def add_edge(self, u_of_edge, v_of_edge, **attr):
+        if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
+            assert u_of_edge.uuid in self, f"'{u_of_edge.uuid=}' not in '{self=}'"
+            assert v_of_edge.uuid in self, f"'{v_of_edge.uuid=}' not in '{self=}'"
+            super().add_edge(
+                u_of_edge.uuid,
+                v_of_edge.uuid,
+                u_attr=u_of_edge.attribute,
+                **attr,
+            )
+        else:
+            super().add_edge(u_of_edge, v_of_edge, **attr)
