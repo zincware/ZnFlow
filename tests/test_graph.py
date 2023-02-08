@@ -71,3 +71,17 @@ def test_changed_graph():
         with znflow.DiGraph():
             znflow.base.NodeBaseMixin._graph_ = znflow.DiGraph()
     znflow.base.NodeBaseMixin._graph_ = None  # reset after test
+
+
+def test_add_others():
+    graph = znflow.DiGraph()
+    with pytest.raises(ValueError):
+        # it is only possible to add classes inheriting from NodeBaseMixin
+        graph.add_node(42)
+
+
+def test_add_connections():
+    graph = znflow.DiGraph()
+    with pytest.raises(ValueError):
+        # it is only to connect Connection and NodeBaseMixin
+        graph.add_connections(42, 42)
