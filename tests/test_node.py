@@ -10,14 +10,23 @@ class PlainNode(znflow.Node):
     def __init__(self, value):
         self.value = value
 
+    def run(self):
+        self.value += 1
+
 
 @dataclasses.dataclass
 class DataclassNode(znflow.Node):
     value: int
 
+    def run(self):
+        self.value += 1
+
 
 class ZnInitNode(zninit.ZnInit, znflow.Node):
     value: int = zninit.Descriptor()
+
+    def run(self):
+        self.value += 1
 
 
 @znflow.nodify

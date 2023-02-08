@@ -7,6 +7,9 @@ from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph
 
 
 class Node(NodeBaseMixin):
+    def run(self):
+        raise NotImplementedError
+
     def __new__(cls, *args, **kwargs):
         try:
             instance = super().__new__(cls, *args, **kwargs)
