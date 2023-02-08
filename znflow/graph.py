@@ -87,14 +87,10 @@ class DiGraph(nx.MultiDiGraph):
                     )
 
     def add_node(self, node_for_adding, **attr):
-        if len(attr):
-            raise ValueError("Attributes are not supported for Nodes.")
-        # TODO what if it is a list of nodes?
         if isinstance(node_for_adding, NodeBaseMixin):
             super().add_node(node_for_adding.uuid, value=node_for_adding, **attr)
         else:
             raise ValueError("Only Nodes are supported.")
-            # super().add_node(node_for_adding, **attr)
 
     def add_connections(self, u_of_edge, v_of_edge, **attr):
         log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
@@ -131,9 +127,16 @@ class DiGraph(nx.MultiDiGraph):
                         value,
                     ),
                 )
-
-            _UpdateConnectors()(node)
             if isinstance(node, Node):
                 node.run()
             elif isinstance(node, FunctionFuture):
                 node.compute_result()
+
+    def write_graph(self, *args):
+        for node in args:
+            if isinstance(node, (list, tuple)):
+                self.write_graph(*node)
+            else:
+                self.add_node(node)
+        with self:
+            pass
