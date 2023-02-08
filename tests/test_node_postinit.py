@@ -42,6 +42,11 @@ def compute_sum(*args):
     return sum(args)
 
 
+@znflow.nodify
+def compute_sum_inputs(*args):
+    return sum([x.inputs for x in args])
+
+
 @pytest.mark.parametrize(
     "cls", [ConvertInputsPlain, ConverInputsZnInit, ConvertInputsDataclass]
 )
@@ -50,5 +55,17 @@ def test_ConvertInputs(cls):
         node1 = cls(inputs="1")
         node2 = cls(inputs="2")
         node3 = compute_sum(node1.inputs, node2.inputs)
+    graph.run()
+    assert node3.result == 3.0
+
+
+@pytest.mark.parametrize(
+    "cls", [ConvertInputsPlain, ConverInputsZnInit, ConvertInputsDataclass]
+)
+def test_ConvertInputsNoAttribute(cls):
+    with znflow.DiGraph() as graph:
+        node1 = cls(inputs="1")
+        node2 = cls(inputs="2")
+        node3 = compute_sum_inputs(node1, node2)
     graph.run()
     assert node3.result == 3.0

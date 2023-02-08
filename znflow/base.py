@@ -64,9 +64,8 @@ class Connection:
 
     @property
     def result(self):
-        assert isinstance(
-            self.attribute, str
-        ), f"attribute must be a string, found ({self.attribute})"
+        if self.attribute is None:
+            return self.instance
         return getattr(self.instance, self.attribute)
 
 
