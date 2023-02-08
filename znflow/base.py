@@ -36,6 +36,9 @@ class NodeBaseMixin:
             raise ValueError("uuid is already set")
         self._uuid = value
 
+    def run(self):
+        raise NotImplementedError
+
 
 def get_graph():
     return NodeBaseMixin._graph_
@@ -79,12 +82,12 @@ class FunctionFuture(NodeBaseMixin):
 
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
-    def compute_result(self):
+    def run(self):
         self._result = self.function(*self.args, **self.kwargs)
 
     @property
     def result(self):
         if self._result is None:
-            self.compute_result()
+            self.run()
 
         return self._result
