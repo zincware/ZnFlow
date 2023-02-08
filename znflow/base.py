@@ -57,6 +57,9 @@ class Connection:
     def uuid(self):
         return self.instance.uuid
 
+    def result(self):
+        return getattr(self.instance, self.attribute)
+
 
 @dataclasses.dataclass
 class FunctionFuture(NodeBaseMixin):
@@ -64,7 +67,11 @@ class FunctionFuture(NodeBaseMixin):
     args: typing.Tuple
     kwargs: typing.Dict
 
+    _result = None
+
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
     def result(self):
-        return self.function(*self.args, **self.kwargs)
+        if self._result is None:
+            self._result = self.function(*self.args, **self.kwargs)
+        return self._result
