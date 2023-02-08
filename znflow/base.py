@@ -67,7 +67,7 @@ class FunctionFuture(NodeBaseMixin):
     args: typing.Tuple
     kwargs: typing.Dict
 
-    _result = None
+    _result: any = dataclasses.field(default=None, init=False, repr=True)
 
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 

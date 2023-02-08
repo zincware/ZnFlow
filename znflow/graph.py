@@ -39,6 +39,13 @@ class _AttributeToConnection(utils.IterableHandler):
         return value
 
 
+class _UpdateConnectors(utils.IterableHandler):
+    def default(self, value, **kwargs):
+        if isinstance(value, Connection):
+            return value.result()
+        return value
+
+
 class DiGraph(nx.MultiDiGraph):
     def __enter__(self):
         if get_graph() is not None:
@@ -102,3 +109,31 @@ class DiGraph(nx.MultiDiGraph):
             )
         else:
             raise ValueError("Only Connections and Nodes are supported.")
+
+    def get_sorted_nodes(self):
+        all_pipelines = []
+        for stage in self.reverse():
+            all_pipelines += nx.dfs_postorder_nodes(self.reverse(), stage)
+        return list(dict.fromkeys(all_pipelines))  # remove duplicates but keep order
+
+    def run(self):
+        for node_uuid in self.get_sorted_nodes():
+            node = self.nodes[node_uuid]["value"]
+            # update connectors
+            for attribute in dir(node):
+                if attribute.startswith("_") or attribute in Node._protected_:
+                    continue
+                value = getattr(node, attribute)
+                setattr(
+                    node,
+                    attribute,
+                    _UpdateConnectors()(
+                        value,
+                    ),
+                )
+
+            _UpdateConnectors()(node)
+            if isinstance(node, Node):
+                node.run()
+            elif isinstance(node, FunctionFuture):
+                node.result()
