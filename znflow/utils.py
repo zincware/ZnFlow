@@ -3,12 +3,13 @@ import abc
 import contextlib
 import functools
 
-from znflow.graph import get_graph, set_graph
 
 
 @contextlib.contextmanager
 def update__graph_(value=None):
     """Temporarily update the DiGraph in 'NodeBaseMixin'."""
+    from znflow.graph import get_graph, set_graph
+
     graph = get_graph()
     set_graph(value)
     try:
