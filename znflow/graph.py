@@ -9,21 +9,31 @@ from znflow.node import Node
 
 class _AttributeToConnection(utils.IterableHandler):
     def default(self, value, **kwargs):
-        if isinstance(value, FunctionFuture):
-            node_instance = kwargs["node_instance"]
-            graph = kwargs["graph"]
-            connection = Connection(value, attribute="result")
+        v_attr = kwargs.get("v_attr")
+        node_instance = kwargs["node_instance"]
+        graph = kwargs["graph"]
 
-            graph.add_edge(connection, node_instance)
+        if isinstance(value, FunctionFuture):
+            connection = Connection(value, attribute="result")
+            if v_attr is None:
+                graph.add_edge(connection, node_instance)
+            else:
+                graph.add_edge(connection, node_instance, v_attr=v_attr)
 
             return connection
         elif isinstance(value, Node):
-            node_instance = kwargs["node_instance"]
-            graph = kwargs["graph"]
-            v_attr = kwargs["v_attr"]
             connection = Connection(value, attribute=None)
-            graph.add_edge(connection, node_instance, v_attr=v_attr)
+            if v_attr is None:
+                graph.add_edge(connection, node_instance)
+            else:
+                graph.add_edge(connection, node_instance, v_attr=v_attr)
             return connection
+        elif isinstance(value, Connection):
+            if v_attr is None:
+                graph.add_edge(value, node_instance)
+            else:
+                graph.add_edge(value, node_instance, v_attr=v_attr)
+            return value
         return value
 
 
@@ -63,7 +73,10 @@ class DiGraph(nx.MultiDiGraph):
                         node_instance,
                         attribute,
                         _AttributeToConnection()(
-                            value, node_instance=node_instance, graph=self, v_attr=attribute
+                            value,
+                            node_instance=node_instance,
+                            graph=self,
+                            v_attr=attribute,
                         ),
                     )
 
@@ -78,6 +91,7 @@ class DiGraph(nx.MultiDiGraph):
             # super().add_node(node_for_adding, **attr)
 
     def add_edge(self, u_of_edge, v_of_edge, **attr):
+        log.warning(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             assert u_of_edge.uuid in self, f"'{u_of_edge.uuid=}' not in '{self=}'"
             assert v_of_edge.uuid in self, f"'{v_of_edge.uuid=}' not in '{self=}'"
