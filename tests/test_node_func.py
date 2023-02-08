@@ -1,3 +1,4 @@
+import dataclasses
 import random
 
 import znflow
@@ -10,9 +11,10 @@ def random_number(seed):
     return random.random()
 
 
+@dataclasses.dataclass
 class ComputeSum(znflow.Node):
-    inputs: list = znflow.EdgeAttribute()
-    outputs: float = znflow.EdgeAttribute(None)
+    inputs: list
+    outputs: float = None
 
     def run(self):
         self.outputs = sum(self.inputs)
@@ -36,4 +38,4 @@ def test_graph():
         n3 = random_number(compute_sum.outputs)
 
     graph.run()
-    assert n3.get_result() == 0.2903973544626711
+    assert n3.result == 0.2903973544626711

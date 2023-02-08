@@ -41,6 +41,6 @@ def test_graph(capsys):
     captured = capsys.readouterr()
     assert captured.out == "Computing\n"
 
-    assert n5.get_result() == 66
+    assert n5.result == 66
     captured = capsys.readouterr()
     assert captured.out == ""

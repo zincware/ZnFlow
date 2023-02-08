@@ -1,124 +1,86 @@
 from __future__ import annotations
 
-import zninit
+import functools
+import uuid
 
-from znflow.base import NodeBaseMixin, disable_graph
-from znflow.connectors import Connector, FunctionConnector, NodeConnector, add_edge
-from znflow.utils import IterableHandler
-
-
-class GetResult(IterableHandler):
-    def default(self, value, *args, **kwargs):
-        return value.get_result() if isinstance(value, Connector) else value
+from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph
 
 
-class AddEdge(IterableHandler):
-    def default(self, value, *args, **kwargs):
-        node = kwargs.pop("node")
-        attribute_name = kwargs.pop("attribute_name")
-        graph = NodeBaseMixin._graph_
-        if isinstance(value, NodeConnector):
-            if value.graph is not None:
-                assert (
-                    value.graph == graph
-                ), f"DiGraphs are not the same '{value.graph}' != '{graph}'"
-            connector = NodeConnector(graph=graph, node=node, attribute=attribute_name)
-            add_edge(connector, value)
-        elif isinstance(value, NodeBaseMixin):
-            connector = NodeConnector(graph=graph, node=node, attribute=attribute_name)
-            node_connector = NodeConnector(graph=graph, node=value)
-            add_edge(connector, node_connector)
-        elif isinstance(value, FunctionConnector):
-            connector = NodeConnector(graph=graph, node=node, attribute=attribute_name)
-            add_edge(connector, value)
+class Node(NodeBaseMixin):
+    _in_construction = False
 
+    def run(self):
+        raise NotImplementedError
 
-def update_connectors_to_results(node):
-    if isinstance(node, zninit.ZnInit):
-        for attribute in zninit.get_descriptors(EdgeAttribute, self=node):
-            value = getattr(node, attribute.name)
-            setattr(node, attribute.name, GetResult().handle(value))
+    def __matmul__(self, other):
+        return Connection(self, other)
 
+    def __new__(cls, *args, **kwargs):
+        cls._in_construction = True
+        try:
+            instance = super().__new__(cls, *args, **kwargs)
+        except TypeError:  # e.g. in dataclasses the arguments are passed to __new__
+            # print("TypeError: ...")
+            instance = super().__new__(cls)
+        cls._in_construction = False
 
-class EdgeAttribute(zninit.Descriptor):
-    def __get__(self, instance, owner=None):
-        if getattr(instance, "_graph_", None) is None:
-            return super().__get__(instance, owner)
-        return NodeConnector(
-            graph=NodeBaseMixin._graph_, node=instance, attribute=self.name
-        )
+        if "__init__" in dir(cls):
 
-    def __set__(self, instance, value):
-        if getattr(instance, "_graph_", None) is not None:
-            AddEdge().handle(value, node=instance, attribute_name=self.name)
+            def wrap_init(func):
+                @functools.wraps(func)
+                def wrapper(*args, **kwargs):
+                    cls._in_construction = True
+                    func(*args, **kwargs)
+                    cls._in_construction = False
 
-        super().__set__(instance, value)
+                return wrapper
 
+            cls.__init__ = wrap_init(cls.__init__)
 
-class Node(zninit.ZnInit, NodeBaseMixin):
-    def __post_init__(self):
-        if self._graph_ is not None:
-            """Add the Node to the DiGraph upon instantiating."""
-            self._graph_.add_node(self)
+        instance.uuid = uuid.uuid4()
 
-    @disable_graph
-    def __repr__(self):
-        """Get the representation.
-
-        We temporarily disable the _graph_ to so __getattribute__ won't trigger.
-        """
-        return super().__repr__()
-
-    def __matmul__(self, other: str) -> NodeConnector:
-        """Method overload to get a NodeConnector.
-
-        Can also be used outside 'DiGraph' contextmanager.
-        """
-        if not isinstance(other, str):
-            raise ValueError(
-                f"{self} @ <other> only supports type string. Found {type(other)}."
-            )
-        return NodeConnector(graph=self._graph_, node=self, attribute=other)
+        # Connect the Node to the Grap
+        graph = get_graph()
+        if graph is not None:
+            graph.add_node(instance)
+        return instance
 
     def __getattribute__(self, item):
-        if not isinstance(getattr(type(self), item), property):
-            _ = super().__getattribute__(item)  # does not work with properties
-        if (
-            item in ["post_init", "_post_init_", "_graph_", "_id_"]
-            or item.startswith("__")
-            or item.startswith("_")
-        ):
-            return super().__getattribute__(item)
-        return super().__getattribute__(item) if self._graph_ is None else self @ item
+        value = super().__getattribute__(item)
+        if get_graph() is not None:
+            if item not in type(self)._protected_ and not item.startswith("_"):
+                if self._in_construction:
+                    return value
+                connector = Connection(instance=self, attribute=item)
+                return connector
+        return value
+
+    def __setattr__(self, item, value) -> None:
+        if get_graph() is not None:
+            if isinstance(value, Connection):
+                assert (
+                    self.uuid in self._graph_
+                ), f"'{self.uuid=}' not in '{self._graph_=}'"
+                assert value.uuid in self._graph_
+                self._graph_.add_edge(
+                    value.uuid, self.uuid, i_attr=value.attribute, j_attr=item
+                )
+        super().__setattr__(item, value)
 
 
 def nodify(function):
     """Decorator to create a Node from a function."""
 
+    @functools.wraps(function)
     def wrapper(*args, **kwargs):
         """Wrapper function for the decorator."""
-        graph = NodeBaseMixin._graph_
+        graph = get_graph()
         if graph is not None:
-            connector = FunctionConnector(
-                func=function, args=args, kwargs=kwargs, graph=graph
-            )
-            graph.add_node(connector)
-            AddFunctionConnection().handle(args, connector=connector)
-            AddFunctionConnection().handle(kwargs, connector=connector)
+            future = FunctionFuture(function, args, kwargs)
+            future.uuid = uuid.uuid4()
 
-            return connector
+            graph.add_node(future)
+            return future
         return function(*args, **kwargs)
 
     return wrapper
-
-
-class AddFunctionConnection(IterableHandler):
-    """Connect 'FunctionConnector' or 'NodeConnector' to a given FunctionConnector."""
-
-    def default(self, value, **kwargs):
-        """Default method of IterableHandler."""
-        connector: FunctionConnector = kwargs.pop("connector")
-        if isinstance(value, FunctionConnector):
-            add_edge(connector, value)
-        if isinstance(value, NodeConnector):
-            add_edge(connector, value)

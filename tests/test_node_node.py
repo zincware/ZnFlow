@@ -1,19 +1,23 @@
+import dataclasses
+
 import pytest
 
 import znflow
 
 
+@dataclasses.dataclass
 class Node(znflow.Node):
-    inputs = znflow.EdgeAttribute()
-    outputs = znflow.EdgeAttribute(None)
+    inputs: float
+    outputs: float = None
 
     def run(self):
         self.outputs = self.inputs * 2
 
 
+@dataclasses.dataclass
 class SumNodes(znflow.Node):
-    inputs = znflow.EdgeAttribute()
-    outputs = znflow.EdgeAttribute(None)
+    inputs: list
+    outputs: float = None
 
     def run(self):
         self.outputs = sum(self.inputs)
@@ -77,13 +81,13 @@ def test_graph_size(size: int):
     assert len(graph) == size
 
 
-# @pytest.mark.parametrize("size", range(1, 10))
-# def test_graph_size_connected(size: int):
-#     with znflow.DiGraph() as graph:
-#         nodes = [Node(inputs=i) for i in range(size - 1)]
-#         _ = SumNodes(inputs=[n.outputs for n in nodes])
-#
-#     assert len(graph) == size
+@pytest.mark.parametrize("size", range(1, 10))
+def test_graph_size_connected(size: int):
+    with znflow.DiGraph() as graph:
+        nodes = [Node(inputs=i) for i in range(size - 1)]
+        _ = SumNodes(inputs=[n.outputs for n in nodes])
+
+    assert len(graph) == size
 
 
 def test_graph_multi():

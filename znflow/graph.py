@@ -1,44 +1,114 @@
+import logging
+
 import networkx as nx
-import zninit
 
-from znflow.base import NodeBaseMixin
-from znflow.connectors import FunctionConnector, NodeConnector
-from znflow.utils import IterableHandler
+from znflow import utils
+from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph, set_graph
+from znflow.node import Node
+
+log = logging.getLogger(__name__)
 
 
-class UpdateValueWithConnector(IterableHandler):
-    def default(self, value, *args, **kwargs):
-        node = kwargs.pop("node")
-        attribute_name = kwargs.pop("attribute_name")
-        graph = kwargs.pop("graph")
-        if isinstance(value, NodeConnector):
-            NodeBaseMixin._graph_ = graph
-            setattr(node, attribute_name, value)
-            NodeBaseMixin._graph_ = None
+class _AttributeToConnection(utils.IterableHandler):
+    def default(self, value, **kwargs):
+        v_attr = kwargs.get("v_attr")
+        node_instance = kwargs["node_instance"]
+        graph = kwargs["graph"]
+
+        if isinstance(value, FunctionFuture):
+            connection = Connection(value, attribute="result")
+            if v_attr is None:
+                graph.add_connections(connection, node_instance)
+            else:
+                graph.add_connections(connection, node_instance, v_attr=v_attr)
+
+            return connection
+        elif isinstance(value, Node):
+            connection = Connection(value, attribute=None)
+            if v_attr is None:
+                graph.add_connections(connection, node_instance)
+            else:
+                graph.add_connections(connection, node_instance, v_attr=v_attr)
+            return connection
+        elif isinstance(value, Connection):
+            if v_attr is None:
+                graph.add_connections(value, node_instance)
+            else:
+                graph.add_connections(value, node_instance, v_attr=v_attr)
+            return value
+        return value
+
+
+class _UpdateConnectors(utils.IterableHandler):
+    def default(self, value, **kwargs):
+        if isinstance(value, Connection):
+            return value.result
+        return value
 
 
 class DiGraph(nx.MultiDiGraph):
     def __enter__(self):
-        if NodeBaseMixin._graph_ is not None:
+        if get_graph() is not None:
             raise ValueError("DiGraph already exists. Nested Graphs are not supported.")
-        NodeBaseMixin._graph_ = self
+        set_graph(self)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if NodeBaseMixin._graph_ is not self:
+        if get_graph() is not self:
             raise ValueError(
                 "Something went wrong. DiGraph was changed inside the context manager."
             )
-        NodeBaseMixin._graph_ = None
+        set_graph(None)
 
-    def write_graph(self, *args):
-        for node in args:
-            self.add_node(node)
-            for descriptor in zninit.get_descriptors(self=node):
-                value = getattr(node, descriptor.name)
-                UpdateValueWithConnector().handle(
-                    value, node=node, attribute_name=descriptor.name, graph=self
+        for node in self.nodes:
+            node_instance = self.nodes[node]["value"]
+            log.debug(f"Node {node} ({node_instance}) was added to the graph.")
+            if isinstance(node_instance, FunctionFuture):
+                node_instance.args = _AttributeToConnection()(
+                    node_instance.args, node_instance=node_instance, graph=self
                 )
+                node_instance.kwargs = _AttributeToConnection()(
+                    node_instance.kwargs, node_instance=node_instance, graph=self
+                )
+            elif isinstance(node_instance, Node):
+                for attribute in dir(node_instance):
+                    if attribute.startswith("_") or attribute in Node._protected_:
+                        continue
+                    value = getattr(node_instance, attribute)
+                    setattr(
+                        node_instance,
+                        attribute,
+                        _AttributeToConnection()(
+                            value,
+                            node_instance=node_instance,
+                            graph=self,
+                            v_attr=attribute,
+                        ),
+                    )
+
+    def add_node(self, node_for_adding, **attr):
+        if len(attr):
+            raise ValueError("Attributes are not supported for Nodes.")
+        # TODO what if it is a list of nodes?
+        if isinstance(node_for_adding, NodeBaseMixin):
+            super().add_node(node_for_adding.uuid, value=node_for_adding, **attr)
+        else:
+            raise ValueError("Only Nodes are supported.")
+            # super().add_node(node_for_adding, **attr)
+
+    def add_connections(self, u_of_edge, v_of_edge, **attr):
+        log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
+        if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
+            assert u_of_edge.uuid in self, f"'{u_of_edge.uuid=}' not in '{self=}'"
+            assert v_of_edge.uuid in self, f"'{v_of_edge.uuid=}' not in '{self=}'"
+            self.add_edge(
+                u_of_edge.uuid,
+                v_of_edge.uuid,
+                u_attr=u_of_edge.attribute,
+                **attr,
+            )
+        else:
+            raise ValueError("Only Connections and Nodes are supported.")
 
     def get_sorted_nodes(self):
         all_pipelines = []
@@ -46,12 +116,24 @@ class DiGraph(nx.MultiDiGraph):
             all_pipelines += nx.dfs_postorder_nodes(self.reverse(), stage)
         return list(dict.fromkeys(all_pipelines))  # remove duplicates but keep order
 
-    def run(self, method="run"):  # TODO why is there a method argument?
-        for node in self.get_sorted_nodes():
-            from znflow.node import update_connectors_to_results
+    def run(self):
+        for node_uuid in self.get_sorted_nodes():
+            node = self.nodes[node_uuid]["value"]
+            # update connectors
+            for attribute in dir(node):
+                if attribute.startswith("_") or attribute in Node._protected_:
+                    continue
+                value = getattr(node, attribute)
+                setattr(
+                    node,
+                    attribute,
+                    _UpdateConnectors()(
+                        value,
+                    ),
+                )
 
-            update_connectors_to_results(node)
-            if hasattr(node, method):
-                getattr(node, method)()
-            if isinstance(node, FunctionConnector):
-                node.get_result()
+            _UpdateConnectors()(node)
+            if isinstance(node, Node):
+                node.run()
+            elif isinstance(node, FunctionFuture):
+                node.compute_result()
