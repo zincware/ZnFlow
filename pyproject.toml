@@ -9,17 +9,19 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 networkx = "^2.8.8"
+matplotlib = "^3.6.3"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.tests.dependencies]
+pytest = "^7.2.1"
 black = "^22.10.0"
 isort = "^5.10.1"
-jupyterlab = "^3.5.1"
 pylint = "^2.15.8"
-pytest = "^7.2.0"
 coverage = "^6.5.0"
 ruff = "^0.0.177"
 zninit = "^0.1.8"
 
+[tool.poetry.group.notebook.dependencies]
+jupyterlab = "^3.5.1"
 
 [build-system]
 requires = ["poetry-core"]
