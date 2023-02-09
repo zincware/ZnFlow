@@ -1,3 +1,5 @@
+"""ZnFlow deployment using Dask."""
+
 import dataclasses
 import typing
 import uuid
@@ -11,7 +13,25 @@ from znflow.utils import IterableHandler
 
 
 class _LoadNode(IterableHandler):
+    """Iterable handler for loading nodes."""
+
     def default(self, value, **kwargs):
+        """Default handler for loading nodes.
+
+        Parameters
+        ----------
+        value: NodeBaseMixin|any
+            If a NodeBaseMixin, the node will be loaded and returned.
+        kwargs: dict
+            results: results dictionary of {uuid: node} shape.
+
+        Returns
+        -------
+        any:
+            If a NodeBaseMixin, the node will be loaded and returned.
+            Otherwise, the input value is returned.
+
+        """
         results = kwargs["results"]
         if isinstance(value, NodeBaseMixin):
             return results[value.uuid].result()
@@ -20,7 +40,25 @@ class _LoadNode(IterableHandler):
 
 
 class _UpdateConnections(IterableHandler):
+    """Iterable handler for replacing connections."""
+
     def default(self, value, **kwargs):
+        """Replace connections by its values.
+
+        Parameters
+        ----------
+        value: Connection|any
+            If a Connection, the connection will be replaced by its result.
+        kwargs: dict
+            predecessors: dict of {uuid: Connection} shape.
+
+        Returns
+        -------
+        any:
+            If a Connection, the connection will be replaced by its result.
+            Otherwise, the input value is returned.
+
+        """
         predecessors = kwargs["predecessors"]
         if isinstance(value, Connection):
             # We don't actually need the connection, we need the results.
@@ -28,7 +66,22 @@ class _UpdateConnections(IterableHandler):
         return value
 
 
-def node_submit(node, **kwargs):
+def node_submit(node: NodeBaseMixin, **kwargs) -> NodeBaseMixin:
+    """Submit script for Dask worker.
+
+    Parameters
+    ----------
+    node: NodeBaseMixin
+        the Node class
+    kwargs: dict
+        predecessors: dict of {uuid: Connection} shape
+
+    Returns
+    -------
+    NodeBaseMixin:
+        the Node class with updated state using.
+
+    """
     predecessors = kwargs.get("predecessors", {})
     for item in dir(node):
         # TODO this information is available in the graph,
@@ -46,6 +99,19 @@ def node_submit(node, **kwargs):
 
 @dataclasses.dataclass
 class Deployment:
+    """ZnFlow deployment using Dask.
+
+    Attributes
+    ----------
+    graph: DiGraph
+        the znflow graph containing the nodes.
+    client: Client, optional
+        the Dask client.
+    results: Dict[uuid, Future]
+        a dictionary of {uuid: Future} shape that is filled after the graph is submitted.
+
+    """
+
     graph: DiGraph
     client: Client = dataclasses.field(default_factory=Client)
     results: typing.Dict[uuid.UUID, Future] = dataclasses.field(
@@ -53,7 +119,7 @@ class Deployment:
     )
 
     def submit_graph(self):
-        """
+        """Submit the graph to Dask.
 
         When submitting to Dask, a Node is serialized, processed and a
         copy can be returned.
@@ -81,6 +147,19 @@ class Deployment:
                 )
 
     def get_results(self, obj: typing.Union[NodeBaseMixin, list, dict, NodeView], /):
+        """Get the results from Dask based on the original object.
+
+        Parameters
+        ----------
+        obj: NodeBaseMixin|list|dict|NodeView
+            either a single Node or multiple Nodes from the submitted graph.
+
+        Returns
+        -------
+        any:
+            Returns an instance of obj which is updated with the results from Dask.
+
+        """
         if isinstance(obj, NodeView):
             data = _LoadNode()(dict(obj), results=self.results)
             return {x: v["value"] for x, v in data.items()}

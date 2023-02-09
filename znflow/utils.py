@@ -8,8 +8,8 @@ class IterableHandler(abc.ABC):
 
     Attributes
     ----------
-    updated : bool
-        Set to ``True`` if handle updated data.
+    updated : bool, default=False
+        Set to True if handle updated data.
     """
 
     updated: bool = False
@@ -17,6 +17,7 @@ class IterableHandler(abc.ABC):
     def __init__(self):
         """Update the signature of handle based on the default method."""
         functools.update_wrapper(self.handle, self.default)
+        self.updated = False
 
     def __call__(self, value, **kwargs):
         """Call the handle method."""
