@@ -9,6 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 networkx = "^2.8.8"
+matplotlib = "^3.6.3"
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.2.1"
