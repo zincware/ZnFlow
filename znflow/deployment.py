@@ -40,15 +40,10 @@ def node_submit(node, *args, **kwargs):
     for item in dir(node):
         if item.startswith("_"):
             continue
-        try:
-            # TODO how to only do this if something changed?
-            setattr(
-                node,
-                item,
-                _UpdateConnections()(getattr(node, item), predecessors=predecessors),
-            )
-        except Exception:
-            pass
+        updater = _UpdateConnections()
+        value = updater(getattr(node, item), predecessors=predecessors)
+        if updater.updated:
+            setattr(node, item, value)
 
     node.run()
     return node

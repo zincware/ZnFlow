@@ -47,3 +47,25 @@ def test_ConvertToString_arg(value, result):
     """Test 'ConvertToString' with 'text' argument."""
     assert ConvertToString().handle(value, text=".") == result
     assert ConvertToString()(value, text=".") == result
+
+
+@pytest.mark.parametrize(
+    ("value", "updated"),
+    [
+        ("1", False),
+        (1, True),
+        (["1"], False),
+        ([1], True),
+        (["1", "2"], False),
+        ((1, "2"), True),
+        ({1, 2}, True),
+        ({"a": "1", "b": "2"}, False),
+        ({"a": "1", "b": 2}, True),
+    ],
+)
+def test_ConvertToString_updated(value, updated):
+    """Test the updated attribute of 'ConvertToString'."""
+
+    converter = ConvertToString()
+    converter.handle(value)
+    assert converter.updated is updated

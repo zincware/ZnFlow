@@ -4,7 +4,15 @@ import functools
 
 
 class IterableHandler(abc.ABC):
-    """Iterable handler using single dispatch."""
+    """Iterable handler using single dispatch.
+
+    Attributes
+    ----------
+    updated : bool
+        Set to ``True`` if handle updated data.
+    """
+
+    updated: bool = False
 
     def __init__(self):
         """Update the signature of handle based on the default method."""
@@ -26,7 +34,11 @@ class IterableHandler(abc.ABC):
     @functools.singledispatchmethod
     def handle(self, value, **kwargs):
         """Fallback handling if no siggledispatch was triggered."""
-        return self.default(value, **kwargs)
+
+        result = self.default(value, **kwargs)
+        if result is not value:
+            self.updated = True
+        return result
 
     @handle.register
     def _(self, value: list, **kwargs) -> list:
