@@ -28,17 +28,11 @@ class _UpdateConnections(IterableHandler):
         return value
 
 
-def node_submit(node, *args, **kwargs):
-    # TODO you need to update all connections to the kwargs from previous
-    #  dask futures. Maybe give a Connection a UUID as well?
-    #  You can / have to use the graph and the edges to update the connections.
-
-    # TODO look https://distributed.dask.org/en/stable/actors.html
-    #  probably not want you want.
+def node_submit(node, **kwargs):
     predecessors = kwargs.get("predecessors", {})
-    # if predecessors:
-    #    raise ValueError(predecessors)
     for item in dir(node):
+        # TODO this information is available in the graph,
+        #  no need to expensively iterate over all attributes
         if item.startswith("_"):
             continue
         updater = _UpdateConnections()
