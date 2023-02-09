@@ -82,3 +82,50 @@ graph.run()
 print(n3.results)
 # >>> 7.5
 ```
+
+## Dask Support
+ZnFlow comes with support for [Dask](https://www.dask.org/) to run your graph:
+- in parallel
+- through e.g. SLURM, ... see https://jobqueue.dask.org/en/latest/api.html
+- with a nice GUI to track progress
+
+All you need to do is install ZnFlow with Dask ``pip install znflow[dask]``.
+We can then extend the example from above. This will run ``n1`` and ``n2`` in parallel. You can investigate the grpah on the Dask dashboard (typically http://127.0.0.1:8787/graph or via the client object in Jupyter.)
+
+````python
+import znflow
+import dataclasses
+from dask.distributed import Client
+
+@znflow.nodify
+def compute_mean(x, y):
+    return (x + y) / 2
+
+@dataclasses.dataclass
+class ComputeMean(znflow.Node):
+    x: float
+    y: float
+    
+    results: float = None
+    
+    def run(self):
+        self.results = (self.x + self.y) / 2
+        
+with znflow.DiGraph() as graph:
+    n1 = ComputeMean(2, 8)
+    n2 = compute_mean(13, 7)
+    # connecting classes and functions to a Node
+    n3 = ComputeMean(n1.results, n2) 
+
+client = Client()
+deployment = znflow.deployment.Deployment(graph=graph, client=client)
+deployment.submit_graph()
+
+n3 = deployment.get_results(n3)
+print(n3)
+# >>> ComputeMean(x=5.0, y=10.0, results=7.5)
+````
+
+We need to get the updated instance from the Dask worker via ``Deployment.get_results``.
+Due to the way Dask works, an inplace update is not possible. 
+To retrieve the full graph, you can use ``Deployment.get_results(graph.nodes)`` instead.
