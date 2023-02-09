@@ -20,9 +20,7 @@ class NodeBaseMixin:
     _uuid: UUID = None
 
     _protected_ = [
-        "_graph_",
         "uuid",
-        "_uuid",
         "result",
     ]  # TODO consider adding regex patterns
 
@@ -79,8 +77,6 @@ class FunctionFuture(NodeBaseMixin):
     kwargs: typing.Dict
 
     _result: any = dataclasses.field(default=None, init=False, repr=True)
-
-    _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
     def run(self):
         self._result = self.function(*self.args, **self.kwargs)

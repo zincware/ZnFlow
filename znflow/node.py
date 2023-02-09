@@ -47,24 +47,23 @@ class Node(NodeBaseMixin):
 
     def __getattribute__(self, item):
         value = super().__getattribute__(item)
-        if get_graph() is not None:
-            if item not in type(self)._protected_ and not item.startswith("_"):
-                if self._in_construction:
-                    return value
-                connector = Connection(instance=self, attribute=item)
-                return connector
+        if (
+            get_graph() is not None
+            and item not in type(self)._protected_
+            and not item.startswith("_")
+        ):
+            if self._in_construction:
+                return value
+            return Connection(instance=self, attribute=item)
         return value
 
     def __setattr__(self, item, value) -> None:
-        if get_graph() is not None:
-            if isinstance(value, Connection):
-                assert (
-                    self.uuid in self._graph_
-                ), f"'{self.uuid=}' not in '{self._graph_=}'"
-                assert value.uuid in self._graph_
-                self._graph_.add_edge(
-                    value.uuid, self.uuid, u_attr=value.attribute, v_attr=item
-                )
+        if get_graph() is not None and isinstance(value, Connection):
+            assert self.uuid in self._graph_, f"'{self.uuid=}' not in '{self._graph_=}'"
+            assert value.uuid in self._graph_
+            self._graph_.add_edge(
+                value.uuid, self.uuid, u_attr=value.attribute, v_attr=item
+            )
         super().__setattr__(item, value)
 
 
