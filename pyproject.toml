@@ -10,6 +10,12 @@ readme = "README.md"
 python = "^3.9"
 networkx = "^2.8.8"
 
+dask = { version = "^2022.12.1", optional = true }
+distributed = { version = "^2022.12.1", optional = true }
+dask-jobqueue = { version = "^0.8.1", optional = true }
+bokeh = "^2.4.2"
+matplotlib = "^3.6.3"
+
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
 isort = "^5.10.1"
@@ -19,7 +25,11 @@ pytest = "^7.2.0"
 coverage = "^6.5.0"
 ruff = "^0.0.177"
 zninit = "^0.1.8"
+ipykernel = "6.20.2"  # there seems to be an issue with dask for >6.20
 
+
+[tool.poetry.extras]
+dask = ["dask", "distributed", "dask-jobqueue"]
 
 [build-system]
 requires = ["poetry-core"]
