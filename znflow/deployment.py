@@ -79,7 +79,7 @@ def node_submit(node: NodeBaseMixin, **kwargs) -> NodeBaseMixin:
     Returns
     -------
     NodeBaseMixin:
-        the Node class with updated state using.
+        the Node class with updated state (after calling "Node.run").
 
     """
     predecessors = kwargs.get("predecessors", {})
