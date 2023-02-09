@@ -3,11 +3,11 @@ import typing
 import uuid
 
 from dask.distributed import Client, Future
+from networkx.classes.reportviews import NodeView
 
 from znflow.base import Connection, NodeBaseMixin
 from znflow.graph import DiGraph
 from znflow.utils import IterableHandler
-from networkx.classes.reportviews import NodeView
 
 
 class _LoadNode(IterableHandler):
@@ -80,9 +80,10 @@ class Deployment:
                     pure=False,
                 )
 
-    def get_results(self, obj: typing.Union[NodeBaseMixin, list, dict], /):
+    def get_results(self, obj: typing.Union[NodeBaseMixin, list, dict, NodeView], /):
         if isinstance(obj, NodeView):
-            return _LoadNode()(dict(obj), results=self.results)
+            data = _LoadNode()(dict(obj), results=self.results)
+            return {x: v["value"] for x, v in data.items()}
         elif isinstance(obj, DiGraph):
             raise NotImplementedError
         return _LoadNode()(obj, results=self.results)
