@@ -5,6 +5,21 @@ import uuid
 
 from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph
 
+def _mark_init_in_construction(cls):
+    if "__init__" in dir(cls):
+        def wrap_init(func):
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                cls._in_construction = True
+                value = func(*args, **kwargs)
+                cls._in_construction = False
+                return value
+
+            return wrapper
+
+
+        cls.__init__ = wrap_init(cls.__init__)
+    return cls
 
 class Node(NodeBaseMixin):
     _in_construction = False
@@ -23,22 +38,7 @@ class Node(NodeBaseMixin):
             # print("TypeError: ...")
             instance = super().__new__(cls)
         cls._in_construction = False
-
-        if "__init__" in dir(cls):
-
-            def wrap_init(func):
-                @functools.wraps(func)
-                def wrapper(*args, **kwargs):
-                    cls._in_construction = True
-                    value = func(*args, **kwargs)
-                    cls._in_construction = False
-                    return value
-
-
-                return wrapper
-
-            cls.__init__ = wrap_init(cls.__init__)
-
+        cls = mark_init_in_construction(cls)
         instance.uuid = uuid.uuid4()
 
         # Connect the Node to the Grap
