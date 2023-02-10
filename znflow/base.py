@@ -1,3 +1,4 @@
+"""The ZnFlow base module."""
 from __future__ import annotations
 
 import dataclasses
@@ -28,10 +29,23 @@ class NodeBaseMixin:
 
     @property
     def uuid(self):
+        """The unique identifier for the Node."""
         return self._uuid
 
     @uuid.setter
-    def uuid(self, value):
+    def uuid(self, value: UUID):
+        """Set the UUID for the Node.
+
+        Raises
+        ------
+        ValueError:
+            The uuid can only be set once. If set again, this error is raised.
+
+        Parameters
+        ----------
+        value: UUID
+            the uuid to use for this Node instance.
+        """
         if self._uuid is not None:
             raise ValueError("uuid is already set")
         self._uuid = value
