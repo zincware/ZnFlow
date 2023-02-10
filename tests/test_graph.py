@@ -48,7 +48,7 @@ def test_run_graph():
     assert node2.value == 18
 
     with pytest.raises(TypeError):
-        node3.compute_result()
+        node3.run()
 
     graph.run()
 

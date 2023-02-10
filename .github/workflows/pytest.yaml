@@ -2,6 +2,9 @@ name: pytest
 
 on:
   pull_request:
+  push:
+    branches:
+    - main
   schedule:
     - cron: '14 3 * * 1'  # at 03:14 on Monday.
 
@@ -31,3 +34,9 @@ jobs:
       - name: Pytest
         run: |
           poetry run coverage run -m pytest
+          poetry run coverage lcov
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage.lcov

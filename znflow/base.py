@@ -21,9 +21,7 @@ class NodeBaseMixin:
     _uuid: UUID = None
 
     _protected_ = [
-        "_graph_",
         "uuid",
-        "_uuid",
         "result",
     ]  # TODO consider adding regex patterns
 
@@ -49,6 +47,9 @@ class NodeBaseMixin:
         if self._uuid is not None:
             raise ValueError("uuid is already set")
         self._uuid = value
+
+    def run(self):
+        raise NotImplementedError
 
 
 def get_graph():
@@ -91,14 +92,12 @@ class FunctionFuture(NodeBaseMixin):
 
     _result: any = dataclasses.field(default=None, init=False, repr=True)
 
-    _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
-
-    def compute_result(self):
+    def run(self):
         self._result = self.function(*self.args, **self.kwargs)
 
     @property
     def result(self):
         if self._result is None:
-            self.compute_result()
+            self.run()
 
         return self._result
