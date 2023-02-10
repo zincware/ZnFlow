@@ -30,8 +30,10 @@ class Node(NodeBaseMixin):
                 @functools.wraps(func)
                 def wrapper(*args, **kwargs):
                     cls._in_construction = True
-                    func(*args, **kwargs)
+                    value = func(*args, **kwargs)
                     cls._in_construction = False
+                    return value
+
 
                 return wrapper
 
