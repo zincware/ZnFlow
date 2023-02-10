@@ -4,6 +4,7 @@ import pytest
 import zninit
 
 import znflow
+from znflow.node import _mark_init_in_construction
 
 
 class PlainNode(znflow.Node):
@@ -189,3 +190,17 @@ def test_Connection():
     assert edge is not None
     assert edge[0]["u_attr"] is None
     assert edge[0]["v_attr"] == "value"
+
+
+def test_CheckWrapInit():
+    @_mark_init_in_construction
+    class CheckWrapInit:
+        _in_construction: bool = False
+
+        def __init__(self):
+            assert self._in_construction
+
+            return 42
+
+    with pytest.raises(TypeError):
+        CheckWrapInit()
