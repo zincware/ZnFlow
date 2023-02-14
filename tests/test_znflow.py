@@ -4,4 +4,4 @@ import znflow
 
 def test_version():
     """Test the version."""
-    assert znflow.__version__ == "0.1.1"
+    assert znflow.__version__ == "0.1.2"

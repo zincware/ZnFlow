@@ -40,7 +40,7 @@ class Node(NodeBaseMixin):
             # print("TypeError: ...")
             instance = super().__new__(cls)
         cls._in_construction = False
-        cls = _mark_init_in_construction(cls)
+        _mark_init_in_construction(cls)
         instance.uuid = uuid.uuid4()
 
         # Connect the Node to the Grap

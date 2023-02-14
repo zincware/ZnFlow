@@ -85,3 +85,29 @@ def test_add_connections():
     with pytest.raises(ValueError):
         # it is only to connect Connection and NodeBaseMixin
         graph.add_connections(42, 42)
+
+
+def test_disable_graph():
+    graph = znflow.DiGraph()
+    with graph:
+        node1 = DataclassNode(value=42)
+        assert node1._graph_ is graph
+        with znflow.base.disable_graph():
+            assert node1._graph_ is None
+        assert node1._graph_ is graph
+    assert node1._graph_ is None
+
+
+def test_get_attribute():
+    graph = znflow.DiGraph()
+    with graph:
+        node1 = DataclassNode(value=42)
+        assert znflow.base.get_attribute(node1, "value") == 42
+        assert isinstance(node1.value, znflow.Connection)
+
+    assert znflow.base.get_attribute(node1, "value") == 42
+    with pytest.raises(AttributeError):
+        znflow.base.get_attribute(node1, "not_existing")
+
+    assert znflow.base.get_attribute(node1, "not_existing", None) is None
+    assert znflow.base.get_attribute(node1, "not_existing", 13) == 13

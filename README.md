@@ -83,3 +83,46 @@ graph.run()
 print(n3.results)
 # >>> 7.5
 ```
+
+### Attributes Access
+Inside the `with znflow.DiGraph()` context manager, accessing class attributes yields `znflow.Connector` objects.
+Sometimes, it may be required to obtain the actual attribute value instead of a `znflow.Connector` object.
+It is not recommended to run class methods inside the `with znflow.DiGraph()` context manager since it should be exclusively used for building the graph and not for actual computation.
+
+In the case of properties or other descriptor-based attributes, it might be necessary to access the actual attribute value. This can be achieved using the `znflow.get_attribute` method, which supports all features from `getattr` and can be imported as such:
+
+```python
+from znflow import get_attribute as getattr
+```
+Here's an example of how to use ``znflow.get_attribute``:
+```python
+import znflow
+
+class POW2(znflow.Node):
+    """Compute the square of x."""
+    x_factor: float = 0.5
+    results: float = None
+    _x: float = None
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, value):
+        # using "self._x = value * self.factor" would run 
+        # "Connector(self, "x_factor") ** 2" which is not possible (TypeError)
+        # therefore we use znflow.get_attribute
+        self._x = value * znflow.get_attribute(self, "x_factor")
+
+    def run(self):
+        self.results = self.x**2
+    
+with znflow.DiGraph() as graph:
+    n1 = POW2()
+    n1.x = 4.0
+
+graph.run()
+assert n1.results == 4.0
+
+```

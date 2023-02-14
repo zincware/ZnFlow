@@ -4,14 +4,22 @@ import importlib.metadata
 import logging
 import sys
 
-from znflow.base import Connection, FunctionFuture
+from znflow.base import Connection, FunctionFuture, get_attribute
 from znflow.graph import DiGraph
 from znflow.node import Node, nodify
 from znflow.visualize import draw
 
 __version__ = importlib.metadata.version(__name__)
 
-__all__ = ["DiGraph", "Node", "draw", "nodify", "FunctionFuture", "Connection"]
+__all__ = [
+    "DiGraph",
+    "Node",
+    "draw",
+    "nodify",
+    "FunctionFuture",
+    "Connection",
+    "get_attribute",
+]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
