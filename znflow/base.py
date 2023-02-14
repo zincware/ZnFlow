@@ -1,8 +1,23 @@
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import typing
 from uuid import UUID
+
+
+@contextlib.contextmanager
+def disable_graph():
+    """Temporarily disable set the graph to None.
+
+    This can be useful, if you e.g. want to use 'get_attribute'.
+    """
+    graph = get_graph()
+    set_graph(None)
+    try:
+        yield
+    finally:
+        set_graph(graph)
 
 
 class NodeBaseMixin:
@@ -46,6 +61,12 @@ def get_graph():
 
 def set_graph(value):
     NodeBaseMixin._graph_ = value
+
+
+def get_attribute(node, attribute):
+    """Get the real value of the attribute and not a znflow.Connection."""
+    with disable_graph():
+        return getattr(node, attribute)
 
 
 @dataclasses.dataclass(frozen=True)

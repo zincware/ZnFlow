@@ -5,11 +5,14 @@ import znflow
 
 class CustomDescriptor(zninit.Descriptor):
     def __set__(self, instance, value):
-        super().__set__(instance, f"{value}_{instance.__class__.__name__}")
+        super().__set__(
+            instance, f"{value}_{znflow.base.get_attribute(instance, 'name')}"
+        )
 
 
 class NodeWithDescriptor(zninit.ZnInit, znflow.Node):
     data = CustomDescriptor()
+    name = "NodeWithDescriptor"
 
     def run(self):
         pass
