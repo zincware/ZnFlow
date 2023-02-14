@@ -70,18 +70,21 @@ class DiGraph(nx.MultiDiGraph):
                     node_instance.kwargs, node_instance=node_instance, graph=self
                 )
             elif isinstance(node_instance, Node):
-                for attribute in dir(node_instance):
-                    if attribute.startswith("_") or attribute in Node._protected_:
-                        continue
-                    updater = _AttributeToConnection()
-                    value = updater(
-                        getattr(node_instance, attribute),
-                        node_instance=node_instance,
-                        graph=self,
-                        v_attr=attribute,
-                    )
-                    if updater.updated:
-                        setattr(node_instance, attribute, value)
+                self._update_node_attributes(node_instance, _AttributeToConnection())
+
+    def _update_node_attributes(self, node_instance, updater):
+        """Apply an updater to all attributes of a node."""
+        for attribute in dir(node_instance):
+            if attribute.startswith("_") or attribute in Node._protected_:
+                continue
+            value = updater(
+                getattr(node_instance, attribute),
+                node_instance=node_instance,
+                graph=self,
+                v_attr=attribute,
+            )
+            if updater.updated:
+                setattr(node_instance, attribute, value)
 
     def add_node(self, node_for_adding, **attr):
         if isinstance(node_for_adding, NodeBaseMixin):
@@ -113,19 +116,7 @@ class DiGraph(nx.MultiDiGraph):
         for node_uuid in self.get_sorted_nodes():
             node = self.nodes[node_uuid]["value"]
             # update connectors
-            for attribute in dir(node):
-                if attribute.startswith("_") or attribute in Node._protected_:
-                    continue
-
-                updater = _UpdateConnectors()
-                value = updater(
-                    getattr(node, attribute),
-                    node_instance=node,
-                    graph=self,
-                    v_attr=attribute,
-                )
-                if updater.updated:
-                    setattr(node, attribute, value)
+            self._update_node_attributes(node, _UpdateConnectors())
             node.run()
 
     def write_graph(self, *args):
