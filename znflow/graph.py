@@ -59,7 +59,6 @@ class DiGraph(nx.MultiDiGraph):
                 "Something went wrong. DiGraph was changed inside the context manager."
             )
         set_graph(None)
-
         for node in self.nodes:
             node_instance = self.nodes[node]["value"]
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")
@@ -117,14 +116,16 @@ class DiGraph(nx.MultiDiGraph):
             for attribute in dir(node):
                 if attribute.startswith("_") or attribute in Node._protected_:
                     continue
-                value = getattr(node, attribute)
-                setattr(
-                    node,
-                    attribute,
-                    _UpdateConnectors()(
-                        value,
-                    ),
+
+                updater = _UpdateConnectors()
+                value = updater(
+                    getattr(node, attribute),
+                    node_instance=node,
+                    graph=self,
+                    v_attr=attribute,
                 )
+                if updater.updated:
+                    setattr(node, attribute, value)
             node.run()
 
     def write_graph(self, *args):
