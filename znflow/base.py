@@ -63,10 +63,15 @@ def set_graph(value):
     NodeBaseMixin._graph_ = value
 
 
-def get_attribute(node, attribute):
+_get_attribute_none = object()
+
+
+def get_attribute(obj, name, default=_get_attribute_none):
     """Get the real value of the attribute and not a znflow.Connection."""
     with disable_graph():
-        return getattr(node, attribute)
+        if default is _get_attribute_none:
+            return getattr(obj, name)
+        return getattr(obj, name, default)
 
 
 @dataclasses.dataclass(frozen=True)

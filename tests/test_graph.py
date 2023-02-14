@@ -104,3 +104,10 @@ def test_get_attribute():
         node1 = DataclassNode(value=42)
         assert znflow.base.get_attribute(node1, "value") == 42
         assert isinstance(node1.value, znflow.Connection)
+
+    assert znflow.base.get_attribute(node1, "value") == 42
+    with pytest.raises(AttributeError):
+        znflow.base.get_attribute(node1, "not_existing")
+
+    assert znflow.base.get_attribute(node1, "not_existing", None) is None
+    assert znflow.base.get_attribute(node1, "not_existing", 13) == 13

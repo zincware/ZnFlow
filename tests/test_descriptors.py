@@ -5,9 +5,7 @@ import znflow
 
 class CustomDescriptor(zninit.Descriptor):
     def __set__(self, instance, value):
-        super().__set__(
-            instance, f"{value}_{znflow.get_attribute(instance, 'name')}"
-        )
+        super().__set__(instance, f"{value}_{znflow.get_attribute(instance, 'name')}")
 
 
 class NodeWithDescriptor(zninit.ZnInit, znflow.Node):
