@@ -92,7 +92,7 @@ It is not recommended to run class methods inside the `with znflow.DiGraph()` co
 In the case of properties or other descriptor-based attributes, it might be necessary to access the actual attribute value. This can be achieved using the `znflow.get_attribute` method, which supports all features from `getattr` and can be imported as such:
 
 ```python
-import znflow.get_attribute as getattr
+from znflow import get_attribute as getattr
 ```
 Here's an example of how to use ``znflow.get_attribute``:
 ```python
