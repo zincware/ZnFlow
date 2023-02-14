@@ -74,17 +74,15 @@ class DiGraph(nx.MultiDiGraph):
                 for attribute in dir(node_instance):
                     if attribute.startswith("_") or attribute in Node._protected_:
                         continue
-                    value = getattr(node_instance, attribute)
-                    setattr(
-                        node_instance,
-                        attribute,
-                        _AttributeToConnection()(
-                            value,
-                            node_instance=node_instance,
-                            graph=self,
-                            v_attr=attribute,
-                        ),
+                    updater = _AttributeToConnection()
+                    value = updater(
+                        getattr(node_instance, attribute),
+                        node_instance=node_instance,
+                        graph=self,
+                        v_attr=attribute,
                     )
+                    if updater.updated:
+                        setattr(node_instance, attribute, value)
 
     def add_node(self, node_for_adding, **attr):
         if isinstance(node_for_adding, NodeBaseMixin):
