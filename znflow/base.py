@@ -72,7 +72,7 @@ def get_attribute(node, attribute):
 @dataclasses.dataclass(frozen=True)
 class Connection:
     """A Connector for Nodes.
-    instance: either a Node or FucntionFuture
+    instance: either a Node or FunctionFuture
     attribute:
         Node.attribute
         or FunctionFuture.result
