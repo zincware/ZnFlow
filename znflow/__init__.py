@@ -1,5 +1,6 @@
 """The 'ZnFlow' package."""
 
+import contextlib
 import importlib.metadata
 import logging
 import sys
@@ -12,6 +13,11 @@ from znflow.visualize import draw
 __version__ = importlib.metadata.version(__name__)
 
 __all__ = ["DiGraph", "Node", "draw", "nodify", "FunctionFuture", "Connection"]
+
+with contextlib.suppress(ImportError):
+    from znflow import deployment
+
+    __all__ += ["deployment"]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
