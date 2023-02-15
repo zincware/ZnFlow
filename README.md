@@ -110,9 +110,9 @@ class POW2(znflow.Node):
 
     @x.setter
     def x(self, value):
-        # using "self._x = value * self.factor" would run 
-        # "Connector(self, "x_factor") ** 2" which is not possible (TypeError)
-        # therefore we use znflow.get_attribute
+        # using "self._x = value * self.x_factor" inside "znflow.DiGraph()" would run 
+        # "value * Connector(self, "x_factor")" which is not possible (TypeError)
+        # therefore we use znflow.get_attribute.
         self._x = value * znflow.get_attribute(self, "x_factor")
 
     def run(self):
