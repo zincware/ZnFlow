@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import functools
 import uuid
+import functools
 
 from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph
 
@@ -30,7 +30,9 @@ class Node(NodeBaseMixin):
         raise NotImplementedError
 
     def __matmul__(self, other):
-        return Connection(self, other)
+        return Connection(
+            self, other
+        )
 
     def __new__(cls, *args, **kwargs):
         cls._in_construction = True
