@@ -126,3 +126,13 @@ graph.run()
 assert n1.results == 4.0
 
 ```
+
+# Supported Frameworks
+ZnFlow includes tests to ensure compatibility with:
+- "Plain classes"
+- ``dataclasses``
+- ``ZnInit``
+- ``attrs``
+
+It is currently **not** compatible with pydantic.
+I don't know what pydantic does internally and wasn't able to find a workaround.
