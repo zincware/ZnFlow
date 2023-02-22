@@ -23,7 +23,7 @@ jobs:
         run: black --check .
       - name: isort
         if: always()
-        run: isort --check-only --quiet .
+        run: isort --check-only .
       - name: ruff
         if: always()
         run: ruff .
