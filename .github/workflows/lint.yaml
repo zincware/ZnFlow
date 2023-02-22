@@ -20,10 +20,10 @@ jobs:
           poetry install --no-root --only=lint
       - name: black
         if: always()
-        run: black .
+        run: black --check .
       - name: isort
         if: always()
-        run: isort .
+        run: isort --check-only --quiet .
       - name: ruff
         if: always()
         run: ruff .
