@@ -17,8 +17,10 @@ black = "^22.10.0"
 isort = "^5.10.1"
 pylint = "^2.15.8"
 coverage = "^6.5.0"
-ruff = "^0.0.177"
+ruff = "^0.0.251"
 zninit = "^0.1.8"
+pydantic = "^1.10.5"
+attrs = "^22.2.0"
 
 [tool.poetry.group.notebook.dependencies]
 jupyterlab = "^3.5.1"
