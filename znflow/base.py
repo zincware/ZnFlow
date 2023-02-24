@@ -1,3 +1,4 @@
+"""The base module of znflow."""
 from __future__ import annotations
 
 import contextlib
@@ -43,23 +44,31 @@ class NodeBaseMixin:
 
     @property
     def uuid(self):
+        """A method that generates a UUID to create a hashable object for each node."""
         return self._uuid
 
     @uuid.setter
     def uuid(self, value):
+        """A method that checks for an existing UUID.
+
+        If no UUID exists, it sets the previously defined UUID for the node.
+        """
         if self._uuid is not None:
             raise ValueError("uuid is already set")
         self._uuid = value
 
     def run(self):
+        """Run Method of NodeBaseMixin."""
         raise NotImplementedError
 
 
 def get_graph():
+    """Gets Graph from the NodeBaseMixin class."""
     return NodeBaseMixin._graph_
 
 
 def set_graph(value):
+    """Sets a value for the NodeBaseMixin graph."""
     NodeBaseMixin._graph_ = value
 
 
@@ -77,11 +86,12 @@ def get_attribute(obj, name, default=_get_attribute_none):
 @dataclasses.dataclass(frozen=True)
 class Connection:
     """A Connector for Nodes.
+
     instance: either a Node or FunctionFuture
     attribute:
         Node.attribute
         or FunctionFuture.result
-        or None if the class is passed and not an attribute
+        or None if the class is passed and not an attribute.
     """
 
     instance: any
@@ -89,10 +99,12 @@ class Connection:
 
     @property
     def uuid(self):
+        """Gets value of the UUID."""
         return self.instance.uuid
 
     @property
     def result(self):
+        """Returns the instance and if available, also the attribute."""
         if self.attribute is None:
             return self.instance
         return getattr(self.instance, self.attribute)
@@ -100,6 +112,9 @@ class Connection:
 
 @dataclasses.dataclass
 class FunctionFuture(NodeBaseMixin):
+    """
+
+    """
     function: typing.Callable
     args: typing.Tuple
     kwargs: typing.Dict
