@@ -1,3 +1,4 @@
+"""The ZnFlow base module."""
 from __future__ import annotations
 
 import contextlib
@@ -35,18 +36,29 @@ class NodeBaseMixin:
     _uuid: UUID = None
 
     _protected_ = [
-        "_graph_",
         "uuid",
-        "_uuid",
         "result",
     ]  # TODO consider adding regex patterns
 
     @property
     def uuid(self):
+        """The unique identifier for the Node."""
         return self._uuid
 
     @uuid.setter
-    def uuid(self, value):
+    def uuid(self, value: UUID):
+        """Set the UUID for the Node.
+
+        Raises
+        ------
+        ValueError:
+            The uuid can only be set once. If set again, this error is raised.
+
+        Parameters
+        ----------
+        value: UUID
+            the uuid to use for this Node instance.
+        """
         if self._uuid is not None:
             raise ValueError("uuid is already set")
         self._uuid = value
@@ -105,8 +117,6 @@ class FunctionFuture(NodeBaseMixin):
     kwargs: typing.Dict
 
     _result: any = dataclasses.field(default=None, init=False, repr=True)
-
-    _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
     def run(self):
         self._result = self.function(*self.args, **self.kwargs)
