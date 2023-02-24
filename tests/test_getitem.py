@@ -1,5 +1,7 @@
 import dataclasses
 
+import pytest
+
 import znflow
 
 
@@ -84,3 +86,11 @@ def test_getitem_with_sum():
     assert node_a.result == list(range(10))
     assert node_b.data == list(range(10))
     assert node_c.result == list(range(10))
+
+
+def test_multi_getitem():
+    with znflow.DiGraph():
+        node_a = get_list()
+        x = node_a[::2]
+        with pytest.raises(TypeError):
+            _ = x[::2]
