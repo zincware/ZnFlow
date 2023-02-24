@@ -89,12 +89,7 @@ class Connection:
     item: any = None
 
     def __getitem__(self, item):
-        if self.item is not None:
-            raise TypeError(
-                f"'__getitem__' call to {self} where 'item is not None' is currently not"
-                " supported."
-            )
-        return dataclasses.replace(self, item=item)
+        return type(self)(instance=self, attribute="result", item=item)
 
     @property
     def uuid(self):

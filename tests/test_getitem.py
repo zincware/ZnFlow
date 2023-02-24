@@ -1,7 +1,5 @@
 import dataclasses
 
-import pytest
-
 import znflow
 
 
@@ -58,7 +56,7 @@ def test_GetList():
 
     assert isinstance(y, znflow.Connection)
 
-    assert y.instance is x
+    assert y.instance.instance is x  # y.instance == Connection(instance=x, ...)
     assert len(graph) == 1
 
     assert x.data == list(range(10))
@@ -89,8 +87,16 @@ def test_getitem_with_sum():
 
 
 def test_multi_getitem():
-    with znflow.DiGraph():
+    with znflow.DiGraph() as graph:
         node_a = get_list()
         x = node_a[::2]
-        with pytest.raises(TypeError):
-            _ = x[::2]
+        y = x[::2]
+
+        out = add_lists(x, y)
+
+    graph.run()
+    assert len(graph) == 2  # node_a and out
+    assert node_a.result == list(range(10))
+    assert x.result == list(range(0, 10, 2))
+    assert y.result == list(range(0, 10, 4))
+    assert out.result == list(range(0, 10, 2)) + list(range(0, 10, 4))
