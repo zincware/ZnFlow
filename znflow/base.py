@@ -112,9 +112,6 @@ class Connection:
 
 @dataclasses.dataclass
 class FunctionFuture(NodeBaseMixin):
-    """
-
-    """
     function: typing.Callable
     args: typing.Tuple
     kwargs: typing.Dict
