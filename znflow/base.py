@@ -87,6 +87,10 @@ class Connection:
     instance: any
     attribute: any
 
+    def __post_init__(self):
+        if self.attribute is not None and self.attribute.startswith("_"):
+            raise ValueError("Private attributes are not allowed.")
+
     @property
     def uuid(self):
         return self.instance.uuid

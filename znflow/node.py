@@ -60,6 +60,7 @@ class Node(NodeBaseMixin):
         return value
 
     def __setattr__(self, item, value) -> None:
+        super().__setattr__(item, value)
         if get_graph() is not None:
             if isinstance(value, Connection):
                 assert (
@@ -69,7 +70,6 @@ class Node(NodeBaseMixin):
                 self._graph_.add_edge(
                     value.uuid, self.uuid, u_attr=value.attribute, v_attr=item
                 )
-        super().__setattr__(item, value)
 
 
 def nodify(function):

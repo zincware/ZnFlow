@@ -37,7 +37,7 @@ class POW2(znflow.Node):
 def test_get_attribute():
     with znflow.DiGraph() as graph:
         n1 = POW2()
-        n1.x = 4.0
+        n1.x = 4.0  # converted to 2.0
 
     graph.run()
     assert n1.x == 2.0
