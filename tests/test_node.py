@@ -15,6 +15,10 @@ class PlainNode(znflow.Node):
     def run(self):
         self.value += 1
 
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
 
 @dataclasses.dataclass
 class DataclassNode(znflow.Node):
@@ -23,12 +27,20 @@ class DataclassNode(znflow.Node):
     def run(self):
         self.value += 1
 
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
 
 class ZnInitNode(zninit.ZnInit, znflow.Node):
     value: int = zninit.Descriptor()
 
     def run(self):
         self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
 
 
 @attrs.define
@@ -37,6 +49,10 @@ class AttrsNode(znflow.Node):
 
     def run(self):
         self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
 
 
 @znflow.nodify
