@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import inspect
 import uuid
 
 from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph
@@ -77,9 +78,18 @@ def nodify(function):
 
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
-        """Wrapper function for the decorator."""
+        """Wrapper function for the decorator.
+
+        Raises
+        ------
+        TypeError:
+            if the args / kwargs do not match the function signature
+        """
         graph = get_graph()
         if graph is not None:
+            # check if the args / kwargs match the function
+            inspect.signature(function).bind(*args, **kwargs)
+
             future = FunctionFuture(function, args, kwargs)
             future.uuid = uuid.uuid4()
 
