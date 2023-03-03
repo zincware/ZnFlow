@@ -86,6 +86,10 @@ class Connection:
 
     instance: any
     attribute: any
+    item: any = None
+
+    def __getitem__(self, item):
+        return dataclasses.replace(self, instance=self, attribute="result", item=item)
 
     @property
     def uuid(self):
@@ -93,9 +97,11 @@ class Connection:
 
     @property
     def result(self):
-        if self.attribute is None:
-            return self.instance
-        return getattr(self.instance, self.attribute)
+        result = (
+            getattr(self.instance, self.attribute) if self.attribute else self.instance
+        )
+
+        return result[self.item] if self.item else result
 
 
 @dataclasses.dataclass
@@ -103,6 +109,7 @@ class FunctionFuture(NodeBaseMixin):
     function: typing.Callable
     args: typing.Tuple
     kwargs: typing.Dict
+    item: any = None
 
     _result: any = dataclasses.field(default=None, init=False, repr=True)
 
@@ -111,9 +118,11 @@ class FunctionFuture(NodeBaseMixin):
     def run(self):
         self._result = self.function(*self.args, **self.kwargs)
 
+    def __getitem__(self, item):
+        return Connection(instance=self, attribute="result", item=item)
+
     @property
     def result(self):
         if self._result is None:
             self.run()
-
         return self._result
