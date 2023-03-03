@@ -50,6 +50,14 @@ def compute_sum(*args):
 
 
 @pytest.mark.parametrize("cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode])
+def test_Node_init(cls):
+    with pytest.raises((TypeError, AttributeError)):
+        # TODO only raise TypeError and not AttributeError when TypeError is expected.
+        with znflow.DiGraph():
+            cls()
+
+
+@pytest.mark.parametrize("cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode])
 def test_Node(cls):
     with znflow.DiGraph() as graph:
         node = cls(value=42)
@@ -162,8 +170,8 @@ def test_ConnectionNodifyMultiNode(cls1, cls2):
 @pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
 def test_ConnectionNodeMultiNodify(cls1, cls2):
     with znflow.DiGraph() as graph:
-        node1 = cls1(value=42)
-        node2 = cls1(value=42)
+        node1 = cls1(42)
+        node2 = cls1(42)
         node3 = cls2(value=[node1, node2])
 
     assert node1.uuid in graph
