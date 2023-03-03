@@ -89,7 +89,7 @@ class Connection:
     item: any = None
 
     def __getitem__(self, item):
-        return type(self)(instance=self, attribute="result", item=item)
+        return dataclasses.replace(self, instance=self, attribute="result", item=item)
 
     @property
     def uuid(self):
@@ -101,9 +101,7 @@ class Connection:
             getattr(self.instance, self.attribute) if self.attribute else self.instance
         )
 
-        if self.item is None:
-            return result
-        return result[self.item]
+        return result[self.item] if self.item else result
 
 
 @dataclasses.dataclass
