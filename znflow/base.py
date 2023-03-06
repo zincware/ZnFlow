@@ -91,6 +91,10 @@ class Connection:
     def __getitem__(self, item):
         return dataclasses.replace(self, instance=self, attribute="result", item=item)
 
+    def __post_init__(self):
+        if self.attribute is not None and self.attribute.startswith("_"):
+            raise ValueError("Private attributes are not allowed.")
+
     @property
     def uuid(self):
         return self.instance.uuid
