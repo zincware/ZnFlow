@@ -51,14 +51,13 @@ class Node(NodeBaseMixin):
         return instance
 
     def __getattribute__(self, item):
-        value = super().__getattribute__(item)
         if get_graph() is not None:
             if item not in type(self)._protected_ and not item.startswith("_"):
                 if self._in_construction:
-                    return value
+                    return super().__getattribute__(item)
                 connector = Connection(instance=self, attribute=item)
                 return connector
-        return value
+        return super().__getattribute__(item)
 
     def __setattr__(self, item, value) -> None:
         super().__setattr__(item, value)

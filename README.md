@@ -127,6 +127,9 @@ assert n1.results == 4.0
 
 ```
 
+Instead, you can also use the ``znflow.disable_graph`` decorator / context manager to disable the graph for a specific block of code or the ``znflow.Property`` as a drop-in replacement for ``property``.
+
+
 # Supported Frameworks
 ZnFlow includes tests to ensure compatibility with:
 - "Plain classes"

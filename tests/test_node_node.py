@@ -23,6 +23,15 @@ class SumNodes(znflow.Node):
         self.outputs = sum(self.inputs)
 
 
+@dataclasses.dataclass
+class SumNodesFromDict(znflow.Node):
+    inputs: dict
+    outputs: float = None
+
+    def run(self):
+        self.outputs = sum(self.inputs.values())
+
+
 def test_eager():
     node = Node(inputs=1)
     node.run()
@@ -102,3 +111,13 @@ def test_graph_multi():
     graph.run()
 
     assert node7.outputs == 80
+
+
+def test_SumNodesFromDict():
+    with znflow.DiGraph() as graph:
+        node1 = Node(inputs=5)
+        node2 = Node(inputs=10)
+        node3 = SumNodesFromDict(inputs={"a": node1.outputs, "b": node2.outputs})
+    graph.run()
+
+    assert node3.outputs == 30

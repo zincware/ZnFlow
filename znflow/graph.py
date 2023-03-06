@@ -93,7 +93,13 @@ class DiGraph(nx.MultiDiGraph):
             if attribute.startswith("_") or attribute in Node._protected_:
                 # We do not allow connections to private attributes.
                 continue
-            value = getattr(node_instance, attribute)
+            try:
+                value = getattr(node_instance, attribute)
+            except Exception:
+                # It might be, that the value is currently not available.
+                #  For example, it could be a property that is not yet set.
+                #  In this case we skip updating the attribute, no matter the exception.
+                continue
             value = updater(value)
             if updater.updated:
                 try:
