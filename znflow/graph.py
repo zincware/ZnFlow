@@ -47,13 +47,21 @@ class _UpdateConnectors(utils.IterableHandler):
 
 
 class DiGraph(nx.MultiDiGraph):
+    def __init__(self, *args, disable=False, **kwargs):
+        self.disable = disable
+        super().__init__(*args, **kwargs)
+
     def __enter__(self):
+        if self.disable:
+            return self
         if get_graph() is not None:
             raise ValueError("DiGraph already exists. Nested Graphs are not supported.")
         set_graph(self)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.disable:
+            return
         if get_graph() is not self:
             raise ValueError(
                 "Something went wrong. DiGraph was changed inside the context manager."

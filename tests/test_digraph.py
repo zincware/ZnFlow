@@ -23,9 +23,20 @@ class ComputeSum(znflow.Node):
 def test_combine_nodes():
     with znflow.DiGraph() as graph:
         n1 = ComputeSum(inputs=(1, 2, 3))
-        n2 = ComputeSum(inputs=(4, 5, 6))
-        n3 = ComputeSum(inputs=(n1.outputs, n2.outputs))
+        n2 = add(4, 5, 6)
+        n3 = ComputeSum(inputs=(n1.outputs, n2))
 
     graph.run()
+
+    assert n3.outputs == 21
+
+
+def test_combine_nodes_disable():
+    with znflow.DiGraph(disable=True):
+        n1 = ComputeSum(inputs=(1, 2, 3))
+        n2 = add(4, 5, 6)
+        n1.run()  # when the graph is disabled, we must call run.
+        n3 = ComputeSum(inputs=(n1.outputs, n2))
+        n3.run()
 
     assert n3.outputs == 21
