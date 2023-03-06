@@ -19,6 +19,9 @@ class PlainNode(znflow.Node):
     def output(self):
         return znflow.get_attribute(self, "value")
 
+    def do_stuff(self):
+        raise NotImplementedError
+
 
 @dataclasses.dataclass
 class DataclassNode(znflow.Node):
