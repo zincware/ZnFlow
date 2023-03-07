@@ -4,7 +4,13 @@ import functools
 import inspect
 import uuid
 
-from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph
+from znflow.base import (
+    Connection,
+    FunctionFuture,
+    NodeBaseMixin,
+    disable_graph,
+    get_graph,
+)
 
 
 def _mark_init_in_construction(cls):
@@ -52,6 +58,12 @@ class Node(NodeBaseMixin):
 
     def __getattribute__(self, item):
         if get_graph() is not None:
+            with disable_graph():
+                if item not in set(dir(self)):
+                    raise AttributeError(
+                        f"'{self.__class__.__name__}' object has no attribute '{item}'"
+                    )
+
             if item not in type(self)._protected_ and not item.startswith("_"):
                 if self._in_construction:
                     return super().__getattribute__(item)

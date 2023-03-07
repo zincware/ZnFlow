@@ -41,7 +41,7 @@ class POW2Decorate(POW2Base):
     def x(self):
         return self._x
 
-    @znflow.disable_graph
+    @znflow.disable_graph()
     @x.setter
     def x(self, value):
         self._x = value * self.x_factor
@@ -103,3 +103,28 @@ def test_invalid_attribute():
     assert invalid_attribute.instance == node
     assert invalid_attribute.attribute == "invalid_attribute"
     assert node.uuid in graph
+
+
+class NodeWithInit(znflow.Node):
+    def __init__(self):
+        self.x = 1.0
+
+
+def test_attribute_not_found():
+    """Try to access an Attribute which does not exist."""
+    with pytest.raises(AttributeError):
+        node = InvalidAttribute()
+        node.this_does_not_exist
+
+    with znflow.DiGraph():
+        node = POW2GetAttr()
+        with pytest.raises(AttributeError):
+            node.this_does_not_exist
+
+    with znflow.DiGraph():
+        node = NodeWithInit()
+        with pytest.raises(AttributeError):
+            node.this_does_not_exist
+        outs = node.x
+
+    assert outs.result == 1.0
