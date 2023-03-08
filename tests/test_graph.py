@@ -132,17 +132,20 @@ def test_not_added_to_graph():
 
         assert node1.value == 42
 
-        node3 = compute_sum(node1.value, node2.value)
-        node4 = ComputeSum(node1, node2)
+        node3 = compute_sum(node1.value, node2.value)  # test getattr
+        node4 = ComputeSum(node1, node2)  # test AttributeToConnection
         assert node3.args[0] == 42  # not a connection
         assert isinstance(node3.args[1], znflow.Connection)
 
     assert node1.uuid not in graph
     assert node2.uuid in graph
     assert node3.uuid in graph
+    assert node4.uuid in graph
 
     assert node1.value == 42
     assert node2.value == 18
+
+    assert len(graph) == 3
 
     graph.run()
 
