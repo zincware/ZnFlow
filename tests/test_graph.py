@@ -4,6 +4,7 @@ import pytest
 import zninit
 
 import znflow
+from znflow.base import empty
 
 
 class PlainNode(znflow.Node):
@@ -27,6 +28,14 @@ class ZnInitNode(zninit.ZnInit, znflow.Node):
 
     def run(self):
         self.value += 1
+
+
+class ComputeSum(znflow.Node):
+    def __init__(self, *args):
+        self.args = args
+
+    def run(self):
+        self.result = sum(x.value for x in self.args)
 
 
 @znflow.nodify
@@ -70,7 +79,7 @@ def test_changed_graph():
     with pytest.raises(ValueError):
         with znflow.DiGraph():
             znflow.base.NodeBaseMixin._graph_ = znflow.DiGraph()
-    znflow.base.NodeBaseMixin._graph_ = None  # reset after test
+    znflow.base.NodeBaseMixin._graph_ = empty  # reset after test
 
 
 def test_add_others():
@@ -124,6 +133,7 @@ def test_not_added_to_graph():
         assert node1.value == 42
 
         node3 = compute_sum(node1.value, node2.value)
+        node4 = ComputeSum(node1, node2)
         assert node3.args[0] == 42  # not a connection
         assert isinstance(node3.args[1], znflow.Connection)
 
@@ -140,6 +150,7 @@ def test_not_added_to_graph():
     #  it was not added to the graph
     assert node2.value == 19
     assert node3.result == 61
+    assert node4.result == 61
 
 
 def test_disable_graph():
@@ -148,9 +159,9 @@ def test_disable_graph():
         node1 = DataclassNode(value=42)
         assert node1._graph_ is graph
         with znflow.base.disable_graph():
-            assert node1._graph_ is None
+            assert node1._graph_ is empty
         assert node1._graph_ is graph
-    assert node1._graph_ is None
+    assert node1._graph_ is empty
 
 
 def test_get_attribute():

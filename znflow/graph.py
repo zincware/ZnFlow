@@ -5,7 +5,14 @@ import typing
 import networkx as nx
 
 from znflow import utils
-from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph, set_graph
+from znflow.base import (
+    Connection,
+    FunctionFuture,
+    NodeBaseMixin,
+    empty,
+    get_graph,
+    set_graph,
+)
 from znflow.node import Node
 
 log = logging.getLogger(__name__)
@@ -55,7 +62,7 @@ class DiGraph(nx.MultiDiGraph):
     def __enter__(self):
         if self.disable:
             return self
-        if get_graph() is not None:
+        if get_graph() is not empty:
             raise ValueError("DiGraph already exists. Nested Graphs are not supported.")
         set_graph(self)
         return self
@@ -67,13 +74,14 @@ class DiGraph(nx.MultiDiGraph):
             raise ValueError(
                 "Something went wrong. DiGraph was changed inside the context manager."
             )
-        set_graph(None)
+        set_graph(empty)
         for node in self.nodes:
             node_instance = self.nodes[node]["value"]
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")
             if isinstance(node_instance, FunctionFuture):
                 self._update_function_future_arguments(node_instance)
             elif isinstance(node_instance, Node):
+                # TODO only update Nodes if the graph is not empty
                 self._update_node_attributes(node_instance, _AttributeToConnection())
 
     def _update_function_future_arguments(self, node_instance: FunctionFuture) -> None:

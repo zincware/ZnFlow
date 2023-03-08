@@ -8,12 +8,12 @@ from uuid import UUID
 
 @contextlib.contextmanager
 def disable_graph(*args, **kwargs):
-    """Temporarily disable set the graph to None.
+    """Temporarily disable set the graph to empty.
 
     This can be useful, if you e.g. want to use 'get_attribute'.
     """
     graph = get_graph()
-    set_graph(None)
+    set_graph(empty)
     try:
         yield
     finally:
@@ -73,6 +73,9 @@ class Property:
         return prop
 
 
+empty = object()
+
+
 class NodeBaseMixin:
     """A Parent for all Nodes.
 
@@ -84,7 +87,7 @@ class NodeBaseMixin:
     uuid : UUID
     """
 
-    _graph_ = None
+    _graph_ = empty
     _uuid: UUID = None
 
     _protected_ = [
