@@ -121,6 +121,9 @@ class DiGraph(nx.MultiDiGraph):
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             assert u_of_edge.uuid in self, f"'{u_of_edge.uuid=}' not in '{self=}'"
             assert v_of_edge.uuid in self, f"'{v_of_edge.uuid=}' not in '{self=}'"
+            # TODO what if 'v_attr' is a list/dict/... that contains multiple connections?
+            #  Is this relevant? We could do `v_attr.<dict_key>` or `v_attr.<list_index>`
+            #  See test_node.test_ListConnection and test_node.test_DictionaryConnection
             self.add_edge(
                 u_of_edge.uuid,
                 v_of_edge.uuid,
