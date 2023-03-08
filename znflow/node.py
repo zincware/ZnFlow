@@ -57,7 +57,9 @@ class Node(NodeBaseMixin):
         return instance
 
     def __getattribute__(self, item):
-        if get_graph() is not None:
+        if item == "_graph_":
+            return super().__getattribute__(item)
+        if self._graph_ is not None:
             with disable_graph():
                 if item not in set(dir(self)):
                     raise AttributeError(
@@ -73,7 +75,7 @@ class Node(NodeBaseMixin):
 
     def __setattr__(self, item, value) -> None:
         super().__setattr__(item, value)
-        if get_graph() is not None:
+        if self._graph_ is not None:
             if isinstance(value, Connection):
                 assert (
                     self.uuid in self._graph_

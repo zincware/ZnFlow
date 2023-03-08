@@ -87,6 +87,61 @@ def test_add_connections():
         graph.add_connections(42, 42)
 
 
+@dataclasses.dataclass
+class ParameterContainer:
+    value: int
+
+
+def test_add_not_Node():
+    parameter = ParameterContainer(value=42)
+    with znflow.DiGraph() as graph:
+        # ParameterContainer is not of type NodeBaseMixin,
+        #  therefore, it won't be added to the graph
+        node1 = DataclassNode(value=parameter.value)
+        assert parameter.value == 42
+
+    assert node1.value == 42
+
+    graph.run()
+    assert len(graph) == 1
+    assert node1.value == 43
+
+
+def test_not_added_to_graph():
+    """Test, if a Node has a deliberately disabled _graph_ attribute
+
+    You can set instance._graph_ = None to disable adding the node to the graph.
+    """
+    node1 = DataclassNode(value=42)
+    node1._graph_ = None
+    assert node1.value == 42
+
+    with znflow.DiGraph() as graph:
+        assert node1._graph_ is None
+        node2 = DataclassNode(value=18)
+        assert node2._graph_ is graph
+
+        assert node1.value == 42
+
+        node3 = compute_sum(node1.value, node2.value)
+        assert node3.args[0] == 42  # not a connection
+        assert isinstance(node3.args[1], znflow.Connection)
+
+    assert node1.uuid not in graph
+    assert node2.uuid in graph
+    assert node3.uuid in graph
+
+    assert node1.value == 42
+    assert node2.value == 18
+
+    graph.run()
+
+    assert node1.value == 42  # the value is not +1 because
+    #  it was not added to the graph
+    assert node2.value == 19
+    assert node3.result == 61
+
+
 def test_disable_graph():
     graph = znflow.DiGraph()
     with graph:
