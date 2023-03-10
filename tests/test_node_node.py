@@ -108,6 +108,8 @@ def test_graph_multi():
         node5 = SumNodes(inputs=[node3.outputs, node4.outputs])
         node6 = SumNodes(inputs=[node2.outputs, node5.outputs])
         node7 = SumNodes(inputs=[node6.outputs])
+
+        assert isinstance(node6.outputs, znflow.Connection)
     graph.run()
 
     assert node7.outputs == 80
