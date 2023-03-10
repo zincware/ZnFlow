@@ -9,6 +9,7 @@ from znflow.base import (
     FunctionFuture,
     NodeBaseMixin,
     disable_graph,
+    empty,
     get_graph,
 )
 
@@ -52,12 +53,14 @@ class Node(NodeBaseMixin):
 
         # Connect the Node to the Grap
         graph = get_graph()
-        if graph is not None:
+        if graph is not empty:
             graph.add_node(instance)
         return instance
 
     def __getattribute__(self, item):
-        if get_graph() is not None:
+        if item == "_graph_":
+            return super().__getattribute__(item)
+        if self._graph_ not in [empty, None]:
             with disable_graph():
                 if item not in set(dir(self)):
                     raise AttributeError(
@@ -73,7 +76,7 @@ class Node(NodeBaseMixin):
 
     def __setattr__(self, item, value) -> None:
         super().__setattr__(item, value)
-        if get_graph() is not None:
+        if self._graph_ not in [empty, None]:
             if isinstance(value, Connection):
                 assert (
                     self.uuid in self._graph_
@@ -97,7 +100,7 @@ def nodify(function):
             if the args / kwargs do not match the function signature
         """
         graph = get_graph()
-        if graph is not None:
+        if graph is not empty:
             # check if the args / kwargs match the function
             inspect.signature(function).bind(*args, **kwargs)
 

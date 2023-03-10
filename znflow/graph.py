@@ -5,7 +5,14 @@ import typing
 import networkx as nx
 
 from znflow import utils
-from znflow.base import Connection, FunctionFuture, NodeBaseMixin, get_graph, set_graph
+from znflow.base import (
+    Connection,
+    FunctionFuture,
+    NodeBaseMixin,
+    empty,
+    get_graph,
+    set_graph,
+)
 from znflow.node import Node
 
 log = logging.getLogger(__name__)
@@ -15,8 +22,12 @@ class _AttributeToConnection(utils.IterableHandler):
     def default(self, value, **kwargs):
         assert not kwargs
         if isinstance(value, FunctionFuture):
+            if value._graph_ is None:
+                return value
             return Connection(value, attribute="result")
         elif isinstance(value, Node):
+            if value._graph_ is None:
+                return value
             return Connection(value, attribute=None)
         else:
             return value
@@ -55,7 +66,7 @@ class DiGraph(nx.MultiDiGraph):
     def __enter__(self):
         if self.disable:
             return self
-        if get_graph() is not None:
+        if get_graph() is not empty:
             raise ValueError("DiGraph already exists. Nested Graphs are not supported.")
         set_graph(self)
         return self
@@ -67,13 +78,14 @@ class DiGraph(nx.MultiDiGraph):
             raise ValueError(
                 "Something went wrong. DiGraph was changed inside the context manager."
             )
-        set_graph(None)
+        set_graph(empty)
         for node in self.nodes:
             node_instance = self.nodes[node]["value"]
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")
             if isinstance(node_instance, FunctionFuture):
                 self._update_function_future_arguments(node_instance)
             elif isinstance(node_instance, Node):
+                # TODO only update Nodes if the graph is not empty
                 self._update_node_attributes(node_instance, _AttributeToConnection())
 
     def _update_function_future_arguments(self, node_instance: FunctionFuture) -> None:
@@ -121,6 +133,9 @@ class DiGraph(nx.MultiDiGraph):
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             assert u_of_edge.uuid in self, f"'{u_of_edge.uuid=}' not in '{self=}'"
             assert v_of_edge.uuid in self, f"'{v_of_edge.uuid=}' not in '{self=}'"
+            # TODO what if 'v_attr' is a list/dict/... that contains multiple connections?
+            #  Is this relevant? We could do `v_attr.<dict_key>` or `v_attr.<list_index>`
+            #  See test_node.test_ListConnection and test_node.test_DictionaryConnection
             self.add_edge(
                 u_of_edge.uuid,
                 v_of_edge.uuid,

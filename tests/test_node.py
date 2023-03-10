@@ -240,3 +240,92 @@ def test_CheckWrapInit():
 
     with pytest.raises(TypeError):
         CheckWrapInit()
+
+
+@dataclasses.dataclass
+class DictionaryConnection(znflow.Node):
+    nodes: dict
+    results: float = None
+
+    def run(self):
+        return sum(self.nodes.values())
+
+
+@dataclasses.dataclass
+class ListConnection(znflow.Node):
+    nodes: list
+    results: float = None
+
+    def run(self):
+        return sum(self.nodes)
+
+
+def test_DictionaryConnection():
+    with znflow.DiGraph() as graph:
+        node1 = PlainNode(value=42)
+        node2 = PlainNode(value=42)
+        node3 = DictionaryConnection(nodes={"node1": node1.value, "node2": node2.value})
+
+    assert node1.uuid in graph
+    assert node2.uuid in graph
+    assert node3.uuid in graph
+
+    assert "node1" in node3.nodes
+    assert "node2" in node3.nodes
+
+    assert isinstance(node3.nodes["node1"], znflow.Connection)
+    assert node3.nodes["node1"].uuid == node1.uuid
+    assert node3.nodes["node1"].attribute == "value"
+
+    assert isinstance(node3.nodes["node2"], znflow.Connection)
+    assert node3.nodes["node2"].uuid == node2.uuid
+    assert node3.nodes["node2"].attribute == "value"
+
+    graph.run()
+
+    edge1: dict = graph.get_edge_data(node1.uuid, node3.uuid)
+    edge2: dict = graph.get_edge_data(node1.uuid, node3.uuid)
+    assert edge1 is not None
+    assert edge2 is not None
+
+    assert isinstance(edge1, dict)
+    assert edge1[0]["u_attr"] == "value"
+    assert edge1[0]["v_attr"] == "nodes"
+
+    assert isinstance(edge2, dict)
+    assert edge2[0]["u_attr"] == "value"
+    assert edge2[0]["v_attr"] == "nodes"
+
+
+def test_ListConnection():
+    with znflow.DiGraph() as graph:
+        node1 = PlainNode(value=42)
+        node2 = PlainNode(value=42)
+        node3 = ListConnection(nodes=[node1.value, node2.value])
+
+    assert node1.uuid in graph
+    assert node2.uuid in graph
+    assert node3.uuid in graph
+
+    assert isinstance(node3.nodes[0], znflow.Connection)
+    assert node3.nodes[0].uuid == node1.uuid
+    assert node3.nodes[0].attribute == "value"
+
+    assert isinstance(node3.nodes[1], znflow.Connection)
+    assert node3.nodes[1].uuid == node2.uuid
+    assert node3.nodes[1].attribute == "value"
+
+    graph.run()
+
+    edge1: dict = graph.get_edge_data(node1.uuid, node3.uuid)
+    edge2: dict = graph.get_edge_data(node1.uuid, node3.uuid)
+    assert edge1 is not None
+    assert edge2 is not None
+
+    assert isinstance(edge1, dict)
+    assert edge1[0]["u_attr"] == "value"
+    assert edge1[0]["v_attr"] == "nodes"
+
+    assert isinstance(edge2, dict)
+    assert edge2[0]["u_attr"] == "value"
+    assert edge2[0]["v_attr"] == "nodes"
