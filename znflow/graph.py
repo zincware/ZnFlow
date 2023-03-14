@@ -131,8 +131,17 @@ class DiGraph(nx.MultiDiGraph):
     def add_connections(self, u_of_edge, v_of_edge, **attr):
         log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
-            assert u_of_edge.uuid in self, f"'{u_of_edge.uuid=}' not in '{self=}'"
-            assert v_of_edge.uuid in self, f"'{v_of_edge.uuid=}' not in '{self=}'"
+            if u_of_edge.uuid not in self:
+                raise ValueError(
+                    f"The source node (uuid={u_of_edge.uuid}, connection={u_of_edge}) is"
+                    " not in the graph."
+                )
+            if v_of_edge.uuid not in self:
+                raise ValueError(
+                    f"The target node (uuid={v_of_edge.uuid}, connection={v_of_edge}) is"
+                    " not in the graph."
+                )
+
             # TODO what if 'v_attr' is a list/dict/... that contains multiple connections?
             #  Is this relevant? We could do `v_attr.<dict_key>` or `v_attr.<list_index>`
             #  See test_node.test_ListConnection and test_node.test_DictionaryConnection
