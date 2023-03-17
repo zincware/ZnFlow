@@ -19,18 +19,10 @@ log = logging.getLogger(__name__)
 
 
 class _AttributeToConnection(utils.IterableHandler):
-    def default(self, value, **kwargs):
-        assert not kwargs
-        if isinstance(value, FunctionFuture):
-            if value._graph_ is None:
-                return value
-            return Connection(value, attribute="result")
-        elif isinstance(value, Node):
-            if value._graph_ is None:
-                return value
-            return Connection(value, attribute=None)
-        else:
+    def default(self, value):
+        if not isinstance(value, (FunctionFuture, Node)):
             return value
+        return value if value._graph_ is None else Connection(value, attribute=None)
 
 
 class _AddConnectionToGraph(utils.IterableHandler):
