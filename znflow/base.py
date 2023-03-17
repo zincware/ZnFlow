@@ -159,10 +159,6 @@ class Connection:
         if self.attribute:
             result = getattr(self.instance, self.attribute)
         elif isinstance(self.instance, (FunctionFuture, self.__class__)):
-            if self.attribute is not None:
-                raise ValueError(
-                    f"Cannot define attribute access for {type(self.instance)}."
-                )
             result = self.instance.result
         else:
             result = self.instance
