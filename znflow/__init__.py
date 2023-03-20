@@ -1,10 +1,15 @@
 """The 'ZnFlow' package."""
-
 import importlib.metadata
 import logging
 import sys
 
-from znflow.base import Connection, FunctionFuture, get_attribute
+from znflow.base import (
+    Connection,
+    FunctionFuture,
+    Property,
+    disable_graph,
+    get_attribute,
+)
 from znflow.graph import DiGraph
 from znflow.node import Node, nodify
 from znflow.visualize import draw
@@ -19,6 +24,8 @@ __all__ = [
     "FunctionFuture",
     "Connection",
     "get_attribute",
+    "disable_graph",
+    "Property",
 ]
 
 logger = logging.getLogger(__name__)
