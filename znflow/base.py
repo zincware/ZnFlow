@@ -230,7 +230,7 @@ class FunctionFuture(NodeBaseMixin):
         self._result = self.function(*self.args, **self.kwargs)
 
     def __getitem__(self, item):
-        """TODO."""
+        """Gets the object with all the information of the Connection class."""
         return Connection(instance=self, attribute="result", item=item)
 
     @property
