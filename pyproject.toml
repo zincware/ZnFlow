@@ -46,7 +46,7 @@ multi_line_output = 3
 
 [tool.ruff]
 line-length = 90
-select = ["E", "F", "D"] #] #, "N", "C", "ANN"]
+select = ["E", "F", "D"]#, "N", "C", "ANN"]
 exclude = [
     "tests",
 ]

@@ -1,4 +1,4 @@
-"""The base module of znflow."""
+"""The base module of ZnFlow."""
 from __future__ import annotations
 
 import contextlib
@@ -52,6 +52,11 @@ class NodeBaseMixin:
         """A method that checks for an existing UUID.
 
         If no UUID exists, it sets the previously defined UUID for the node.
+
+        Raises
+        ------
+        ValueError
+            If a UUID is already set for the current node.
         """
         if self._uuid is not None:
             raise ValueError("uuid is already set")
@@ -87,9 +92,13 @@ def get_attribute(obj, name, default=_get_attribute_none):
 class Connection:
     """A Connector for Nodes.
 
-    instance: either a Node or FunctionFuture
-    attribute:
-        Node.attribute
+    Instance
+    --------
+        Either a Node or FunctionFuture.
+
+    Attributes
+    ----------
+    attribute : Node.attribute
         or FunctionFuture.result
         or None if the class is passed and not an attribute.
     """
@@ -112,6 +121,15 @@ class Connection:
 
 @dataclasses.dataclass
 class FunctionFuture(NodeBaseMixin):
+    """A class that creates a future object out of a function.
+
+    Attributes
+    ----------
+    function : callable
+    args : tuple
+    kwargs : dict
+    """
+
     function: typing.Callable
     args: typing.Tuple
     kwargs: typing.Dict
@@ -121,10 +139,24 @@ class FunctionFuture(NodeBaseMixin):
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
     def run(self):
+        """Run Method of the FunctionFuture class.
+
+        Executes the function with the given arguments.
+
+        Returns
+        -------
+        TODO
+        """
         self._result = self.function(*self.args, **self.kwargs)
 
     @property
     def result(self):
+        """TODO.
+
+        Returns
+        -------
+        TODO
+        """
         if self._result is None:
             self.run()
 

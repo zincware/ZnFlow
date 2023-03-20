@@ -1,3 +1,4 @@
+"""The graph module of ZnFlow."""
 import logging
 
 import networkx as nx
@@ -47,6 +48,9 @@ class _UpdateConnectors(utils.IterableHandler):
 
 
 class DiGraph(nx.MultiDiGraph):
+    """
+
+    """
     def __enter__(self):
         if get_graph() is not None:
             raise ValueError("DiGraph already exists. Nested Graphs are not supported.")
