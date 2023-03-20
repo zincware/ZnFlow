@@ -32,7 +32,9 @@ class Property:
     def __init__(self, fget=None, fset=None, fdel=None, doc=None):
         """Init method of the property class.
 
-        Uses the disable_graph function to get/set/delete properties with a description (doc).
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
         """
         self.fget = disable_graph()(fget)
         self.fset = disable_graph()(fset)
@@ -43,11 +45,21 @@ class Property:
         self._name = ""
 
     def __set_name__(self, owner, name):
-        """Sets a name as a property."""
+        """Set Name Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         self._name = name
 
     def __get__(self, obj, objtype=None):
-        """TODO."""
+        """Get Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         if obj is None:
             return self
         if self.fget is None:
@@ -55,31 +67,56 @@ class Property:
         return self.fget(obj)
 
     def __set__(self, obj, value):
-        """TODO."""
+        """Set Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         if self.fset is None:
             raise AttributeError(f"property '{self._name}' has no setter")
         self.fset(obj, value)
 
     def __delete__(self, obj):
-        """TODO."""
+        """Delete Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         if self.fdel is None:
             raise AttributeError(f"property '{self._name}' has no deleter")
         self.fdel(obj)
 
     def getter(self, fget):
-        """TODO."""
+        """Getter Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         prop = type(self)(fget, self.fset, self.fdel, self.__doc__)
         prop._name = self._name
         return prop
 
     def setter(self, fset):
-        """TODO."""
+        """Setter Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         prop = type(self)(self.fget, fset, self.fdel, self.__doc__)
         prop._name = self._name
         return prop
 
     def deleter(self, fdel):
-        """TODO."""
+        """Deleter Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         prop = type(self)(self.fget, self.fset, fdel, self.__doc__)
         prop._name = self._name
         return prop
@@ -221,11 +258,7 @@ class FunctionFuture(NodeBaseMixin):
     def run(self):
         """Run Method of the FunctionFuture class.
 
-        Executes the function with the given arguments.
-
-        Returns
-        -------
-        TODO
+        Executes the function with the given arguments and saves the result.
         """
         self._result = self.function(*self.args, **self.kwargs)
 
@@ -233,14 +266,3 @@ class FunctionFuture(NodeBaseMixin):
         """Gets the object with all the information of the Connection class."""
         return Connection(instance=self, attribute="result", item=item)
 
-    @property
-    def result(self):
-        """If no result is available yet, it executes the Run Method of the FunctionFuture class.
-
-        Returns
-        -------
-        TODO
-        """
-        if self._result is None:
-            self.run()
-        return self._result
