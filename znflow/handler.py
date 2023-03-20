@@ -8,3 +8,15 @@ class AttributeToConnection(utils.IterableHandler):
         if not isinstance(value, (FunctionFuture, Node)):
             return value
         return value if value._graph_ is None else Connection(value, attribute=None)
+
+
+class AddConnectionToGraph(utils.IterableHandler):
+    def default(self, value, **kwargs):
+        if isinstance(value, Connection):
+            graph = kwargs["graph"]
+            v_attr = kwargs.get("attribute")
+            node_instance = kwargs["node_instance"]
+            if v_attr is None:
+                graph.add_connections(value, node_instance)
+            else:
+                graph.add_connections(value, node_instance, v_attr=v_attr)

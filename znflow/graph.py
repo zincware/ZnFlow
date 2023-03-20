@@ -18,16 +18,7 @@ from znflow.node import Node
 log = logging.getLogger(__name__)
 
 
-class _AddConnectionToGraph(utils.IterableHandler):
-    def default(self, value, **kwargs):
-        if isinstance(value, Connection):
-            graph = kwargs["graph"]
-            v_attr = kwargs.get("attribute")
-            node_instance = kwargs["node_instance"]
-            if v_attr is None:
-                graph.add_connections(value, node_instance)
-            else:
-                graph.add_connections(value, node_instance, v_attr=v_attr)
+
 
 
 class _UpdateConnectors(utils.IterableHandler):
@@ -44,9 +35,9 @@ class DiGraph(nx.MultiDiGraph):
     def add_connections_from_iterable(self) -> typing.Callable:
         """Get a function that adds connections to the graph.
 
-        Return a _AddConnectionToGraph class with this Graph instance attached.
+        Return a AddConnectionToGraph class with this Graph instance attached.
         """
-        return functools.partial(_AddConnectionToGraph(), graph=self)
+        return functools.partial(handler.AddConnectionToGraph(), graph=self)
 
     def __enter__(self):
         if self.disable:
