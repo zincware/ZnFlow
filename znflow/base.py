@@ -1,3 +1,4 @@
+"""The base module of znflow."""
 from __future__ import annotations
 
 import contextlib
@@ -29,6 +30,10 @@ class Property:
     """
 
     def __init__(self, fget=None, fset=None, fdel=None, doc=None):
+        """Init method of the property class.
+
+        Uses the disable_graph function to get/set/delete properties with a description (doc).
+        """
         self.fget = disable_graph()(fget)
         self.fset = disable_graph()(fset)
         self.fdel = disable_graph()(fdel)
@@ -38,9 +43,11 @@ class Property:
         self._name = ""
 
     def __set_name__(self, owner, name):
+        """Sets a name as a property."""
         self._name = name
 
     def __get__(self, obj, objtype=None):
+        """TODO."""
         if obj is None:
             return self
         if self.fget is None:
@@ -48,26 +55,31 @@ class Property:
         return self.fget(obj)
 
     def __set__(self, obj, value):
+        """TODO."""
         if self.fset is None:
             raise AttributeError(f"property '{self._name}' has no setter")
         self.fset(obj, value)
 
     def __delete__(self, obj):
+        """TODO."""
         if self.fdel is None:
             raise AttributeError(f"property '{self._name}' has no deleter")
         self.fdel(obj)
 
     def getter(self, fget):
+        """TODO."""
         prop = type(self)(fget, self.fset, self.fdel, self.__doc__)
         prop._name = self._name
         return prop
 
     def setter(self, fset):
+        """TODO."""
         prop = type(self)(self.fget, fset, self.fdel, self.__doc__)
         prop._name = self._name
         return prop
 
     def deleter(self, fdel):
+        """TODO."""
         prop = type(self)(self.fget, self.fset, fdel, self.__doc__)
         prop._name = self._name
         return prop
@@ -163,9 +175,11 @@ class Connection:
     item: any = None
 
     def __getitem__(self, item):
+        """TODO."""
         return dataclasses.replace(self, instance=self, attribute="result", item=item)
 
     def __post_init__(self):
+        """Raises a Valueerror if a private attribute is called."""
         if self.attribute is not None and self.attribute.startswith("_"):
             raise ValueError("Private attributes are not allowed.")
 
@@ -216,11 +230,12 @@ class FunctionFuture(NodeBaseMixin):
         self._result = self.function(*self.args, **self.kwargs)
 
     def __getitem__(self, item):
+        """TODO."""
         return Connection(instance=self, attribute="result", item=item)
 
     @property
     def result(self):
-        """TODO.
+        """If no result is available yet, it executes the Run Method of the FunctionFuture class.
 
         Returns
         -------
