@@ -143,7 +143,6 @@ class NodeBaseMixin:
         "_graph_",
         "uuid",
         "_uuid",
-        "result",
     ]  # TODO consider adding regex patterns
 
     @property
@@ -228,6 +227,7 @@ class Connection:
     @property
     def result(self):
         """Returns the instance and if available, also the attribute."""
+
         if self.attribute:
             result = getattr(self.instance, self.attribute)
         elif isinstance(self.instance, (FunctionFuture, self.__class__)):
@@ -253,7 +253,7 @@ class FunctionFuture(NodeBaseMixin):
     kwargs: typing.Dict
     item: any = None
 
-    _result: any = dataclasses.field(default=None, init=False, repr=True)
+    result: any = dataclasses.field(default=None, init=False, repr=True)
 
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
@@ -267,4 +267,3 @@ class FunctionFuture(NodeBaseMixin):
     def __getitem__(self, item):
         """Gets the object with all the information of the Connection class."""
         return Connection(instance=self, attribute=None, item=item)
-
