@@ -153,7 +153,7 @@ class NodeBaseMixin:
 
     @uuid.setter
     def uuid(self, value):
-        """A method that checks for an existing UUID.
+        """Check for an existing UUID.
 
         If no UUID exists, it sets the previously defined UUID for the node.
 
@@ -172,12 +172,12 @@ class NodeBaseMixin:
 
 
 def get_graph():
-    """Gets Graph from the NodeBaseMixin class."""
+    """Get Graph from the NodeBaseMixin class."""
     return NodeBaseMixin._graph_
 
 
 def set_graph(value):
-    """Sets a value for the NodeBaseMixin graph."""
+    """Set a value for the NodeBaseMixin graph."""
     NodeBaseMixin._graph_ = value
 
 
@@ -216,7 +216,7 @@ class Connection:
         return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
     def __post_init__(self):
-        """Raises a Valueerror if a private attribute is called."""
+        """Raise a Valueerror if a private attribute is called."""
         if self.attribute is not None and self.attribute.startswith("_"):
             raise ValueError("Private attributes are not allowed.")
 
@@ -265,6 +265,6 @@ class FunctionFuture(NodeBaseMixin):
         self._result = self.function(*self.args, **self.kwargs)
 
     def __getitem__(self, item):
-        """Gets the object with all the information of the Connection class."""
+        """Get the object with all the information of the Connection class."""
         return Connection(instance=self, attribute=None, item=item)
 
