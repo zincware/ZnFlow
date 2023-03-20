@@ -94,7 +94,6 @@ class NodeBaseMixin:
         "_graph_",
         "uuid",
         "_uuid",
-        "result",
     ]  # TODO consider adding regex patterns
 
     @property
@@ -145,7 +144,7 @@ class Connection:
     item: any = None
 
     def __getitem__(self, item):
-        return dataclasses.replace(self, instance=self, attribute="result", item=item)
+        return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
     def __post_init__(self):
         if self.attribute is not None and self.attribute.startswith("_"):
@@ -157,10 +156,12 @@ class Connection:
 
     @property
     def result(self):
-        result = (
-            getattr(self.instance, self.attribute) if self.attribute else self.instance
-        )
-
+        if self.attribute:
+            result = getattr(self.instance, self.attribute)
+        elif isinstance(self.instance, (FunctionFuture, self.__class__)):
+            result = self.instance.result
+        else:
+            result = self.instance
         return result[self.item] if self.item else result
 
 
@@ -171,18 +172,12 @@ class FunctionFuture(NodeBaseMixin):
     kwargs: typing.Dict
     item: any = None
 
-    _result: any = dataclasses.field(default=None, init=False, repr=True)
+    result: any = dataclasses.field(default=None, init=False, repr=True)
 
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
     def run(self):
-        self._result = self.function(*self.args, **self.kwargs)
+        self.result = self.function(*self.args, **self.kwargs)
 
     def __getitem__(self, item):
-        return Connection(instance=self, attribute="result", item=item)
-
-    @property
-    def result(self):
-        if self._result is None:
-            self.run()
-        return self._result
+        return Connection(instance=self, attribute=None, item=item)
