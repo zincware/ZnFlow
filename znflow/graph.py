@@ -4,7 +4,7 @@ import typing
 
 import networkx as nx
 
-from znflow import utils
+from znflow import handler, utils
 from znflow.base import (
     Connection,
     FunctionFuture,
@@ -16,13 +16,6 @@ from znflow.base import (
 from znflow.node import Node
 
 log = logging.getLogger(__name__)
-
-
-class _AttributeToConnection(utils.IterableHandler):
-    def default(self, value):
-        if not isinstance(value, (FunctionFuture, Node)):
-            return value
-        return value if value._graph_ is None else Connection(value, attribute=None)
 
 
 class _AddConnectionToGraph(utils.IterableHandler):
@@ -78,12 +71,14 @@ class DiGraph(nx.MultiDiGraph):
                 self._update_function_future_arguments(node_instance)
             elif isinstance(node_instance, Node):
                 # TODO only update Nodes if the graph is not empty
-                self._update_node_attributes(node_instance, _AttributeToConnection())
+                self._update_node_attributes(
+                    node_instance, handler.AttributeToConnection()
+                )
 
     def _update_function_future_arguments(self, node_instance: FunctionFuture) -> None:
         """Apply an update to args and kwargs of a FunctionFuture."""
-        node_instance.args = _AttributeToConnection()(node_instance.args)
-        node_instance.kwargs = _AttributeToConnection()(node_instance.kwargs)
+        node_instance.args = handler.AttributeToConnection()(node_instance.args)
+        node_instance.kwargs = handler.AttributeToConnection()(node_instance.kwargs)
         self.add_connections_from_iterable(
             node_instance.args, node_instance=node_instance
         )
