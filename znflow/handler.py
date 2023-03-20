@@ -20,3 +20,8 @@ class AddConnectionToGraph(utils.IterableHandler):
                 graph.add_connections(value, node_instance)
             else:
                 graph.add_connections(value, node_instance, v_attr=v_attr)
+
+
+class UpdateConnectors(utils.IterableHandler):
+    def default(self, value, **kwargs):
+        return value.result if isinstance(value, Connection) else value

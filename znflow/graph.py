@@ -4,7 +4,7 @@ import typing
 
 import networkx as nx
 
-from znflow import handler, utils
+from znflow import handler
 from znflow.base import (
     Connection,
     FunctionFuture,
@@ -16,14 +16,6 @@ from znflow.base import (
 from znflow.node import Node
 
 log = logging.getLogger(__name__)
-
-
-
-
-
-class _UpdateConnectors(utils.IterableHandler):
-    def default(self, value, **kwargs):
-        return value.result if isinstance(value, Connection) else value
 
 
 class DiGraph(nx.MultiDiGraph):
@@ -133,7 +125,7 @@ class DiGraph(nx.MultiDiGraph):
         for node_uuid in self.get_sorted_nodes():
             node = self.nodes[node_uuid]["value"]
             # update connectors
-            self._update_node_attributes(node, _UpdateConnectors())
+            self._update_node_attributes(node, handler.UpdateConnectors())
             node.run()
 
     def write_graph(self, *args):
