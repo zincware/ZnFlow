@@ -213,7 +213,7 @@ class Connection:
 
     def __getitem__(self, item):
         """TODO."""
-        return dataclasses.replace(self, instance=self, attribute="result", item=item)
+        return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
     def __post_init__(self):
         """Raises a Valueerror if a private attribute is called."""
@@ -228,10 +228,12 @@ class Connection:
     @property
     def result(self):
         """Returns the instance and if available, also the attribute."""
-        result = (
-            getattr(self.instance, self.attribute) if self.attribute else self.instance
-        )
-
+        if self.attribute:
+            result = getattr(self.instance, self.attribute)
+        elif isinstance(self.instance, (FunctionFuture, self.__class__)):
+            result = self.instance.result
+        else:
+            result = self.instance
         return result[self.item] if self.item else result
 
 
@@ -264,5 +266,5 @@ class FunctionFuture(NodeBaseMixin):
 
     def __getitem__(self, item):
         """Gets the object with all the information of the Connection class."""
-        return Connection(instance=self, attribute="result", item=item)
+        return Connection(instance=self, attribute=None, item=item)
 
