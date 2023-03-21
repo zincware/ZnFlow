@@ -44,3 +44,30 @@ def test_ConnectResults():
 
     graph.run()
     assert outs.result == 43
+
+
+class PropertyAddsValue(znflow.Node):
+    def __init__(self, value):
+        self.value = value
+
+    @property
+    def result(self):
+        self.value += 1
+        return self.value
+
+    def run(self):
+        pass
+
+
+def test_PropertyAddsValue():
+    with znflow.DiGraph() as graph:
+        node1 = PropertyAddsValue(1)
+        con = node1.result
+        outs = add_one(con)
+
+    assert isinstance(con, znflow.Connection)
+
+    assert node1.value == 1
+    graph.run()
+    assert node1.value == 2
+    assert outs.result == 3
