@@ -61,3 +61,29 @@ def test_add_lists():
     graph.run()
 
     assert outs.result == list(range(1, 6)) + list(range(1, 11))
+
+
+def test_add_node_nodify():
+    with znflow.DiGraph() as graph:
+        lst1 = create_list(5)
+        lst2 = CreateList(10)
+
+        outs = add_one(lst1 + lst2.outs)
+
+    graph.run()
+
+    assert outs.result == list(range(1, 6)) + list(range(1, 11))
+
+
+def test_add_node_nodify_getitem():
+    with znflow.DiGraph() as graph:
+        lst1 = create_list(5)
+        lst2 = CreateList(10)
+
+        data = lst1 + lst2.outs
+
+        outs = add_one(data[::2])
+
+    graph.run()
+
+    assert outs.result == (list(range(1, 6)) + list(range(1, 11)))[::2]

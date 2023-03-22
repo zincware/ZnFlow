@@ -171,13 +171,7 @@ class Connection:
 @dataclasses.dataclass
 class AddedConnections:
     connections: typing.List[Connection]
-
-    @property
-    def result(self):
-        results = []
-        for connection in self.connections:
-            results.extend(connection.result)
-        return results
+    item: any = None
 
     def __add__(self, other) -> AddedConnections:
         if isinstance(other, Connection):
@@ -186,6 +180,16 @@ class AddedConnections:
             return dataclasses.replace(
                 self, connections=self.connections + other.connections
             )
+
+    def __getitem__(self, item):
+        return dataclasses.replace(self, item=item)
+
+    @property
+    def result(self):
+        results = []
+        for connection in self.connections:
+            results.extend(connection.result)
+        return results[self.item] if self.item else results
 
 
 @dataclasses.dataclass
