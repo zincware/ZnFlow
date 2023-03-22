@@ -175,8 +175,35 @@ class Connection:
         return result[self.item] if self.item else result
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class AddedConnections:
+    """Combine multiple Connections into one.
+
+    This class allows to 'add' Connections and/or FunctionFutures.
+    This only works if the Connection or FunctionFuture points to a 'list'.
+    A new entry of 'AddedConnections' will be created for every time a new
+    item is added.
+
+    Examples
+    --------
+
+    >>> import znflow
+    >>> @znflow.nodfiy
+    >>> def add(size) -> list:
+    >>>     return list(range(size))
+    >>> with znflow.DiGraph() as graph:
+    >>>     outs = add(2) + add(3)
+    >>> graph.run()
+    >>> assert outs.result == [0, 1, 0, 1, 2]
+
+    Attributes
+    ----------
+    connections : list[Connection|FunctionFuture|AddedConnections]
+        The List of items to be added.
+    item : any
+        Any slice to be applied to the result.
+    """
+
     connections: typing.List[Connection]
     item: any = None
 
