@@ -1,5 +1,5 @@
 from znflow import utils
-from znflow.base import Connection, FunctionFuture, AddedConnections
+from znflow.base import AddedConnections, Connection, FunctionFuture
 from znflow.node import Node
 
 

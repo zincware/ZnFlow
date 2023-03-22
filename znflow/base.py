@@ -174,11 +174,15 @@ class AddedConnections:
     item: any = None
 
     def __add__(self, other) -> AddedConnections:
-        if isinstance(other, Connection):
+        if isinstance(other, (Connection, FunctionFuture)):
             return dataclasses.replace(self, connections=self.connections + [other])
         elif isinstance(other, AddedConnections):
             return dataclasses.replace(
                 self, connections=self.connections + other.connections
+            )
+        else:
+            raise TypeError(
+                "Can only add Connection, FunctionFuture or AddedConnections."
             )
 
     def __getitem__(self, item):

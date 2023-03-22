@@ -87,3 +87,28 @@ def test_add_node_nodify_getitem():
     graph.run()
 
     assert outs.result == (list(range(1, 6)) + list(range(1, 11)))[::2]
+
+
+def test_add_node_nodify_nested():
+    with znflow.DiGraph() as graph:
+        data = create_list(5)
+        for _ in range(5):
+            data += create_list(5)
+
+        for _ in range(5):
+            data += CreateList(5).outs
+
+        outs = add_one(data)
+
+    graph.run()
+
+    assert outs.result == list(range(1, 6)) * 11
+
+
+# test errors
+
+# def test_raises_error():
+#     with znflow.DiGraph() as graph:
+#         data = []
+#         for _ in range(1):
+#             data += create_list(5)
