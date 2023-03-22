@@ -153,7 +153,9 @@ class Connection:
     def __iter__(self):
         raise TypeError(f"Can not iterate over {self}.")
 
-    def __add__(self, other) -> AddedConnections:
+    def __add__(
+        self, other: typing.Union[Connection, FunctionFuture, AddedConnections]
+    ) -> AddedConnections:
         if isinstance(other, (Connection, FunctionFuture, AddedConnections)):
             return AddedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
@@ -178,7 +180,9 @@ class AddedConnections:
     connections: typing.List[Connection]
     item: any = None
 
-    def __add__(self, other) -> AddedConnections:
+    def __add__(
+        self, other: typing.Union[Connection, FunctionFuture, AddedConnections]
+    ) -> AddedConnections:
         if isinstance(other, (Connection, FunctionFuture)):
             return dataclasses.replace(self, connections=self.connections + [other])
         elif isinstance(other, AddedConnections):
@@ -222,7 +226,9 @@ class FunctionFuture(NodeBaseMixin):
     def __iter__(self):
         raise TypeError(f"Can not iterate over {self}.")
 
-    def __add__(self, other) -> AddedConnections:
+    def __add__(
+        self, other: typing.Union[Connection, FunctionFuture, AddedConnections]
+    ) -> AddedConnections:
         if isinstance(other, (Connection, FunctionFuture, AddedConnections)):
             return AddedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
