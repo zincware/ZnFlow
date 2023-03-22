@@ -108,6 +108,21 @@ def test_add_node_nodify_nested():
     assert outs.result == list(range(1, 6)) * 11
 
 
+def test_sum_list():
+    with znflow.DiGraph() as graph:
+        data1 = [create_list(5) for _ in range(5)]
+        data2 = [CreateList(5).outs for _ in range(5)]
+
+        outs1 = sum(data1)
+        outs2 = sum(data2)
+        outs = sum([outs1, outs2])
+        
+
+    graph.run()
+
+    assert outs.result == list(range(5)) * 10
+
+
 # test errors
 
 
