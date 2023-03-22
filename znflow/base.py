@@ -200,10 +200,16 @@ class AddedConnections:
 
     @property
     def result(self):
-        results = []
-        for connection in self.connections:
-            results.extend(connection.result)
-        return results[self.item] if self.item else results
+        try:
+            results = []
+            for connection in self.connections:
+                results.extend(connection.result)
+            return results[self.item] if self.item else results
+        except TypeError as err:
+            raise TypeError(
+                f"The value {connection.result} is of type {type(connection.result)}. The"
+                f" only supported type is list. Please change {connection}"
+            ) from err
 
 
 @dataclasses.dataclass

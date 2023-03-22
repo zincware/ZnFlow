@@ -1,6 +1,7 @@
+import pytest
+
 import znflow
 from znflow.base import AddedConnections
-import pytest
 
 
 @znflow.nodify
@@ -88,6 +89,7 @@ def test_add_node_nodify_getitem():
     graph.run()
 
     assert outs.result == (list(range(1, 6)) + list(range(1, 11)))[::2]
+    assert data.result == list(range(5)) + list(range(10))
 
 
 def test_add_node_nodify_nested():
@@ -138,3 +140,18 @@ def test_raises_error_on_add():
         x = CreateList(5).outs
         with pytest.raises(TypeError):
             x + "a"
+
+
+@znflow.nodify
+def return_one():
+    return 1
+
+
+def test_combine_none():
+    with znflow.DiGraph() as graph:
+        a = return_one()
+        b = return_one()
+        add_one(a + b)
+
+    with pytest.raises(TypeError):
+        graph.run()
