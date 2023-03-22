@@ -223,4 +223,6 @@ class FunctionFuture(NodeBaseMixin):
         raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(self, other) -> AddedConnections:
-        return AddedConnections(connections=[self, other])
+        if isinstance(other, (Connection, FunctionFuture, AddedConnections)):
+            return AddedConnections(connections=[self, other])
+        raise TypeError(f"Can not add {type(other)} to {type(self)}.")

@@ -109,9 +109,15 @@ def test_add_node_nodify_nested():
 # test errors
 
 
-def test_raises_error():
+def test_raises_error_on_iter():
     with znflow.DiGraph():
         data = []
         for _ in range(1):
             with pytest.raises(TypeError):
                 data += create_list(5)
+
+
+def test_raises_error_on_add():
+    with znflow.DiGraph():
+        with pytest.raises(TypeError):
+            create_list(5) + "a"
