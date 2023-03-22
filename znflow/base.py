@@ -210,6 +210,17 @@ class AddedConnections:
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, AddedConnections]
     ) -> AddedConnections:
+        """Implement add for AddedConnections.
+
+        Raises
+        ------
+        ValueError
+            If  self.item is set, we can not add another item.
+        TypeError
+            If other is not a Connection, FunctionFuture or AddedConnections.
+        """
+        if self.item is not None:
+            raise ValueError("Can not combine multiple slices")
         if isinstance(other, (Connection, FunctionFuture)):
             return dataclasses.replace(self, connections=self.connections + [other])
         elif isinstance(other, AddedConnections):

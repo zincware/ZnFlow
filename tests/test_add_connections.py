@@ -111,6 +111,14 @@ def test_add_node_nodify_nested():
 # test errors
 
 
+def test_nested_getitem_error():
+    with znflow.DiGraph():
+        a = create_list(3) + create_list(4)
+        b = create_list(5) + create_list(6)
+        with pytest.raises(ValueError):
+            _ = a[::2] + b[1::2]
+
+
 def test_raises_error_on_iter():
     with znflow.DiGraph():
         data = []
