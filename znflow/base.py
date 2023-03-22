@@ -154,7 +154,9 @@ class Connection:
         raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(self, other) -> AddedConnections:
-        return AddedConnections(connections=[self, other])
+        if isinstance(other, (Connection, FunctionFuture, AddedConnections)):
+            return AddedConnections(connections=[self, other])
+        raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     @property
     def uuid(self):
@@ -184,9 +186,7 @@ class AddedConnections:
                 self, connections=self.connections + other.connections
             )
         else:
-            raise TypeError(
-                "Can only add Connection, FunctionFuture or AddedConnections."
-            )
+            raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __getitem__(self, item):
         return dataclasses.replace(self, item=item)

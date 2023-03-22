@@ -121,3 +121,20 @@ def test_raises_error_on_add():
     with znflow.DiGraph():
         with pytest.raises(TypeError):
             create_list(5) + "a"
+
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+        data = a + b
+        with pytest.raises(TypeError):
+            data + "a"
+
+    with znflow.DiGraph():
+        x = CreateList(5)
+        with pytest.raises(TypeError):
+            x + "a"
+
+    with znflow.DiGraph():
+        x = CreateList(5).outs
+        with pytest.raises(TypeError):
+            x + "a"
