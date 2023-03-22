@@ -143,12 +143,15 @@ class Connection:
     attribute: any
     item: any = None
 
-    def __getitem__(self, item):
-        return dataclasses.replace(self, instance=self, attribute=None, item=item)
-
     def __post_init__(self):
         if self.attribute is not None and self.attribute.startswith("_"):
             raise ValueError("Private attributes are not allowed.")
+        
+    def __getitem__(self, item):
+        return dataclasses.replace(self, instance=self, attribute=None, item=item)
+    
+    def __add__(self, other) -> AddedConnections:
+        return AddedConnections(connections=[self, other])
 
     @property
     def uuid(self):
@@ -163,6 +166,17 @@ class Connection:
         else:
             result = self.instance
         return result[self.item] if self.item else result
+
+@dataclasses.dataclass
+class AddedConnections:
+    connections: typing.List[Connection]
+
+    def result(self):
+        results = []
+        for connection in self.connections:
+            results.extend(connection.result)
+        return results
+
 
 
 @dataclasses.dataclass
