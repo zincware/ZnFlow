@@ -172,6 +172,7 @@ class Connection:
 class AddedConnections:
     connections: typing.List[Connection]
 
+    @property
     def result(self):
         results = []
         for connection in self.connections:

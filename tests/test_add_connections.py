@@ -1,4 +1,5 @@
 import znflow
+from znflow.base import AddedConnections
 
 
 @znflow.nodify
@@ -38,9 +39,16 @@ def test_AddLists():
 
         outs = AddOne(lst1.outs + lst2.outs)
 
+    assert isinstance(outs.value, AddedConnections)
+    assert len(outs.value.connections) == 2
+    assert outs.value.connections[0].instance is lst1
+    assert outs.value.connections[0].attribute == "outs"
+    assert outs.value.connections[1].instance is lst2
+    assert outs.value.connections[1].attribute == "outs"
+
     graph.run()
 
-    assert outs.outs == list(range(5)) + list(range(10))
+    assert outs.outs == list(range(1, 6)) + list(range(1, 11))
 
 
 # def test_add_lists():
