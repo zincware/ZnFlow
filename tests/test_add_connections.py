@@ -116,7 +116,6 @@ def test_sum_list():
         outs1 = sum(data1)
         outs2 = sum(data2)
         outs = sum([outs1, outs2])
-        
 
     graph.run()
 
