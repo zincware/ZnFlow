@@ -1,5 +1,6 @@
 import znflow
 from znflow.base import AddedConnections
+import pytest
 
 
 @znflow.nodify
@@ -107,8 +108,10 @@ def test_add_node_nodify_nested():
 
 # test errors
 
-# def test_raises_error():
-#     with znflow.DiGraph() as graph:
-#         data = []
-#         for _ in range(1):
-#             data += create_list(5)
+
+def test_raises_error():
+    with znflow.DiGraph():
+        data = []
+        for _ in range(1):
+            with pytest.raises(TypeError):
+                data += create_list(5)
