@@ -51,11 +51,13 @@ def test_AddLists():
     assert outs.outs == list(range(1, 6)) + list(range(1, 11))
 
 
-# def test_add_lists():
-#     with znflow.DiGraph() as graph:
-#         lst1 = create_list(5)
-#         lst2 = create_list(10)
+def test_add_lists():
+    with znflow.DiGraph() as graph:
+        lst1 = create_list(5)
+        lst2 = create_list(10)
 
-#         outs = add_one(lst1 + lst2)
+        outs = add_one(lst1 + lst2)
 
-#     graph.run()
+    graph.run()
+
+    assert outs.result == list(range(1, 6)) + list(range(1, 11))

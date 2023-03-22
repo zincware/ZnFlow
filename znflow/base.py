@@ -204,3 +204,6 @@ class FunctionFuture(NodeBaseMixin):
 
     def __getitem__(self, item):
         return Connection(instance=self, attribute=None, item=item)
+
+    def __add__(self, other) -> AddedConnections:
+        return AddedConnections(connections=[self, other])
