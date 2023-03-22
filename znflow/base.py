@@ -146,10 +146,10 @@ class Connection:
     def __post_init__(self):
         if self.attribute is not None and self.attribute.startswith("_"):
             raise ValueError("Private attributes are not allowed.")
-        
+
     def __getitem__(self, item):
         return dataclasses.replace(self, instance=self, attribute=None, item=item)
-    
+
     def __add__(self, other) -> AddedConnections:
         return AddedConnections(connections=[self, other])
 
@@ -167,6 +167,7 @@ class Connection:
             result = self.instance
         return result[self.item] if self.item else result
 
+
 @dataclasses.dataclass
 class AddedConnections:
     connections: typing.List[Connection]
@@ -177,6 +178,13 @@ class AddedConnections:
             results.extend(connection.result)
         return results
 
+    def __add__(self, other) -> AddedConnections:
+        if isinstance(other, Connection):
+            return dataclasses.replace(self, connections=self.connections + [other])
+        elif isinstance(other, AddedConnections):
+            return dataclasses.replace(
+                self, connections=self.connections + other.connections
+            )
 
 
 @dataclasses.dataclass
