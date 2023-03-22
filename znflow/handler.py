@@ -1,5 +1,5 @@
 from znflow import utils
-from znflow.base import AddedConnections, Connection, FunctionFuture
+from znflow.base import CombinedConnections, Connection, FunctionFuture
 from znflow.node import Node
 
 
@@ -24,7 +24,7 @@ class AddConnectionToGraph(utils.IterableHandler):
 
 class UpdateConnectors(utils.IterableHandler):
     def default(self, value, **kwargs):
-        if isinstance(value, (Connection, AddedConnections)):
+        if isinstance(value, (Connection, CombinedConnections)):
             return value.result
         else:
             return value

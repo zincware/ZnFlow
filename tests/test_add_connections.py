@@ -1,7 +1,7 @@
 import pytest
 
 import znflow
-from znflow.base import AddedConnections
+from znflow.base import CombinedConnections
 
 
 @znflow.nodify
@@ -41,7 +41,7 @@ def test_AddLists():
 
         outs = AddOne(lst1.outs + lst2.outs)
 
-    assert isinstance(outs.value, AddedConnections)
+    assert isinstance(outs.value, CombinedConnections)
     assert len(outs.value.connections) == 2
     assert outs.value.connections[0].instance is lst1
     assert outs.value.connections[0].attribute == "outs"

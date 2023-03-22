@@ -4,6 +4,7 @@ import logging
 import sys
 
 from znflow.base import (
+    CombinedConnections,
     Connection,
     FunctionFuture,
     Property,
@@ -26,6 +27,7 @@ __all__ = [
     "get_attribute",
     "disable_graph",
     "Property",
+    "CombinedConnections",
 ]
 
 logger = logging.getLogger(__name__)

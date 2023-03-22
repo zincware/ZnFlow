@@ -154,10 +154,10 @@ class Connection:
         raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(
-        self, other: typing.Union[Connection, FunctionFuture, AddedConnections]
-    ) -> AddedConnections:
-        if isinstance(other, (Connection, FunctionFuture, AddedConnections)):
-            return AddedConnections(connections=[self, other])
+        self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
+    ) -> CombinedConnections:
+        if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
+            return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     @property
@@ -176,12 +176,12 @@ class Connection:
 
 
 @dataclasses.dataclass(frozen=True)
-class AddedConnections:
+class CombinedConnections:
     """Combine multiple Connections into one.
 
     This class allows to 'add' Connections and/or FunctionFutures.
     This only works if the Connection or FunctionFuture points to a 'list'.
-    A new entry of 'AddedConnections' will be created for every time a new
+    A new entry of 'CombinedConnections' will be created for every time a new
     item is added.
 
     Examples
@@ -208,8 +208,8 @@ class AddedConnections:
     item: any = None
 
     def __add__(
-        self, other: typing.Union[Connection, FunctionFuture, AddedConnections]
-    ) -> AddedConnections:
+        self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
+    ) -> CombinedConnections:
         """Implement add for AddedConnections.
 
         Raises
@@ -223,7 +223,7 @@ class AddedConnections:
             raise ValueError("Can not combine multiple slices")
         if isinstance(other, (Connection, FunctionFuture)):
             return dataclasses.replace(self, connections=self.connections + [other])
-        elif isinstance(other, AddedConnections):
+        elif isinstance(other, CombinedConnections):
             return dataclasses.replace(
                 self, connections=self.connections + other.connections
             )
@@ -271,8 +271,8 @@ class FunctionFuture(NodeBaseMixin):
         raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(
-        self, other: typing.Union[Connection, FunctionFuture, AddedConnections]
-    ) -> AddedConnections:
-        if isinstance(other, (Connection, FunctionFuture, AddedConnections)):
-            return AddedConnections(connections=[self, other])
+        self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
+    ) -> CombinedConnections:
+        if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
+            return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
