@@ -13,6 +13,7 @@ from znflow.base import (
 )
 from znflow.graph import DiGraph
 from znflow.node import Node, nodify
+from znflow.utils import combine
 from znflow.visualize import draw
 
 __version__ = importlib.metadata.version(__name__)
@@ -28,6 +29,7 @@ __all__ = [
     "disable_graph",
     "Property",
     "CombinedConnections",
+    "combine",
 ]
 
 logger = logging.getLogger(__name__)
