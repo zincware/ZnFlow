@@ -279,6 +279,38 @@ def test_sum_list(use_graph):
     assert result == sum([list(range(x)) for x in range(5)] * 2, [])
 
 
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_combine_advanced(use_graph):
+    """test the znflow.combine with various inputs"""
+
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            node = CreateList(10)
+            a = znflow.combine(node, attribute="outs")
+            b = znflow.combine([node], attribute="outs")
+            c = znflow.combine(node, node.outs, attribute="outs")
+            d = znflow.combine([node, node.outs], attribute="outs")
+        graph.run()
+        a = a.result
+        b = b.result
+        c = c.result
+        d = d.result
+
+    else:
+        node = CreateList(10)
+        node.run()
+        a = znflow.combine(node, attribute="outs")
+        b = znflow.combine([node], attribute="outs")
+
+        c = znflow.combine(node, node.outs, attribute="outs")
+        d = znflow.combine([node, node.outs], attribute="outs")
+
+    assert a == b
+    assert a == list(range(10))
+    assert c == d
+    assert c == 2 * list(range(10))
+
+
 # test errors
 
 
