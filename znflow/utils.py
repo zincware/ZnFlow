@@ -16,7 +16,6 @@ class IterableHandler(abc.ABC):
 
     def __init__(self):
         """Update the signature of handle based on the default method."""
-        functools.update_wrapper(self.handle, self.default)
         self.updated = False
 
     def __call__(self, value, **kwargs):
@@ -32,8 +31,13 @@ class IterableHandler(abc.ABC):
         """
         raise NotImplementedError
 
-    @functools.singledispatchmethod
     def handle(self, value, **kwargs):
+        """Handle the iterable."""
+        self.updated = False
+        return self._handle(value, **kwargs)
+
+    @functools.singledispatchmethod
+    def _handle(self, value, **kwargs):
         """Fallback handling if no siggledispatch was triggered."""
 
         result = self.default(value, **kwargs)
@@ -41,26 +45,26 @@ class IterableHandler(abc.ABC):
             self.updated = True
         return result
 
-    @handle.register
+    @_handle.register
     def _(self, value: list, **kwargs) -> list:
         """Handle a list."""
-        return [self.handle(x, **kwargs) for x in value]
+        return [self._handle(x, **kwargs) for x in value]
 
-    @handle.register
+    @_handle.register
     def _(self, value: tuple, **kwargs) -> tuple:
         """Handle a tuple."""
         # without 'tuple' it would be a generator
-        return tuple(self.handle(x, **kwargs) for x in value)
+        return tuple(self._handle(x, **kwargs) for x in value)
 
-    @handle.register
+    @_handle.register
     def _(self, value: set, **kwargs) -> set:
         """Handle a set."""
-        return {self.handle(x, **kwargs) for x in value}
+        return {self._handle(x, **kwargs) for x in value}
 
-    @handle.register
+    @_handle.register
     def _(self, value: dict, **kwargs) -> dict:
         """Handle a dict."""
-        return {key: self.handle(val, **kwargs) for key, val in value.items()}
+        return {key: self._handle(val, **kwargs) for key, val in value.items()}
 
 
 def combine(*args, attribute=None):
