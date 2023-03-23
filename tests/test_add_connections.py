@@ -279,36 +279,59 @@ def test_sum_list(use_graph):
     assert result == sum([list(range(x)) for x in range(5)] * 2, [])
 
 
+@pytest.mark.parametrize("unpack", [False])
 @pytest.mark.parametrize("use_graph", [True, False])
-def test_combine_advanced(use_graph):
+def test_combine_advanced(use_graph, unpack):
     """test the znflow.combine with various inputs"""
+
+    def get_connections(node):
+        if unpack:
+            return (
+                # test list[node]
+                znflow.combine(*[node], attribute="outs"),
+                # test list[node]
+                znflow.combine(*[node, node], attribute="outs"),
+                # test connection
+                znflow.combine(*[node.outs], attribute="outs"),
+                # test list[connection]
+                znflow.combine(*[node.outs, node.outs], attribute="outs"),
+                # test list[combined_node]
+                znflow.combine(
+                    *[node.outs + node.outs, node.outs + node.outs], attribute="outs"
+                ),
+            )
+        else:
+            return (
+                # test list[node]
+                znflow.combine([node], attribute="outs"),
+                # test list[node]
+                znflow.combine([node, node], attribute="outs"),
+                # test connection
+                znflow.combine([node.outs], attribute="outs"),
+                # test list[connection]
+                znflow.combine([node.outs, node.outs], attribute="outs"),
+                # test list[combined_node]
+                znflow.combine(
+                    [node.outs + node.outs, node.outs + node.outs], attribute="outs"
+                ),
+            )
 
     if use_graph:
         with znflow.DiGraph() as graph:
             node = CreateList(10)
-            a = znflow.combine(node, attribute="outs")
-            b = znflow.combine([node], attribute="outs")
-            c = znflow.combine(node, node.outs, attribute="outs")
-            d = znflow.combine([node, node.outs], attribute="outs")
+            outs = get_connections(node)
         graph.run()
-        a = a.result
-        b = b.result
-        c = c.result
-        d = d.result
-
+        outs = [x.result for x in outs]
     else:
         node = CreateList(10)
         node.run()
-        a = znflow.combine(node, attribute="outs")
-        b = znflow.combine([node], attribute="outs")
+        outs = get_connections(node)
 
-        c = znflow.combine(node, node.outs, attribute="outs")
-        d = znflow.combine([node, node.outs], attribute="outs")
-
-    assert a == b
-    assert a == list(range(10))
-    assert c == d
-    assert c == 2 * list(range(10))
+    assert outs[0] == list(range(10))
+    assert outs[1] == list(range(10)) * 2
+    assert outs[2] == list(range(10))
+    assert outs[3] == list(range(10)) * 2
+    assert outs[4] == list(range(10)) * 4
 
 
 # test errors

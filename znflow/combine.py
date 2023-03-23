@@ -1,7 +1,14 @@
 from znflow.node import Node
+from znflow.base import Connection, CombinedConnections, FunctionFuture
+import typing
+
+NODE_OR_CONNECTION_OR_COMBINED = typing.Union[Node, Connection, CombinedConnections]
+ARGS_TYPE = typing.List[NODE_OR_CONNECTION_OR_COMBINED]
+
+# TODO check if there a FuncitonFuture
 
 
-def combine(*args, attribute=None, only_getattr_on_nodes=True):
+def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
     """Combine Node outputs which are lists into a single flat list.
 
     Attributes
@@ -29,8 +36,6 @@ def combine(*args, attribute=None, only_getattr_on_nodes=True):
     if len(args) == 1:
         if isinstance(args[0], (list, tuple)):
             args = args[0]
-        elif isinstance(args[0], Node):
-            args = [args[0]]
     if attribute is not None:
         outs = []
         if only_getattr_on_nodes:
