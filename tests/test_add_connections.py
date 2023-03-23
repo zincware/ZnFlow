@@ -34,78 +34,125 @@ class AddOne(znflow.Node):
         self.outs = [x + 1 for x in self.value]
 
 
-def test_AddLists():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_AddLists(use_graph):
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            lst1 = CreateList(5)
+            lst2 = CreateList(10)
+
+            outs = AddOne(lst1.outs + lst2.outs)
+
+        assert isinstance(outs.value, CombinedConnections)
+        assert len(outs.value.connections) == 2
+        assert outs.value.connections[0].instance is lst1
+        assert outs.value.connections[0].attribute == "outs"
+        assert outs.value.connections[1].instance is lst2
+        assert outs.value.connections[1].attribute == "outs"
+
+        graph.run()
+    else:
         lst1 = CreateList(5)
+        lst1.run()
         lst2 = CreateList(10)
-
+        lst2.run()
         outs = AddOne(lst1.outs + lst2.outs)
-
-    assert isinstance(outs.value, CombinedConnections)
-    assert len(outs.value.connections) == 2
-    assert outs.value.connections[0].instance is lst1
-    assert outs.value.connections[0].attribute == "outs"
-    assert outs.value.connections[1].instance is lst2
-    assert outs.value.connections[1].attribute == "outs"
-
-    graph.run()
+        outs.run()
 
     assert outs.outs == list(range(1, 6)) + list(range(1, 11))
 
 
-def test_add_lists():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_add_lists(use_graph):
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            lst1 = create_list(5)
+            lst2 = create_list(10)
+
+            outs = add_one(lst1 + lst2)
+
+        graph.run()
+        result = outs.result
+    else:
         lst1 = create_list(5)
         lst2 = create_list(10)
+        result = add_one(lst1 + lst2)
 
-        outs = add_one(lst1 + lst2)
-
-    graph.run()
-
-    assert outs.result == list(range(1, 6)) + list(range(1, 11))
+    assert result == list(range(1, 6)) + list(range(1, 11))
 
 
-def test_add_node_nodify():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_add_node_nodify(use_graph):
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            lst1 = create_list(5)
+            lst2 = CreateList(10)
+
+            outs = add_one(lst1 + lst2.outs)
+
+        graph.run()
+        result = outs.result
+    else:
         lst1 = create_list(5)
         lst2 = CreateList(10)
+        lst2.run()
+        result = add_one(lst1 + lst2.outs)
 
-        outs = add_one(lst1 + lst2.outs)
-
-    graph.run()
-
-    assert outs.result == list(range(1, 6)) + list(range(1, 11))
+    assert result == list(range(1, 6)) + list(range(1, 11))
 
 
-def test_add_node_nodify_getitem():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_add_node_nodify_getitem(use_graph):
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            lst1 = create_list(5)
+            lst2 = CreateList(10)
+
+            data = lst1 + lst2.outs
+
+            outs = add_one(data[::2])
+
+        graph.run()
+        assert data.result == list(range(5)) + list(range(10))
+        result = outs.result
+    else:
         lst1 = create_list(5)
         lst2 = CreateList(10)
-
+        lst2.run()
         data = lst1 + lst2.outs
+        result = add_one(data[::2])
 
-        outs = add_one(data[::2])
-
-    graph.run()
-
-    assert outs.result == (list(range(1, 6)) + list(range(1, 11)))[::2]
-    assert data.result == list(range(5)) + list(range(10))
+    assert result == (list(range(1, 6)) + list(range(1, 11)))[::2]
 
 
-def test_add_node_nodify_nested():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_add_node_nodify_nested(use_graph):
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            data = create_list(5)
+            for _ in range(5):
+                data += create_list(5)
+
+            for _ in range(5):
+                data += CreateList(5).outs
+
+            outs = add_one(data)
+
+        graph.run()
+        result = outs.result
+    else:
         data = create_list(5)
         for _ in range(5):
             data += create_list(5)
 
         for _ in range(5):
-            data += CreateList(5).outs
+            x = CreateList(5)
+            x.run()
+            data += x.outs
 
-        outs = add_one(data)
+        result = add_one(data)
 
-    graph.run()
-
-    assert outs.result == list(range(1, 6)) * 11
+    assert result == list(range(1, 6)) * 11
 
 
 def test_sum_list():
