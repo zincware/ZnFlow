@@ -35,25 +35,16 @@ def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
     CombinedConnections:
         A combined connections object.
     """
-    if len(args) == 1:
-        if isinstance(args[0], (list, tuple)):
-            args = args[0]
+    if len(args) == 1 and isinstance(args[0], (list, tuple)):
+        args = args[0]
     if attribute is not None:
-        outs = []
         if only_getattr_on_nodes:
-            for arg in args:
-                if isinstance(arg, Node):
-                    outs.append(getattr(arg, attribute))
-                else:
-                    outs.append(arg)
+            args = [
+                getattr(arg, attribute) if isinstance(arg, Node) else arg for arg in args
+            ]
         else:
-            outs = [getattr(arg, attribute) for arg in args]
-    else:
-        outs = args
+            args = [getattr(arg, attribute) for arg in args]
     try:
-        return sum(outs, [])
+        return sum(args, [])
     except TypeError:
-        try:
-            return outs
-        except TypeError as err:
-            raise TypeError(f"{args=} with {attribute=} is not allowed.") from err
+        return args
