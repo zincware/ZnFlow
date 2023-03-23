@@ -61,3 +61,32 @@ class IterableHandler(abc.ABC):
     def _(self, value: dict, **kwargs) -> dict:
         """Handle a dict."""
         return {key: self.handle(val, **kwargs) for key, val in value.items()}
+
+
+def combine(*args, attribute=None):
+    """Combine Node outputs which are lists into a single flat list.
+
+    Attributes
+    ----------
+    args : list of Node instances
+    attribute : str, default=None
+        If not None, the attribute of the Node instance is gathered.
+
+    Examples
+    --------
+    The following are all allowed:
+    >>> combine([a, b, c])
+    >>> combine(a, b, c)
+    >>> combine([a, b, c], attribute="outs")
+    >>> combine(a, b, c, attribute="outs")
+
+    Returns
+    -------
+    CombinedConnections:
+        A combined connections object.
+    """
+    if len(args) == 1 and isinstance(args[0], (list, tuple)):
+        args = args[0]
+    if attribute is None:
+        return sum(args)
+    return sum(map(lambda x: getattr(x, attribute), args))

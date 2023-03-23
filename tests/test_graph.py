@@ -56,9 +56,6 @@ def test_run_graph():
     assert node1.value == 42
     assert node2.value == 18
 
-    with pytest.raises(TypeError):
-        node3.run()
-
     graph.run()
 
     assert node1.value == 43
