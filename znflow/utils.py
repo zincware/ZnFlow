@@ -89,8 +89,8 @@ def combine(*args, attribute=None):
     CombinedConnections:
         A combined connections object.
     """
-    # if len(args) == 1 and isinstance(args[0], (list, tuple)):
-    #     args = args[0]
+    if len(args) == 1 and isinstance(args[0], (list, tuple)):
+        args = args[0]
     if attribute is None:
         outs = args[0]
         for node in args[1:]:

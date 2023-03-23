@@ -156,7 +156,7 @@ def test_add_node_nodify_nested(use_graph):
 
 
 @pytest.mark.parametrize("use_graph", [True, False])
-def test_combine(use_graph):
+def test_combine_unpack(use_graph):
     if use_graph:
         with znflow.DiGraph() as graph:
             a = create_list(2)
@@ -168,6 +168,23 @@ def test_combine(use_graph):
         a = create_list(2)
         b = create_list(3)
         c = znflow.combine(a, b)
+
+    assert c == [0, 1, 0, 1, 2]
+
+
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_combine_list(use_graph):
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            a = create_list(2)
+            b = create_list(3)
+            c = znflow.combine([a, b])
+        graph.run()
+        c = c.result
+    else:
+        a = create_list(2)
+        b = create_list(3)
+        c = znflow.combine([a, b])
 
     assert c == [0, 1, 0, 1, 2]
 
