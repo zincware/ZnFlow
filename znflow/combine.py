@@ -1,11 +1,12 @@
-from znflow.node import Node
-from znflow.base import Connection, CombinedConnections, FunctionFuture
 import typing
 
-NODE_OR_CONNECTION_OR_COMBINED = typing.Union[Node, Connection, CombinedConnections]
-ARGS_TYPE = typing.List[NODE_OR_CONNECTION_OR_COMBINED]
+from znflow.base import CombinedConnections, Connection, FunctionFuture
+from znflow.node import Node
 
-# TODO check if there a FuncitonFuture
+NODE_OR_CONNECTION_OR_COMBINED_OR_FUNC_FUT = typing.Union[
+    Node, Connection, CombinedConnections, FunctionFuture
+]
+ARGS_TYPE = typing.List[NODE_OR_CONNECTION_OR_COMBINED_OR_FUNC_FUT]
 
 
 def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
@@ -13,7 +14,8 @@ def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
 
     Attributes
     ----------
-    args : list of Node instances
+    args : ARGS_TYPE
+        The arguments to combine.
     attribute : str, default=None
         If not None, the attribute of the Node instance is gathered.
     only_getattr_on_nodes : bool, default=True
@@ -50,5 +52,8 @@ def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
         outs = args
     try:
         return sum(outs, [])
-    except TypeError as err:
-        raise TypeError(f"{args=} with {attribute=} is not allowed.") from err
+    except TypeError:
+        try:
+            return outs
+        except TypeError as err:
+            raise TypeError(f"{args=} with {attribute=} is not allowed.") from err

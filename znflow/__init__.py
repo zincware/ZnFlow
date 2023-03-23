@@ -11,9 +11,9 @@ from znflow.base import (
     disable_graph,
     get_attribute,
 )
+from znflow.combine import combine
 from znflow.graph import DiGraph
 from znflow.node import Node, nodify
-from znflow.combine import combine
 from znflow.visualize import draw
 
 __version__ = importlib.metadata.version(__name__)
