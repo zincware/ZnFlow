@@ -161,9 +161,8 @@ class Connection:
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        if other == 0:  # python uses sum(..., start=0) so we need to handle this case
-            return self
-        return self.__add__(other)
+        """Enable 'sum([a, b], [])'"""
+        return self if other == [] else self.__add__(other)
 
     @property
     def uuid(self):
@@ -236,9 +235,8 @@ class CombinedConnections:
             raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        if other == 0:  # python uses sum(..., start=0) so we need to handle this case
-            return self
-        return self.__add__(other)
+        """Enable 'sum([a, b], [])'"""
+        return self if other == [] else self.__add__(other)
 
     def __getitem__(self, item):
         return dataclasses.replace(self, item=item)
@@ -288,6 +286,5 @@ class FunctionFuture(NodeBaseMixin):
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        if other == 0:  # python uses sum(..., start=0) so we need to handle this case
-            return self
-        return self.__add__(other)
+        """Enable 'sum([a, b], [])'"""
+        return self if other == [] else self.__add__(other)
