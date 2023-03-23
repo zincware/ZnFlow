@@ -84,6 +84,31 @@ print(n3.results)
 # >>> 7.5
 ```
 
+### Working with lists
+ZnFlow supports some special features for working with lists.
+In the following example we want to ``combine`` two lists together.
+
+```python
+import znflow
+
+@znflow.nodify
+def arange(size: int) -> list:
+    return list(range(size))
+
+print(arange(2) + arange(3))
+>>> [0, 1, 0, 1, 2]
+
+with znflow.DiGraph() as graph:
+    lst = arange(2) + arange(3)
+
+graph.run()
+print(lst.result)
+>>> [0, 1, 0, 1, 2]
+```
+
+This functionality is restricted to lists.
+There are some further features that allow combining ``data: list[list]`` by either using ``data: list = znflow.combine(data)`` which has an optional ``attribute=None`` argument to be used in the case of classes or you can simply use ``data = sum(data, [])``.
+
 ### Attributes Access
 Inside the `with znflow.DiGraph()` context manager, accessing class attributes yields `znflow.Connector` objects.
 Sometimes, it may be required to obtain the actual attribute value instead of a `znflow.Connector` object.
