@@ -160,6 +160,11 @@ class Connection:
             return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
+    def __radd__(self, other):
+        if other == []:
+            return self
+        return self.__add__(other)
+
     @property
     def uuid(self):
         return self.instance.uuid
@@ -230,6 +235,11 @@ class CombinedConnections:
         else:
             raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
+    def __radd__(self, other):
+        if other == []:
+            return self
+        return self.__add__(other)
+
     def __getitem__(self, item):
         return dataclasses.replace(self, item=item)
 
@@ -276,3 +286,8 @@ class FunctionFuture(NodeBaseMixin):
         if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
             return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
+
+    def __radd__(self, other):
+        if other == []:
+            return self
+        return self.__add__(other)

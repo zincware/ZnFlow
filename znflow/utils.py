@@ -92,11 +92,11 @@ def combine(*args, attribute=None):
     if len(args) == 1 and isinstance(args[0], (list, tuple)):
         args = args[0]
     if attribute is None:
-        outs = args[0]
-        for node in args[1:]:
+        outs = []
+        for node in args:
             outs += node
     else:
-        outs = getattr(args[0], attribute)
-        for node in args[1:]:
+        outs = []
+        for node in args:
             outs += getattr(node, attribute)
     return outs
