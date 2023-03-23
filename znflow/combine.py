@@ -43,7 +43,13 @@ def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
                 getattr(arg, attribute) if isinstance(arg, Node) else arg for arg in args
             ]
         else:
-            args = [getattr(arg, attribute) for arg in args]
+            try:
+                args = [getattr(arg, attribute) for arg in args]
+            except AttributeError as err:
+                raise TypeError(
+                    "znflow.combine tried to use 'getattr' on non-node type from"
+                    f" '{args=}'. Consider using 'only_getattr_on_nodes=True'"
+                ) from err
     try:
         return sum(args, [])
     except TypeError:

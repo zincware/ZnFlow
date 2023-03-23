@@ -411,3 +411,10 @@ def test_combine_none():
 
     with pytest.raises(TypeError):
         graph.run()
+
+
+def test_combine_error():
+    with pytest.raises(TypeError):
+        znflow.combine([1, 2, 3], attribute="outs", only_getattr_on_nodes=False)
+
+    assert znflow.combine([1, 2, 3], attribute="outs") == [1, 2, 3]
