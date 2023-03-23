@@ -189,6 +189,29 @@ def test_combine_list(use_graph):
     assert c == [0, 1, 0, 1, 2]
 
 
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_combine(use_graph):
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            data1 = [create_list(x) for x in range(5)]
+            data2 = [CreateList(x) for x in range(5)]
+
+            data1 = znflow.combine(data1)
+            data2 = znflow.combine(data2, attribute="outs")
+            outs = znflow.combine(data1, data2)
+        graph.run()
+        result = outs.result
+    else:
+        data1 = [create_list(x) for x in range(5)]
+        data2 = [CreateList(x) for x in range(5)]
+        [x.run() for x in data2]
+        data1 = znflow.combine(data1)
+        data2 = znflow.combine(data2, attribute="outs")
+        result = znflow.combine(data1, data2)
+
+    assert result == sum([list(range(x)) for x in range(5)] * 2, [])
+
+
 # @pytest.mark.parametrize("use_graph", [True, False])
 # def test_combine(use_graph):
 #     if use_graph:
