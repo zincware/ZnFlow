@@ -91,7 +91,6 @@ def combine(*args, attribute=None):
     """
     if len(args) == 1 and isinstance(args[0], (list, tuple)):
         args = args[0]
-    outs = []
-    for node in args:
-        outs += node if attribute is None else getattr(node, attribute)
-    return outs
+    if attribute is None:
+        return sum(args, [])
+    return sum(map(lambda x: getattr(x, attribute), args), [])
