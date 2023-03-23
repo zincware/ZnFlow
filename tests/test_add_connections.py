@@ -293,7 +293,7 @@ def test_nested_getitem_error():
 def test_raises_error_on_normal_sum():
     with znflow.DiGraph():
         with pytest.raises(TypeError):
-            sum(create_list(5), create_list(5))
+            sum([create_list(5), create_list(5)])
 
 
 def test_raises_error_on_add():
