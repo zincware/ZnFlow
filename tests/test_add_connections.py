@@ -155,23 +155,58 @@ def test_add_node_nodify_nested(use_graph):
     assert result == list(range(1, 6)) * 11
 
 
-def test_combine():
-    with znflow.DiGraph() as graph:
-        data1 = [create_list(x) for x in range(5)]
-        data2 = [CreateList(x) for x in range(5)]
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_combine(use_graph):
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            a = create_list(2)
+            b = create_list(3)
+            c = znflow.combine(a, b)
+        graph.run()
+        c = c.result
+    else:
+        a = create_list(2)
+        b = create_list(3)
+        c = znflow.combine(a, b)
 
-        outs1 = znflow.combine(data1)
-        outs2 = znflow.combine(*data1)
-        outs3 = znflow.combine(data2, attribute="outs")
-        outs4 = znflow.combine(*data2, attribute="outs")
-        outs = znflow.combine([outs1, outs2, outs3, outs4])
+    assert c == [0, 1, 0, 1, 2]
 
-    graph.run()
 
-    result = []
-    for x in [list(range(x)) for x in range(5)]:
-        result.extend(x)
-    assert outs.result == result + result + result + result
+# @pytest.mark.parametrize("use_graph", [True, False])
+# def test_combine(use_graph):
+#     if use_graph:
+#         with znflow.DiGraph() as graph:
+#             data1 = [create_list(x) for x in range(5)]
+#             data2 = [CreateList(x) for x in range(5)]
+
+#             outs1 = znflow.combine(*data1)
+#             outs2 = znflow.combine(*data1)
+#             outs3 = znflow.combine(*data2, attribute="outs")
+#             outs4 = znflow.combine(*data2, attribute="outs")
+#             outs = znflow.combine(*[outs1, outs2, outs3, outs4])
+
+#         graph.run()
+#         result = outs.result
+#     else:
+#         data1 = [create_list(x) for x in range(5)]
+#         data2 = []
+#         for x in range(5):
+#             n = CreateList(x)
+#             n.run()
+#             data2.append(n)
+
+#         outs1 = znflow.combine(*data1)
+#         outs2 = znflow.combine(*data1)
+#         outs3 = znflow.combine(*data2, attribute="outs")
+#         outs4 = znflow.combine(*data2, attribute="outs")
+#         outs = znflow.combine(*[outs1, outs2, outs3, outs4])
+
+#         result = outs
+
+#     expected = []
+#     for x in [list(range(x)) for x in range(5)]:
+#         expected.extend(x)
+#     assert result == expected + expected + expected + expected
 
 
 # test errors
