@@ -1,6 +1,9 @@
-import znflow
-import pytest
+import contextlib
 import sys
+
+import pytest
+
+import znflow
 
 
 class AddOne(znflow.Node):
@@ -12,26 +15,33 @@ class AddOne(znflow.Node):
         self.x += 1
 
 
-# @pytest.mark.parametrize("depth", [1, 10, 100, 1000])
-# def test_AddOneLoop(depth):
-#     try:
-#         sys.setrecursionlimit(100) # TODO REMOVE
-#         with znflow.DiGraph() as graph:
-#             start = AddOne(0)
-#             for _ in range(depth):
-#                 start = AddOne(start.x)
+@contextlib.contextmanager
+def setrecursionlimit(limit: int):
+    """Set the recursion limit for the duration of the context manager."""
+    _limit = sys.getrecursionlimit()
+    try:
+        sys.setrecursionlimit(limit)
+        yield
+    finally:
+        sys.setrecursionlimit(_limit)
 
-#         graph.run()
-#         assert len(graph.nodes) == depth + 1
-#         assert start.x == depth + 1
-#     finally:
-#         sys.setrecursionlimit(1000)
+
+@pytest.mark.parametrize("depth", [1, 10, 100, 1000])
+def test_AddOneLoop(depth):
+    with setrecursionlimit(100):
+        with znflow.DiGraph() as graph:
+            start = AddOne(0)
+            for _ in range(depth):
+                start = AddOne(start.x)
+
+        graph.run()
+        assert len(graph.nodes) == depth + 1
+        assert start.x == depth + 1
 
 
 @pytest.mark.parametrize("depth", [1, 10, 100, 1000])
 def test_AddOneLoopNoGraph(depth):
-    try:
-        sys.setrecursionlimit(100)  # TODO REMOVE
+    with setrecursionlimit(100):
         start = AddOne(0)
         start.run()
         for _ in range(depth):
@@ -39,5 +49,3 @@ def test_AddOneLoopNoGraph(depth):
             start.run()
 
         assert start.x == depth + 1
-    finally:
-        sys.setrecursionlimit(1000)
