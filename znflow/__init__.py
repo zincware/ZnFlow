@@ -1,4 +1,5 @@
 """The 'ZnFlow' package."""
+import contextlib
 import importlib.metadata
 import logging
 import sys
@@ -31,6 +32,11 @@ __all__ = [
     "CombinedConnections",
     "combine",
 ]
+
+with contextlib.suppress(ImportError):
+    from znflow import deployment
+
+    __all__ += ["deployment"]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
