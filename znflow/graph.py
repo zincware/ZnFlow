@@ -109,7 +109,9 @@ class DiGraph(nx.MultiDiGraph):
                     f"The source node (uuid={u_of_edge.uuid}, connection={u_of_edge}) is"
                     " not in the graph."
                 )
-            if v_of_edge.uuid not in self:
+            if (
+                v_of_edge.uuid not in self
+            ):  # this might be impossible to reach. Let me know if you found a way.
                 raise ValueError(
                     f"The target node (uuid={v_of_edge.uuid}, connection={v_of_edge}) is"
                     " not in the graph."
