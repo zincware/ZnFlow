@@ -18,12 +18,19 @@ def _mark_init_in_construction(cls):
     if "__init__" in dir(cls):
 
         def wrap_init(func):
+            if getattr(func, "_already_wrapped", False):
+                # if the function is already wrapped, return it
+                #  TODO this is solving the error but not the root cause
+                return func
+
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 cls._in_construction = True
                 value = func(*args, **kwargs)
                 cls._in_construction = False
                 return value
+
+            wrapper._already_wrapped = True
 
             return wrapper
 
