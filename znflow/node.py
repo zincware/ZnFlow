@@ -65,7 +65,7 @@ class Node(NodeBaseMixin):
         return instance
 
     def __getattribute__(self, item):
-        if item == "_graph_":
+        if item.startswith("_"):
             return super().__getattribute__(item)
         if self._graph_ not in [empty, None]:
             with disable_graph():
@@ -74,7 +74,7 @@ class Node(NodeBaseMixin):
                         f"'{self.__class__.__name__}' object has no attribute '{item}'"
                     )
 
-            if item not in type(self)._protected_ and not item.startswith("_"):
+            if item not in type(self)._protected_:
                 if self._in_construction:
                     return super().__getattribute__(item)
                 return Connection(instance=self, attribute=item)
