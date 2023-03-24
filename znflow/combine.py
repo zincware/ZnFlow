@@ -29,6 +29,7 @@ def combine(
         If provided, that return type will not be 'CombinedConnections' but a
         dictionary with the attribute as key and the instances as values.
         One example would be "uuid" to get {uuid: instance} back.
+        The value will be taken from the Node and not the Connection.
 
         This only works if the args are Nodes. If they are not, an error is raised.
 
@@ -70,7 +71,12 @@ def combine(
         if isinstance(result, CombinedConnections):
             result_dict = {}
             for connections in result.connections:
-                key = getattr(connections, return_dict_attr)
+                if isinstance(
+                    connections, Connection
+                ):  # TODO test with attribute that only the node has
+                    key = getattr(connections.instance, return_dict_attr)
+                else:
+                    key = getattr(connections, return_dict_attr)
                 if key in result_dict:
                     raise ValueError(
                         f"znflow.combine: The attribute '{return_dict_attr}=<{key}>' is"
@@ -78,6 +84,10 @@ def combine(
                     )
                 result_dict[key] = connections
             return result_dict
+        elif isinstance(result, (Connection)):
+            return {getattr(result.instance, return_dict_attr): result}
+        elif isinstance(result, (Node)):
+            return {getattr(result, return_dict_attr): result}
         else:
             raise TypeError(
                 "znflow.combine can only return a dict if the result type is"
