@@ -220,17 +220,26 @@ class Connection:
         return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
     def __iter__(self):
+        """Raise TypeError when iterating over itself."""
         raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
+        """Add Method of the Connection class.
+
+        Adds instances onto eachother.
+
+        Raises
+        ------
+        TypeError when two types cannot be added.
+        """
         if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
             return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        """Enable 'sum([a, b], [])'"""
+        """Enable 'sum([a, b], [])'."""
         return self if other == [] else self.__add__(other)
 
     @property
@@ -261,7 +270,6 @@ class CombinedConnections:
 
     Examples
     --------
-
     >>> import znflow
     >>> @znflow.nodfiy
     >>> def add(size) -> list:
@@ -306,17 +314,20 @@ class CombinedConnections:
             raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        """Enable 'sum([a, b], [])'"""
+        """Enable 'sum([a, b], [])'."""
         return self if other == [] else self.__add__(other)
 
     def __getitem__(self, item):
+        """Create a new object of the same type as self with values from changes."""
         return dataclasses.replace(self, item=item)
 
     def __iter__(self):
+        """Raise TypeError when iterating over itself."""
         raise TypeError(f"Can not iterate over {self}.")
 
     @property
     def result(self):
+        """TODO."""
         try:
             results = []
             for connection in self.connections:
@@ -361,15 +372,24 @@ class FunctionFuture(NodeBaseMixin):
         return Connection(instance=self, attribute=None, item=item)
 
     def __iter__(self):
+        """Raise TypeError when iterating over itself."""
         raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
+        """Add Method of the FunctionFuture class.
+
+        Adds instances onto eachother.
+
+        Raises
+        ------
+        TypeError when two types cannot be added.
+        """
         if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
             return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        """Enable 'sum([a, b], [])'"""
+        """Enable 'sum([a, b], [])'."""
         return self if other == [] else self.__add__(other)
