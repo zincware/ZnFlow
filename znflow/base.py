@@ -211,6 +211,7 @@ class Connection:
     item: any = None
 
     def __getitem__(self, item):
+        """Create a new object of the same type as self with values from changes."""
         return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
     def __post_init__(self):
