@@ -86,12 +86,13 @@ print(n3.results)
 
 ## Dask Support
 ZnFlow comes with support for [Dask](https://www.dask.org/) to run your graph:
-- in parallel
-- through e.g. SLURM, ... see https://jobqueue.dask.org/en/latest/api.html
-- with a nice GUI to track progress
+- in parallel.
+- through e.g. SLURM (see https://jobqueue.dask.org/en/latest/api.html).
+- with a nice GUI to track progress.
 
 All you need to do is install ZnFlow with Dask ``pip install znflow[dask]``.
-We can then extend the example from above. This will run ``n1`` and ``n2`` in parallel. You can investigate the grpah on the Dask dashboard (typically http://127.0.0.1:8787/graph or via the client object in Jupyter.)
+We can then extend the example from above. This will run ``n1`` and ``n2`` in parallel.
+You can investigate the graph on the Dask dashboard (typically http://127.0.0.1:8787/graph or via the client object in Jupyter.)
 
 ````python
 import znflow
