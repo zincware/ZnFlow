@@ -130,3 +130,84 @@ print(n3)
 We need to get the updated instance from the Dask worker via ``Deployment.get_results``.
 Due to the way Dask works, an inplace update is not possible. 
 To retrieve the full graph, you can use ``Deployment.get_results(graph.nodes)`` instead.
+
+### Working with lists
+ZnFlow supports some special features for working with lists.
+In the following example we want to ``combine`` two lists.
+
+```python
+import znflow
+
+@znflow.nodify
+def arange(size: int) -> list:
+    return list(range(size))
+
+print(arange(2) + arange(3))
+>>> [0, 1, 0, 1, 2]
+
+with znflow.DiGraph() as graph:
+    lst = arange(2) + arange(3)
+
+graph.run()
+print(lst.result)
+>>> [0, 1, 0, 1, 2]
+```
+
+This functionality is restricted to lists.
+There are some further features that allow combining ``data: list[list]`` by either using ``data: list = znflow.combine(data)`` which has an optional ``attribute=None`` argument to be used in the case of classes or you can simply use ``data: list = sum(data, [])``.
+
+### Attributes Access
+Inside the `with znflow.DiGraph()` context manager, accessing class attributes yields `znflow.Connector` objects.
+Sometimes, it may be required to obtain the actual attribute value instead of a `znflow.Connector` object.
+It is not recommended to run class methods inside the `with znflow.DiGraph()` context manager since it should be exclusively used for building the graph and not for actual computation.
+
+In the case of properties or other descriptor-based attributes, it might be necessary to access the actual attribute value. This can be achieved using the `znflow.get_attribute` method, which supports all features from `getattr` and can be imported as such:
+
+```python
+from znflow import get_attribute as getattr
+```
+Here's an example of how to use ``znflow.get_attribute``:
+```python
+import znflow
+
+class POW2(znflow.Node):
+    """Compute the square of x."""
+    x_factor: float = 0.5
+    results: float = None
+    _x: float = None
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, value):
+        # using "self._x = value * self.x_factor" inside "znflow.DiGraph()" would run 
+        # "value * Connector(self, "x_factor")" which is not possible (TypeError)
+        # therefore we use znflow.get_attribute.
+        self._x = value * znflow.get_attribute(self, "x_factor")
+
+    def run(self):
+        self.results = self.x**2
+    
+with znflow.DiGraph() as graph:
+    n1 = POW2()
+    n1.x = 4.0
+
+graph.run()
+assert n1.results == 4.0
+
+```
+
+Instead, you can also use the ``znflow.disable_graph`` decorator / context manager to disable the graph for a specific block of code or the ``znflow.Property`` as a drop-in replacement for ``property``.
+
+
+# Supported Frameworks
+ZnFlow includes tests to ensure compatibility with:
+- "Plain classes"
+- ``dataclasses``
+- ``ZnInit``
+- ``attrs``
+
+It is currently **not** compatible with pydantic.
+I don't know what pydantic does internally and wasn't able to find a workaround.

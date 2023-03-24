@@ -1,18 +1,37 @@
 """The 'ZnFlow' package."""
-
-import contextlib
 import importlib.metadata
+import contextlib
 import logging
 import sys
 
-from znflow.base import Connection, FunctionFuture
+from znflow.base import (
+    CombinedConnections,
+    Connection,
+    FunctionFuture,
+    Property,
+    disable_graph,
+    get_attribute,
+)
+from znflow.combine import combine
 from znflow.graph import DiGraph
 from znflow.node import Node, nodify
 from znflow.visualize import draw
 
 __version__ = importlib.metadata.version(__name__)
 
-__all__ = ["DiGraph", "Node", "draw", "nodify", "FunctionFuture", "Connection"]
+__all__ = [
+    "DiGraph",
+    "Node",
+    "draw",
+    "nodify",
+    "FunctionFuture",
+    "Connection",
+    "get_attribute",
+    "disable_graph",
+    "Property",
+    "CombinedConnections",
+    "combine",
+]
 
 with contextlib.suppress(ImportError):
     from znflow import deployment

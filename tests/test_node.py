@@ -1,5 +1,6 @@
 import dataclasses
 
+import attrs
 import pytest
 import zninit
 
@@ -14,6 +15,13 @@ class PlainNode(znflow.Node):
     def run(self):
         self.value += 1
 
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
+    def do_stuff(self):
+        raise NotImplementedError
+
 
 @dataclasses.dataclass
 class DataclassNode(znflow.Node):
@@ -22,12 +30,32 @@ class DataclassNode(znflow.Node):
     def run(self):
         self.value += 1
 
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
 
 class ZnInitNode(zninit.ZnInit, znflow.Node):
     value: int = zninit.Descriptor()
 
     def run(self):
         self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
+
+@attrs.define
+class AttrsNode(znflow.Node):
+    value: int
+
+    def run(self):
+        self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
 
 
 @znflow.nodify
@@ -40,7 +68,15 @@ def compute_sum(*args):
     return sum(args)
 
 
-@pytest.mark.parametrize("cls", [PlainNode, DataclassNode, ZnInitNode, add])
+@pytest.mark.parametrize("cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode])
+def test_Node_init(cls):
+    with pytest.raises((TypeError, AttributeError)):
+        # TODO only raise TypeError and not AttributeError when TypeError is expected.
+        with znflow.DiGraph():
+            cls()
+
+
+@pytest.mark.parametrize("cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode])
 def test_Node(cls):
     with znflow.DiGraph() as graph:
         node = cls(value=42)
@@ -48,14 +84,14 @@ def test_Node(cls):
     if isinstance(node, (PlainNode, DataclassNode, ZnInitNode)):
         assert node.value == 42
     elif isinstance(node, znflow.FunctionFuture):
-        assert node.result == 42
+        assert node.kwargs["value"] == 42
 
     assert node.uuid in graph
     assert graph.nodes[node.uuid]["value"] is node
 
 
-@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode])
-@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode])
+@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
+@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
 def test_ConnectionNodeNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -88,11 +124,11 @@ def test_ConnectionNodifyNodify(cls1, cls2):
 
     assert edge is not None
     # # we have one connection, so we use 0
-    assert edge[0]["u_attr"] == "result"
+    assert edge[0]["u_attr"] is None
 
 
 @pytest.mark.parametrize("cls1", [add])
-@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode])
+@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
 def test_ConnectionNodeNodify(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -106,12 +142,12 @@ def test_ConnectionNodeNodify(cls1, cls2):
     edge: dict = graph.get_edge_data(node1.uuid, node2.uuid)
     assert edge is not None
     # we have one connection, so we use 0
-    assert edge[0]["u_attr"] == "result"
+    assert edge[0]["u_attr"] is None
     assert edge[0]["v_attr"] == "value"
 
 
 @pytest.mark.parametrize("cls2", [add])
-@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode])
+@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
 def test_ConnectionNodifyNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -127,7 +163,7 @@ def test_ConnectionNodifyNode(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls2", [compute_sum])
-@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode])
+@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
 def test_ConnectionNodifyMultiNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -150,11 +186,11 @@ def test_ConnectionNodifyMultiNode(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls1", [compute_sum])
-@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode])
+@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
 def test_ConnectionNodeMultiNodify(cls1, cls2):
     with znflow.DiGraph() as graph:
-        node1 = cls1(value=42)
-        node2 = cls1(value=42)
+        node1 = cls1(42)
+        node2 = cls1(42)
         node3 = cls2(value=[node1, node2])
 
     assert node1.uuid in graph
@@ -166,10 +202,10 @@ def test_ConnectionNodeMultiNodify(cls1, cls2):
     assert edge1 is not None
     assert edge2 is not None
 
-    assert edge1[0]["u_attr"] == "result"
+    assert edge1[0]["u_attr"] is None
     assert edge1[0]["v_attr"] == "value"
 
-    assert edge2[0]["u_attr"] == "result"
+    assert edge2[0]["u_attr"] is None
     assert edge2[0]["v_attr"] == "value"
 
 
@@ -204,3 +240,92 @@ def test_CheckWrapInit():
 
     with pytest.raises(TypeError):
         CheckWrapInit()
+
+
+@dataclasses.dataclass
+class DictionaryConnection(znflow.Node):
+    nodes: dict
+    results: float = None
+
+    def run(self):
+        return sum(self.nodes.values())
+
+
+@dataclasses.dataclass
+class ListConnection(znflow.Node):
+    nodes: list
+    results: float = None
+
+    def run(self):
+        return sum(self.nodes)
+
+
+def test_DictionaryConnection():
+    with znflow.DiGraph() as graph:
+        node1 = PlainNode(value=42)
+        node2 = PlainNode(value=42)
+        node3 = DictionaryConnection(nodes={"node1": node1.value, "node2": node2.value})
+
+    assert node1.uuid in graph
+    assert node2.uuid in graph
+    assert node3.uuid in graph
+
+    assert "node1" in node3.nodes
+    assert "node2" in node3.nodes
+
+    assert isinstance(node3.nodes["node1"], znflow.Connection)
+    assert node3.nodes["node1"].uuid == node1.uuid
+    assert node3.nodes["node1"].attribute == "value"
+
+    assert isinstance(node3.nodes["node2"], znflow.Connection)
+    assert node3.nodes["node2"].uuid == node2.uuid
+    assert node3.nodes["node2"].attribute == "value"
+
+    graph.run()
+
+    edge1: dict = graph.get_edge_data(node1.uuid, node3.uuid)
+    edge2: dict = graph.get_edge_data(node1.uuid, node3.uuid)
+    assert edge1 is not None
+    assert edge2 is not None
+
+    assert isinstance(edge1, dict)
+    assert edge1[0]["u_attr"] == "value"
+    assert edge1[0]["v_attr"] == "nodes"
+
+    assert isinstance(edge2, dict)
+    assert edge2[0]["u_attr"] == "value"
+    assert edge2[0]["v_attr"] == "nodes"
+
+
+def test_ListConnection():
+    with znflow.DiGraph() as graph:
+        node1 = PlainNode(value=42)
+        node2 = PlainNode(value=42)
+        node3 = ListConnection(nodes=[node1.value, node2.value])
+
+    assert node1.uuid in graph
+    assert node2.uuid in graph
+    assert node3.uuid in graph
+
+    assert isinstance(node3.nodes[0], znflow.Connection)
+    assert node3.nodes[0].uuid == node1.uuid
+    assert node3.nodes[0].attribute == "value"
+
+    assert isinstance(node3.nodes[1], znflow.Connection)
+    assert node3.nodes[1].uuid == node2.uuid
+    assert node3.nodes[1].attribute == "value"
+
+    graph.run()
+
+    edge1: dict = graph.get_edge_data(node1.uuid, node3.uuid)
+    edge2: dict = graph.get_edge_data(node1.uuid, node3.uuid)
+    assert edge1 is not None
+    assert edge2 is not None
+
+    assert isinstance(edge1, dict)
+    assert edge1[0]["u_attr"] == "value"
+    assert edge1[0]["v_attr"] == "nodes"
+
+    assert isinstance(edge2, dict)
+    assert edge2[0]["u_attr"] == "value"
+    assert edge2[0]["v_attr"] == "nodes"
