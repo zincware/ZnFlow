@@ -18,12 +18,19 @@ def _mark_init_in_construction(cls):
     if "__init__" in dir(cls):
 
         def wrap_init(func):
+            if getattr(func, "_already_wrapped", False):
+                # if the function is already wrapped, return it
+                #  TODO this is solving the error but not the root cause
+                return func
+
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 cls._in_construction = True
                 value = func(*args, **kwargs)
                 cls._in_construction = False
                 return value
+
+            wrapper._already_wrapped = True
 
             return wrapper
 
@@ -58,7 +65,7 @@ class Node(NodeBaseMixin):
         return instance
 
     def __getattribute__(self, item):
-        if item == "_graph_":
+        if item.startswith("_"):
             return super().__getattribute__(item)
         if self._graph_ not in [empty, None]:
             with disable_graph():
@@ -67,7 +74,7 @@ class Node(NodeBaseMixin):
                         f"'{self.__class__.__name__}' object has no attribute '{item}'"
                     )
 
-            if item not in type(self)._protected_ and not item.startswith("_"):
+            if item not in type(self)._protected_:
                 if self._in_construction:
                     return super().__getattribute__(item)
                 return Connection(instance=self, attribute=item)
