@@ -111,7 +111,7 @@ class Property:
         return prop
 
     def deleter(self, fdel):
-        """Deleter Method of the Property class.
+        """Set delete method for Property class.
 
         References
         ----------
