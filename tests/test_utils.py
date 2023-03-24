@@ -69,3 +69,16 @@ def test_ConvertToString_updated(value, updated):
     converter = ConvertToString()
     converter.handle(value)
     assert converter.updated is updated
+
+
+def test_repeated_upddates():
+    """Test repeated updates."""
+    converter = ConvertToString()
+    assert converter.handle(1) == "1"
+    assert converter.updated is True
+    assert converter.handle("1") == "1"
+    assert converter.updated is False
+    assert converter.handle(1) == "1"
+    assert converter.updated is True
+    assert converter("1") == "1"
+    assert converter.updated is False

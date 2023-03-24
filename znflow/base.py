@@ -94,7 +94,6 @@ class NodeBaseMixin:
         "_graph_",
         "uuid",
         "_uuid",
-        "result",
     ]  # TODO consider adding regex patterns
 
     @property
@@ -144,12 +143,26 @@ class Connection:
     attribute: any
     item: any = None
 
-    def __getitem__(self, item):
-        return dataclasses.replace(self, instance=self, attribute="result", item=item)
-
     def __post_init__(self):
         if self.attribute is not None and self.attribute.startswith("_"):
             raise ValueError("Private attributes are not allowed.")
+
+    def __getitem__(self, item):
+        return dataclasses.replace(self, instance=self, attribute=None, item=item)
+
+    def __iter__(self):
+        raise TypeError(f"Can not iterate over {self}.")
+
+    def __add__(
+        self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
+    ) -> CombinedConnections:
+        if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
+            return CombinedConnections(connections=[self, other])
+        raise TypeError(f"Can not add {type(other)} to {type(self)}.")
+
+    def __radd__(self, other):
+        """Enable 'sum([a, b], [])'"""
+        return self if other == [] else self.__add__(other)
 
     @property
     def uuid(self):
@@ -157,11 +170,92 @@ class Connection:
 
     @property
     def result(self):
-        result = (
-            getattr(self.instance, self.attribute) if self.attribute else self.instance
-        )
-
+        if self.attribute:
+            result = getattr(self.instance, self.attribute)
+        elif isinstance(self.instance, (FunctionFuture, self.__class__)):
+            result = self.instance.result
+        else:
+            result = self.instance
         return result[self.item] if self.item else result
+
+
+@dataclasses.dataclass(frozen=True)
+class CombinedConnections:
+    """Combine multiple Connections into one.
+
+    This class allows to 'add' Connections and/or FunctionFutures.
+    This only works if the Connection or FunctionFuture points to a 'list'.
+    A new entry of 'CombinedConnections' will be created for every time a new
+    item is added.
+
+    Examples
+    --------
+
+    >>> import znflow
+    >>> @znflow.nodfiy
+    >>> def add(size) -> list:
+    >>>     return list(range(size))
+    >>> with znflow.DiGraph() as graph:
+    >>>     outs = add(2) + add(3)
+    >>> graph.run()
+    >>> assert outs.result == [0, 1, 0, 1, 2]
+
+    Attributes
+    ----------
+    connections : list[Connection|FunctionFuture|AddedConnections]
+        The List of items to be added.
+    item : any
+        Any slice to be applied to the result.
+    """
+
+    connections: typing.List[Connection]
+    item: any = None
+
+    def __add__(
+        self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
+    ) -> CombinedConnections:
+        """Implement add for AddedConnections.
+
+        Raises
+        ------
+        ValueError
+            If  self.item is set, we can not add another item.
+        TypeError
+            If other is not a Connection, FunctionFuture or AddedConnections.
+        """
+        if self.item is not None:
+            raise ValueError("Can not combine multiple slices")
+        if isinstance(other, (Connection, FunctionFuture)):
+            return dataclasses.replace(self, connections=self.connections + [other])
+        elif isinstance(other, CombinedConnections):
+            return dataclasses.replace(
+                self, connections=self.connections + other.connections
+            )
+        else:
+            raise TypeError(f"Can not add {type(other)} to {type(self)}.")
+
+    def __radd__(self, other):
+        """Enable 'sum([a, b], [])'"""
+        return self if other == [] else self.__add__(other)
+
+    def __getitem__(self, item):
+        return dataclasses.replace(self, item=item)
+
+    def __iter__(self):
+        raise TypeError(f"Can not iterate over {self}.")
+
+    @property
+    def result(self):
+        try:
+            results = []
+            for connection in self.connections:
+                results.extend(connection.result)
+            return results[self.item] if self.item else results
+        except TypeError as err:
+            raise TypeError(
+                f"The value {connection.result} is of type {type(connection.result)}. The"
+                f" only supported type is list. Please change {connection}"
+            ) from err
 
 
 @dataclasses.dataclass
@@ -171,18 +265,26 @@ class FunctionFuture(NodeBaseMixin):
     kwargs: typing.Dict
     item: any = None
 
-    _result: any = dataclasses.field(default=None, init=False, repr=True)
+    result: any = dataclasses.field(default=None, init=False, repr=True)
 
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
     def run(self):
-        self._result = self.function(*self.args, **self.kwargs)
+        self.result = self.function(*self.args, **self.kwargs)
 
     def __getitem__(self, item):
-        return Connection(instance=self, attribute="result", item=item)
+        return Connection(instance=self, attribute=None, item=item)
 
-    @property
-    def result(self):
-        if self._result is None:
-            self.run()
-        return self._result
+    def __iter__(self):
+        raise TypeError(f"Can not iterate over {self}.")
+
+    def __add__(
+        self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
+    ) -> CombinedConnections:
+        if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
+            return CombinedConnections(connections=[self, other])
+        raise TypeError(f"Can not add {type(other)} to {type(self)}.")
+
+    def __radd__(self, other):
+        """Enable 'sum([a, b], [])'"""
+        return self if other == [] else self.__add__(other)

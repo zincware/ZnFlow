@@ -84,7 +84,7 @@ def test_Node(cls):
     if isinstance(node, (PlainNode, DataclassNode, ZnInitNode)):
         assert node.value == 42
     elif isinstance(node, znflow.FunctionFuture):
-        assert node.result == 42
+        assert node.kwargs["value"] == 42
 
     assert node.uuid in graph
     assert graph.nodes[node.uuid]["value"] is node
@@ -124,7 +124,7 @@ def test_ConnectionNodifyNodify(cls1, cls2):
 
     assert edge is not None
     # # we have one connection, so we use 0
-    assert edge[0]["u_attr"] == "result"
+    assert edge[0]["u_attr"] is None
 
 
 @pytest.mark.parametrize("cls1", [add])
@@ -142,7 +142,7 @@ def test_ConnectionNodeNodify(cls1, cls2):
     edge: dict = graph.get_edge_data(node1.uuid, node2.uuid)
     assert edge is not None
     # we have one connection, so we use 0
-    assert edge[0]["u_attr"] == "result"
+    assert edge[0]["u_attr"] is None
     assert edge[0]["v_attr"] == "value"
 
 
@@ -202,10 +202,10 @@ def test_ConnectionNodeMultiNodify(cls1, cls2):
     assert edge1 is not None
     assert edge2 is not None
 
-    assert edge1[0]["u_attr"] == "result"
+    assert edge1[0]["u_attr"] is None
     assert edge1[0]["v_attr"] == "value"
 
-    assert edge2[0]["u_attr"] == "result"
+    assert edge2[0]["u_attr"] is None
     assert edge2[0]["v_attr"] == "value"
 
 

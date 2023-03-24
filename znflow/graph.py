@@ -4,7 +4,7 @@ import typing
 
 import networkx as nx
 
-from znflow import utils
+from znflow import handler
 from znflow.base import (
     Connection,
     FunctionFuture,
@@ -18,38 +18,6 @@ from znflow.node import Node
 log = logging.getLogger(__name__)
 
 
-class _AttributeToConnection(utils.IterableHandler):
-    def default(self, value, **kwargs):
-        assert not kwargs
-        if isinstance(value, FunctionFuture):
-            if value._graph_ is None:
-                return value
-            return Connection(value, attribute="result")
-        elif isinstance(value, Node):
-            if value._graph_ is None:
-                return value
-            return Connection(value, attribute=None)
-        else:
-            return value
-
-
-class _AddConnectionToGraph(utils.IterableHandler):
-    def default(self, value, **kwargs):
-        if isinstance(value, Connection):
-            graph = kwargs["graph"]
-            v_attr = kwargs.get("attribute")
-            node_instance = kwargs["node_instance"]
-            if v_attr is None:
-                graph.add_connections(value, node_instance)
-            else:
-                graph.add_connections(value, node_instance, v_attr=v_attr)
-
-
-class _UpdateConnectors(utils.IterableHandler):
-    def default(self, value, **kwargs):
-        return value.result if isinstance(value, Connection) else value
-
-
 class DiGraph(nx.MultiDiGraph):
     def __init__(self, *args, disable=False, **kwargs):
         self.disable = disable
@@ -59,9 +27,9 @@ class DiGraph(nx.MultiDiGraph):
     def add_connections_from_iterable(self) -> typing.Callable:
         """Get a function that adds connections to the graph.
 
-        Return a _AddConnectionToGraph class with this Graph instance attached.
+        Return a AddConnectionToGraph class with this Graph instance attached.
         """
-        return functools.partial(_AddConnectionToGraph(), graph=self)
+        return functools.partial(handler.AddConnectionToGraph(), graph=self)
 
     def __enter__(self):
         if self.disable:
@@ -86,12 +54,14 @@ class DiGraph(nx.MultiDiGraph):
                 self._update_function_future_arguments(node_instance)
             elif isinstance(node_instance, Node):
                 # TODO only update Nodes if the graph is not empty
-                self._update_node_attributes(node_instance, _AttributeToConnection())
+                self._update_node_attributes(
+                    node_instance, handler.AttributeToConnection()
+                )
 
     def _update_function_future_arguments(self, node_instance: FunctionFuture) -> None:
         """Apply an update to args and kwargs of a FunctionFuture."""
-        node_instance.args = _AttributeToConnection()(node_instance.args)
-        node_instance.kwargs = _AttributeToConnection()(node_instance.kwargs)
+        node_instance.args = handler.AttributeToConnection()(node_instance.args)
+        node_instance.kwargs = handler.AttributeToConnection()(node_instance.kwargs)
         self.add_connections_from_iterable(
             node_instance.args, node_instance=node_instance
         )
@@ -104,6 +74,9 @@ class DiGraph(nx.MultiDiGraph):
         for attribute in dir(node_instance):
             if attribute.startswith("_") or attribute in Node._protected_:
                 # We do not allow connections to private attributes.
+                continue
+            if isinstance(getattr(type(node_instance), attribute, None), property):
+                # We do not want to call getter of properties.
                 continue
             try:
                 value = getattr(node_instance, attribute)
@@ -164,7 +137,7 @@ class DiGraph(nx.MultiDiGraph):
         for node_uuid in self.get_sorted_nodes():
             node = self.nodes[node_uuid]["value"]
             # update connectors
-            self._update_node_attributes(node, _UpdateConnectors())
+            self._update_node_attributes(node, handler.UpdateConnectors())
             node.run()
 
     def write_graph(self, *args):
