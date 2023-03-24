@@ -177,3 +177,12 @@ def test_get_attribute():
 
     assert znflow.base.get_attribute(node1, "not_existing", None) is None
     assert znflow.base.get_attribute(node1, "not_existing", 13) == 13
+
+
+def test_node_not_on_graph():
+    node1 = DataclassNode(value=42)
+
+    with pytest.raises(ValueError):
+        with znflow.DiGraph():
+            with pytest.raises(ValueError):
+                _ = DataclassNode(value=node1.value)
