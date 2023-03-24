@@ -143,7 +143,6 @@ class NodeBaseMixin:
         "_graph_",
         "uuid",
         "_uuid",
-        "result",
     ]  # TODO consider adding regex patterns
 
     @property
@@ -212,7 +211,6 @@ class Connection:
     item: any = None
 
     def __getitem__(self, item):
-        """TODO."""
         return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
     def __post_init__(self):
@@ -253,7 +251,7 @@ class FunctionFuture(NodeBaseMixin):
     kwargs: typing.Dict
     item: any = None
 
-    _result: any = dataclasses.field(default=None, init=False, repr=True)
+    result: any = dataclasses.field(default=None, init=False, repr=True)
 
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
@@ -262,9 +260,8 @@ class FunctionFuture(NodeBaseMixin):
 
         Executes the function with the given arguments and saves the result.
         """
-        self._result = self.function(*self.args, **self.kwargs)
+        self.result = self.function(*self.args, **self.kwargs)
 
     def __getitem__(self, item):
         """Get the object with all the information of the Connection class."""
         return Connection(instance=self, attribute=None, item=item)
-
