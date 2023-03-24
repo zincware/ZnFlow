@@ -71,21 +71,17 @@ class Node(NodeBaseMixin):
             if item not in type(self)._protected_ and not item.startswith("_"):
                 if self._in_construction:
                     return super().__getattribute__(item)
-                connector = Connection(instance=self, attribute=item)
-                return connector
+                return Connection(instance=self, attribute=item)
         return super().__getattribute__(item)
 
     def __setattr__(self, item, value) -> None:
         super().__setattr__(item, value)
-        if self._graph_ not in [empty, None]:
-            if isinstance(value, Connection):
-                assert (
-                    self.uuid in self._graph_
-                ), f"'{self.uuid=}' not in '{self._graph_=}'"
-                assert value.uuid in self._graph_
-                self._graph_.add_edge(
-                    value.uuid, self.uuid, u_attr=value.attribute, v_attr=item
-                )
+        if self._graph_ not in [empty, None] and isinstance(value, Connection):
+            assert self.uuid in self._graph_, f"'{self.uuid=}' not in '{self._graph_=}'"
+            assert value.uuid in self._graph_
+            self._graph_.add_edge(
+                value.uuid, self.uuid, u_attr=value.attribute, v_attr=item
+            )
 
 
 def nodify(function):
