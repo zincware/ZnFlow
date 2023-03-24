@@ -9,7 +9,12 @@ NODE_OR_CONNECTION_OR_COMBINED_OR_FUNC_FUT = typing.Union[
 ARGS_TYPE = typing.List[NODE_OR_CONNECTION_OR_COMBINED_OR_FUNC_FUT]
 
 
-def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
+def combine(
+    *args: ARGS_TYPE,
+    attribute=None,
+    only_getattr_on_nodes=True,
+    return_dict_attr: str = None,
+):
     """Combine Node outputs which are lists into a single flat list.
 
     Attributes
@@ -20,6 +25,12 @@ def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
         If not None, the attribute of the Node instance is gathered.
     only_getattr_on_nodes : bool, default=True
         If True, the attribute is only gathered from Node instances.
+    return_dict_attr : str, default=None
+        If provided, that return type will not be 'CombinedConnections' but a
+        dictionary with the attribute as key and the instances as values.
+        One example would be "uuid" to get {uuid: instance} back.
+
+        This only works if the args are Nodes. If they are not, an error is raised.
 
     Examples
     --------
@@ -51,6 +62,25 @@ def combine(*args: ARGS_TYPE, attribute=None, only_getattr_on_nodes=True):
                     f" '{args=}'. Consider using 'only_getattr_on_nodes=True'"
                 ) from err
     try:
-        return sum(args, [])
+        result = sum(args, [])
     except TypeError:
-        return args
+        result = args
+
+    if return_dict_attr:
+        if isinstance(result, CombinedConnections):
+            result_dict = {}
+            for connections in result.connections:
+                key = getattr(connections, return_dict_attr)
+                if key in result_dict:
+                    raise ValueError(
+                        f"znflow.combine: The attribute '{return_dict_attr}=<{key}>' is"
+                        " not unique. Please use a different attribute."
+                    )
+                result_dict[key] = connections
+            return result_dict
+        else:
+            raise TypeError(
+                "znflow.combine can only return a dict if the result type is"
+                " 'CombinedConnections'."
+            )
+    return result
