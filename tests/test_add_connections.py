@@ -254,6 +254,33 @@ def test_combine_w_wo_graph():
     assert outs == expected + expected + expected + expected
 
 
+def test_combine_get_dict():
+    with znflow.DiGraph():
+        g_data1 = [create_list(x) for x in range(5)]
+        g_data2 = [CreateList(x) for x in range(5)]
+
+        g_outs1 = znflow.combine(*g_data1, return_dict_attr="uuid")
+        g_outs2 = znflow.combine(*g_data2, attribute="outs", return_dict_attr="uuid")
+        with pytest.raises(
+            ValueError
+        ):  # nodes occur multiple times, dict is not possible
+            znflow.combine(g_data1 + g_data1, return_dict_attr="uuid")
+
+    assert isinstance(g_outs1, dict)
+    assert len(g_outs1) == 5
+    assert isinstance(g_outs2, dict)
+    assert len(g_outs2) == 5
+
+    for node in g_data1:
+        assert node.uuid in g_outs1
+        assert g_outs1[node.uuid] == node
+
+    # withot graph
+    g_data1 = [create_list(x) for x in range(5)]
+    with pytest.raises(TypeError):
+        znflow.combine(*g_data1, return_dict_attr="uuid")
+
+
 @pytest.mark.parametrize("use_graph", [True, False])
 def test_sum_list(use_graph):
     if use_graph:
