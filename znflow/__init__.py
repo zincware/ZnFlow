@@ -1,6 +1,6 @@
 """The 'ZnFlow' package."""
-import importlib.metadata
 import contextlib
+import importlib.metadata
 import logging
 import sys
 
