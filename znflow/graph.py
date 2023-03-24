@@ -131,8 +131,9 @@ class DiGraph(nx.MultiDiGraph):
 
     def get_sorted_nodes(self):
         all_pipelines = []
-        for stage in self.reverse():
-            all_pipelines += nx.dfs_postorder_nodes(self.reverse(), stage)
+        reverse = self.reverse(copy=False)
+        for stage in reverse:
+            all_pipelines += nx.dfs_postorder_nodes(reverse, stage)
         return list(dict.fromkeys(all_pipelines))  # remove duplicates but keep order
 
     def run(self):
