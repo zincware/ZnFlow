@@ -7,9 +7,9 @@ import uuid
 from dask.distributed import Client, Future
 from networkx.classes.reportviews import NodeView
 
-from znflow.base import Connection, FunctionFuture, CombinedConnections
-from znflow.node import Node
+from znflow.base import CombinedConnections, Connection, FunctionFuture
 from znflow.graph import DiGraph
+from znflow.node import Node
 from znflow.utils import IterableHandler
 
 

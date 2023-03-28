@@ -1,7 +1,8 @@
 import dataclasses
 
-import znflow
 import numpy as np
+
+import znflow
 
 
 @znflow.nodify
