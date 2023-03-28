@@ -9,6 +9,24 @@ NODE_OR_CONNECTION_OR_COMBINED_OR_FUNC_FUT = typing.Union[
 ARGS_TYPE = typing.List[NODE_OR_CONNECTION_OR_COMBINED_OR_FUNC_FUT]
 
 
+def _return_dict_attr(data, attr_name) -> dict:
+    """Return a dictionary with the attribute as key and the instances as values."""
+    result_dict = {}
+    for connection in data:
+        key = (
+            getattr(connection.instance, attr_name)
+            if isinstance(connection, Connection)
+            else getattr(connection, attr_name)
+        )
+        if key in result_dict:
+            raise ValueError(
+                f"znflow.combine: The attribute '{attr_name}=<{key}>' is"
+                " not unique. Please use a different attribute."
+            )
+        result_dict[key] = connection
+    return result_dict
+
+
 def combine(
     *args: ARGS_TYPE,
     attribute=None,
@@ -69,29 +87,20 @@ def combine(
 
     if isinstance(result, CombinedConnections):
         if return_dict_attr:
-            result_dict = {}
-            for connections in result.connections:
-                key = (
-                    getattr(connections.instance, return_dict_attr)
-                    if isinstance(connections, Connection)
-                    else getattr(connections, return_dict_attr)
-                )
-                if key in result_dict:
-                    raise ValueError(
-                        f"znflow.combine: The attribute '{return_dict_attr}=<{key}>' is"
-                        " not unique. Please use a different attribute."
-                    )
-                result_dict[key] = connections
-            return result_dict
+            return _return_dict_attr(result.connections, return_dict_attr)
     elif isinstance(result, (Connection)):
         if return_dict_attr:
             return {getattr(result.instance, return_dict_attr): result}
     elif isinstance(result, (Node)):
         if return_dict_attr:
             return {getattr(result, return_dict_attr): result}
+    elif isinstance(result, (list, tuple)) and isinstance(result[0], (Connection, Node)):
+        # we assume if the first item is a Connection or Node, all are
+        if return_dict_attr:
+            return _return_dict_attr(result, return_dict_attr)
     elif return_dict_attr:
         raise TypeError(
             "znflow.combine can only return a dict if the result type is"
-            " 'CombinedConnections'."
+            f" 'CombinedConnections'. Found {result} instead."
         )
     return result

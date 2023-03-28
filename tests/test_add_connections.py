@@ -275,10 +275,23 @@ def test_combine_get_dict():
         assert node.uuid in g_outs1
         assert g_outs1[node.uuid] == node
 
-    # withot graph
+    # without graph
     g_data1 = [create_list(x) for x in range(5)]
     with pytest.raises(TypeError):
         znflow.combine(*g_data1, return_dict_attr="uuid")
+
+
+def test_Node_list_wo_graph():
+    # Nodes without graph
+    data1 = [CreateList(x) for x in range(5)]
+    for idx, x in enumerate(data1):
+        x._uuid = idx
+
+    outs1 = znflow.combine(*data1, return_dict_attr="uuid")
+    assert isinstance(outs1, dict)
+    assert len(outs1) == 5
+    for node in data1:
+        assert outs1[node.uuid] == node
 
 
 @pytest.mark.parametrize("use_graph", [True, False])
