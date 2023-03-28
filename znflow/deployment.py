@@ -7,8 +7,9 @@ import uuid
 from dask.distributed import Client, Future
 from networkx.classes.reportviews import NodeView
 
-from znflow.base import Connection, NodeBaseMixin
+from znflow.base import CombinedConnections, Connection, FunctionFuture
 from znflow.graph import DiGraph
+from znflow.node import Node
 from znflow.utils import IterableHandler
 
 
@@ -20,23 +21,20 @@ class _LoadNode(IterableHandler):
 
         Parameters
         ----------
-        value: NodeBaseMixin|any
-            If a NodeBaseMixin, the node will be loaded and returned.
+        value: any
+            the value to be loaded from the results dict
         kwargs: dict
-            results: results dictionary of {uuid: node} shape.
-
-        Returns
-        -------
-        any:
-            If a NodeBaseMixin, the node will be loaded and returned.
-            Otherwise, the input value is returned.
-
+            results: results dictionary of {uuid: Future} shape.
         """
         results = kwargs["results"]
-        if isinstance(value, NodeBaseMixin):
-            return results[value.uuid].result()
 
-        return value
+        if isinstance(value, Node):
+            # results: dict[uuid, DaskFuture]
+            return results[value.uuid].result()
+        elif isinstance(value, (FunctionFuture, CombinedConnections, Connection)):
+            return results[value.uuid].result().result
+        else:
+            return value
 
 
 class _UpdateConnections(IterableHandler):
@@ -66,19 +64,19 @@ class _UpdateConnections(IterableHandler):
         return value
 
 
-def node_submit(node: NodeBaseMixin, **kwargs) -> NodeBaseMixin:
+def node_submit(node, **kwargs):
     """Submit script for Dask worker.
 
     Parameters
     ----------
-    node: NodeBaseMixin
+    node: any
         the Node class
     kwargs: dict
         predecessors: dict of {uuid: Connection} shape
 
     Returns
     -------
-    NodeBaseMixin:
+    any:
         the Node class with updated state (after calling "Node.run").
 
     """
@@ -146,12 +144,12 @@ class Deployment:
                     pure=False,
                 )
 
-    def get_results(self, obj: typing.Union[NodeBaseMixin, list, dict, NodeView], /):
+    def get_results(self, obj: typing.Union[Node, list, dict, NodeView], /):
         """Get the results from Dask based on the original object.
 
         Parameters
         ----------
-        obj: NodeBaseMixin|list|dict|NodeView
+        obj: any
             either a single Node or multiple Nodes from the submitted graph.
 
         Returns

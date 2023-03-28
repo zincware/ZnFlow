@@ -1,5 +1,7 @@
 import dataclasses
 
+import numpy as np
+
 import znflow
 
 
@@ -30,8 +32,7 @@ def test_single_nodify():
     depl = znflow.deployment.Deployment(graph=graph)
     depl.submit_graph()
 
-    node1 = depl.get_results(node1)
-    assert node1.result == 6
+    assert depl.get_results(node1) == 6
 
 
 def test_single_Node():
@@ -54,12 +55,9 @@ def test_multiple_nodify():
     depl = znflow.deployment.Deployment(graph=graph)
     depl.submit_graph()
 
-    node1 = depl.get_results(node1)
-    node2 = depl.get_results(node2)
-    node3 = depl.get_results(node3)
-    assert node1.result == 6
-    assert node2.result == 15
-    assert node3.result == 21
+    assert depl.get_results(node1) == 6
+    assert depl.get_results(node2) == 15
+    assert depl.get_results(node3) == 21
 
 
 def test_multiple_Node():
@@ -92,8 +90,33 @@ def test_multiple_nodify_and_Node():
 
     results = depl.get_results(graph.nodes)
 
-    assert results[node1.uuid].result == 6
+    assert results[node1.uuid] == 6
     assert results[node2.uuid].outputs == 15
-    assert results[node3.uuid].result == 21
+    assert results[node3.uuid] == 21
     assert results[node4.uuid].outputs == 42
-    assert results[node5.uuid].result == 43
+    assert results[node5.uuid] == 43
+
+
+@znflow.nodify
+def get_forces():
+    return np.random.normal(size=(100, 3))
+
+
+@znflow.nodify
+def concatenate(forces):
+    return np.concatenate(forces)
+
+
+def test_concatenate():
+    with znflow.DiGraph() as graph:
+        forces = [get_forces() for _ in range(10)]
+        forces = concatenate(forces)
+
+    deployment = znflow.deployment.Deployment(
+        graph=graph,
+    )
+    deployment.submit_graph()
+    results = deployment.get_results(forces)
+
+    assert isinstance(results, np.ndarray)
+    assert results.shape == (1000, 3)
