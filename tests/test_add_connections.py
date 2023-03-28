@@ -280,6 +280,10 @@ def test_combine_get_dict():
     with pytest.raises(TypeError):
         znflow.combine(*g_data1, return_dict_attr="uuid")
 
+    assert znflow.combine(
+        *g_data1, return_dict_attr="uuid", return_dict_attr_error=False
+    ) == znflow.combine(*g_data1)
+
 
 def test_Node_list_wo_graph():
     # Nodes without graph

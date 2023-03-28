@@ -32,6 +32,7 @@ def combine(
     attribute=None,
     only_getattr_on_nodes=True,
     return_dict_attr: str = None,
+    return_dict_attr_error: bool = True,
 ):
     """Combine Node outputs which are lists into a single flat list.
 
@@ -50,6 +51,10 @@ def combine(
         The value will be taken from the Node and not the Connection.
 
         This only works if the args are Nodes. If they are not, an error is raised.
+    return_dict_attr_error : bool, default=True
+        If True, an error is raised if the return type is not 'CombinedConnections'
+        or list[Node] and the 'return_dict_attr' is not None. Otherwise, this is
+        silently ignored.
 
     Examples
     --------
@@ -98,7 +103,7 @@ def combine(
         # we assume if the first item is a Connection or Node, all are
         if return_dict_attr:
             return _return_dict_attr(result, return_dict_attr)
-    elif return_dict_attr:
+    elif return_dict_attr and return_dict_attr_error:
         raise TypeError(
             "znflow.combine can only return a dict if the result type is"
             f" 'CombinedConnections'. Found {result} instead."
