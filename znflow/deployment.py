@@ -9,7 +9,7 @@ from networkx.classes.reportviews import NodeView
 
 from znflow.graph import DiGraph
 from znflow.node import Node
-from znflow.handler import _LoadNode, _UpdateConnections
+from znflow.handler import _LoadNode, UpdateConnectionsWithPredecessor
 
 
 def node_submit(node, **kwargs):
@@ -29,12 +29,12 @@ def node_submit(node, **kwargs):
 
     """
     predecessors = kwargs.get("predecessors", {})
+    updater = UpdateConnectionsWithPredecessor()
     for item in dir(node):
         # TODO this information is available in the graph,
         #  no need to expensively iterate over all attributes
         if item.startswith("_"):
             continue
-        updater = _UpdateConnections()
         value = updater(getattr(node, item), predecessors=predecessors)
         if updater.updated:
             setattr(node, item, value)

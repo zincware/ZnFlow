@@ -55,7 +55,7 @@ class _LoadNode(utils.IterableHandler):
             return value
 
 
-class _UpdateConnections(utils.IterableHandler):
+class UpdateConnectionsWithPredecessor(utils.IterableHandler):
     """Iterable handler for replacing connections."""
 
     def default(self, value, **kwargs):
