@@ -83,6 +83,10 @@ def test_Node(cls):
 
     if isinstance(node, (PlainNode, DataclassNode, ZnInitNode)):
         assert node.value == 42
+        assert not node._in_construction
+        assert cls._in_construction
+        assert hasattr(node, "__init__")
+
     elif isinstance(node, znflow.FunctionFuture):
         assert node.kwargs["value"] == 42
 

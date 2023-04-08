@@ -50,13 +50,15 @@ class Node(NodeBaseMixin):
     def __new__(cls, *args, **kwargs):
         try:
             instance = super().__new__(cls, *args, **kwargs)
-        except TypeError:  # e.g. in dataclasses the arguments are passed to __new__
+        except TypeError:
+            # e.g. in dataclasses the arguments are passed to __new__
+            # but even dataclasses seem to have an __init__ afterwards.
             # print("TypeError: ...")
             instance = super().__new__(cls)
         _mark_init_in_construction(cls)
         instance.uuid = uuid.uuid4()
 
-        # Connect the Node to the Grap
+        # Connect the Node to the Graph
         graph = get_graph()
         if graph is not empty:
             graph.add_node(instance)
