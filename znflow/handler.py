@@ -1,7 +1,8 @@
+import dataclasses
+
 from znflow import utils
 from znflow.base import CombinedConnections, Connection, FunctionFuture
 from znflow.node import Node
-import dataclasses
 
 
 class AttributeToConnection(utils.IterableHandler):

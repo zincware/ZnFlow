@@ -8,8 +8,11 @@ from dask.distributed import Client, Future
 from networkx.classes.reportviews import NodeView
 
 from znflow.graph import DiGraph
+from znflow.handler import (
+    LoadNodeFromDeploymentResults,
+    UpdateConnectionsWithPredecessor,
+)
 from znflow.node import Node
-from znflow.handler import LoadNodeFromDeploymentResults, UpdateConnectionsWithPredecessor
 
 
 def node_submit(node, **kwargs):
