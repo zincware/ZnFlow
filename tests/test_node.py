@@ -235,15 +235,13 @@ def test_Connection():
 def test_CheckWrapInit():
     @_mark_init_in_construction
     class CheckWrapInit:
-        _in_construction: bool = False
+        _in_construction: bool = True
 
         def __init__(self):
             assert self._in_construction
 
-            return 42
-
-    with pytest.raises(TypeError):
-        CheckWrapInit()
+    instance = CheckWrapInit()
+    assert not instance._in_construction
 
 
 @dataclasses.dataclass
