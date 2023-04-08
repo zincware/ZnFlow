@@ -48,13 +48,11 @@ class Node(NodeBaseMixin):
         return Connection(self, other)
 
     def __new__(cls, *args, **kwargs):
-        cls._in_construction = True
         try:
             instance = super().__new__(cls, *args, **kwargs)
         except TypeError:  # e.g. in dataclasses the arguments are passed to __new__
             # print("TypeError: ...")
             instance = super().__new__(cls)
-        cls._in_construction = False
         _mark_init_in_construction(cls)
         instance.uuid = uuid.uuid4()
 
