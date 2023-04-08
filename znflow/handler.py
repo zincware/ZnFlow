@@ -1,6 +1,7 @@
 from znflow import utils
 from znflow.base import CombinedConnections, Connection, FunctionFuture
 from znflow.node import Node
+import dataclasses
 
 
 class AttributeToConnection(utils.IterableHandler):
@@ -28,3 +29,54 @@ class UpdateConnectors(utils.IterableHandler):
             return value.result
         else:
             return value
+
+
+class _LoadNode(utils.IterableHandler):
+    """Iterable handler for loading nodes."""
+
+    def default(self, value, **kwargs):
+        """Default handler for loading nodes.
+
+        Parameters
+        ----------
+        value: any
+            the value to be loaded from the results dict
+        kwargs: dict
+            results: results dictionary of {uuid: Future} shape.
+        """
+        results = kwargs["results"]
+
+        if isinstance(value, Node):
+            # results: dict[uuid, DaskFuture]
+            return results[value.uuid].result()
+        elif isinstance(value, (FunctionFuture, CombinedConnections, Connection)):
+            return results[value.uuid].result().result
+        else:
+            return value
+
+
+class _UpdateConnections(utils.IterableHandler):
+    """Iterable handler for replacing connections."""
+
+    def default(self, value, **kwargs):
+        """Replace connections by its values.
+
+        Parameters
+        ----------
+        value: Connection|any
+            If a Connection, the connection will be replaced by its result.
+        kwargs: dict
+            predecessors: dict of {uuid: Connection} shape.
+
+        Returns
+        -------
+        any:
+            If a Connection, the connection will be replaced by its result.
+            Otherwise, the input value is returned.
+
+        """
+        predecessors = kwargs["predecessors"]
+        if isinstance(value, Connection):
+            # We don't actually need the connection, we need the results.
+            return dataclasses.replace(value, instance=predecessors[value.uuid]).result
+        return value

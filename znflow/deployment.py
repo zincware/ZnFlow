@@ -7,61 +7,9 @@ import uuid
 from dask.distributed import Client, Future
 from networkx.classes.reportviews import NodeView
 
-from znflow.base import CombinedConnections, Connection, FunctionFuture
 from znflow.graph import DiGraph
 from znflow.node import Node
-from znflow.utils import IterableHandler
-
-
-class _LoadNode(IterableHandler):
-    """Iterable handler for loading nodes."""
-
-    def default(self, value, **kwargs):
-        """Default handler for loading nodes.
-
-        Parameters
-        ----------
-        value: any
-            the value to be loaded from the results dict
-        kwargs: dict
-            results: results dictionary of {uuid: Future} shape.
-        """
-        results = kwargs["results"]
-
-        if isinstance(value, Node):
-            # results: dict[uuid, DaskFuture]
-            return results[value.uuid].result()
-        elif isinstance(value, (FunctionFuture, CombinedConnections, Connection)):
-            return results[value.uuid].result().result
-        else:
-            return value
-
-
-class _UpdateConnections(IterableHandler):
-    """Iterable handler for replacing connections."""
-
-    def default(self, value, **kwargs):
-        """Replace connections by its values.
-
-        Parameters
-        ----------
-        value: Connection|any
-            If a Connection, the connection will be replaced by its result.
-        kwargs: dict
-            predecessors: dict of {uuid: Connection} shape.
-
-        Returns
-        -------
-        any:
-            If a Connection, the connection will be replaced by its result.
-            Otherwise, the input value is returned.
-
-        """
-        predecessors = kwargs["predecessors"]
-        if isinstance(value, Connection):
-            # We don't actually need the connection, we need the results.
-            return dataclasses.replace(value, instance=predecessors[value.uuid]).result
-        return value
+from znflow.handler import _LoadNode, _UpdateConnections
 
 
 def node_submit(node, **kwargs):
