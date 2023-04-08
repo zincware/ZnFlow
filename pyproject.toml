@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "znflow"
-version = "0.1.10"
+version = "0.1.11"
 description = "A general purpose framework for building and running computational graphs."
 authors = ["zincwarecode <zincwarecode@gmail.com>"]
 license = "Apache-2.0"
@@ -17,9 +17,9 @@ dask-jobqueue = { version = "^0.8.1", optional = true }
 bokeh = { version = "^2.4.2", optional = true }
 
 [tool.poetry.group.lint.dependencies]
-black = "^22.10.0"
-isort = "^5.10.1"
-ruff = "^0.0.251"
+black = "^23.3.0"
+isort = "^5.12.0"
+ruff = "^0.0.261"
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.2.1"

@@ -83,6 +83,10 @@ def test_Node(cls):
 
     if isinstance(node, (PlainNode, DataclassNode, ZnInitNode)):
         assert node.value == 42
+        assert not node._in_construction
+        assert cls._in_construction
+        assert hasattr(node, "__init__")
+
     elif isinstance(node, znflow.FunctionFuture):
         assert node.kwargs["value"] == 42
 
@@ -231,15 +235,13 @@ def test_Connection():
 def test_CheckWrapInit():
     @_mark_init_in_construction
     class CheckWrapInit:
-        _in_construction: bool = False
+        _in_construction: bool = True
 
         def __init__(self):
             assert self._in_construction
 
-            return 42
-
-    with pytest.raises(TypeError):
-        CheckWrapInit()
+    instance = CheckWrapInit()
+    assert not instance._in_construction
 
 
 @dataclasses.dataclass
