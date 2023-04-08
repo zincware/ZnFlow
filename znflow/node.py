@@ -23,7 +23,7 @@ def _mark_init_in_construction(cls):
                 #  TODO this is solving the error but not the root cause
                 return func
 
-            @functools.wraps(func)
+            @functools.wraps(cls.__init__)
             def wrapper(*args, **kwargs):
                 cls._in_construction = True
                 value = func(*args, **kwargs)
