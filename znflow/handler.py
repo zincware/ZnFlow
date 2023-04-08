@@ -31,7 +31,7 @@ class UpdateConnectors(utils.IterableHandler):
             return value
 
 
-class _LoadNode(utils.IterableHandler):
+class LoadNodeFromDeploymentResults(utils.IterableHandler):
     """Iterable handler for loading nodes."""
 
     def default(self, value, **kwargs):

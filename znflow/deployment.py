@@ -9,7 +9,7 @@ from networkx.classes.reportviews import NodeView
 
 from znflow.graph import DiGraph
 from znflow.node import Node
-from znflow.handler import _LoadNode, UpdateConnectionsWithPredecessor
+from znflow.handler import LoadNodeFromDeploymentResults, UpdateConnectionsWithPredecessor
 
 
 def node_submit(node, **kwargs):
@@ -107,8 +107,8 @@ class Deployment:
 
         """
         if isinstance(obj, NodeView):
-            data = _LoadNode()(dict(obj), results=self.results)
+            data = LoadNodeFromDeploymentResults()(dict(obj), results=self.results)
             return {x: v["value"] for x, v in data.items()}
         elif isinstance(obj, DiGraph):
             raise NotImplementedError
-        return _LoadNode()(obj, results=self.results)
+        return LoadNodeFromDeploymentResults()(obj, results=self.results)
