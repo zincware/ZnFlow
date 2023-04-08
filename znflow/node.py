@@ -25,7 +25,6 @@ def _mark_init_in_construction(cls):
 
             @functools.wraps(cls.__init__)
             def wrapper(self, *args, **kwargs):
-                self._in_construction = True
                 value = func(self, *args, **kwargs)
                 self._in_construction = False
                 return value
