@@ -24,10 +24,10 @@ def _mark_init_in_construction(cls):
                 return func
 
             @functools.wraps(cls.__init__)
-            def wrapper(*args, **kwargs):
-                cls._in_construction = True
-                value = func(*args, **kwargs)
-                cls._in_construction = False
+            def wrapper(self, *args, **kwargs):
+                self._in_construction = True
+                value = func(self, *args, **kwargs)
+                self._in_construction = False
                 return value
 
             wrapper._already_wrapped = True
@@ -39,7 +39,7 @@ def _mark_init_in_construction(cls):
 
 
 class Node(NodeBaseMixin):
-    _in_construction = False
+    _in_construction = True
 
     def run(self):
         raise NotImplementedError
