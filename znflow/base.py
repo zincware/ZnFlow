@@ -1,3 +1,4 @@
+"""The base module of znflow."""
 from __future__ import annotations
 
 import contextlib
@@ -29,6 +30,12 @@ class Property:
     """
 
     def __init__(self, fget=None, fset=None, fdel=None, doc=None):
+        """Init method of the property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         self.fget = disable_graph()(fget)
         self.fset = disable_graph()(fset)
         self.fdel = disable_graph()(fdel)
@@ -38,9 +45,21 @@ class Property:
         self._name = ""
 
     def __set_name__(self, owner, name):
+        """Set Name Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         self._name = name
 
     def __get__(self, obj, objtype=None):
+        """Get Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         if obj is None:
             return self
         if self.fget is None:
@@ -48,26 +67,56 @@ class Property:
         return self.fget(obj)
 
     def __set__(self, obj, value):
+        """Set Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         if self.fset is None:
             raise AttributeError(f"property '{self._name}' has no setter")
         self.fset(obj, value)
 
     def __delete__(self, obj):
+        """Delete Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         if self.fdel is None:
             raise AttributeError(f"property '{self._name}' has no deleter")
         self.fdel(obj)
 
     def getter(self, fget):
+        """Getter Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         prop = type(self)(fget, self.fset, self.fdel, self.__doc__)
         prop._name = self._name
         return prop
 
     def setter(self, fset):
+        """Setter Method of the Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         prop = type(self)(self.fget, fset, self.fdel, self.__doc__)
         prop._name = self._name
         return prop
 
     def deleter(self, fdel):
+        """Set delete method for Property class.
+
+        References
+        ----------
+        Adapted from https://docs.python.org/3/howto/descriptor.html#properties
+        """
         prop = type(self)(self.fget, self.fset, fdel, self.__doc__)
         prop._name = self._name
         return prop
@@ -98,23 +147,36 @@ class NodeBaseMixin:
 
     @property
     def uuid(self):
+        """A method that generates a UUID to create a hashable object for each node."""
         return self._uuid
 
     @uuid.setter
     def uuid(self, value):
+        """Check for an existing UUID.
+
+        If no UUID exists, it sets the previously defined UUID for the node.
+
+        Raises
+        ------
+        ValueError
+            If a UUID is already set for the current node.
+        """
         if self._uuid is not None:
             raise ValueError("uuid is already set")
         self._uuid = value
 
     def run(self):
+        """Run Method of NodeBaseMixin."""
         raise NotImplementedError
 
 
 def get_graph():
+    """Get Graph from the NodeBaseMixin class."""
     return NodeBaseMixin._graph_
 
 
 def set_graph(value):
+    """Set a value for the NodeBaseMixin graph."""
     NodeBaseMixin._graph_ = value
 
 
@@ -132,11 +194,16 @@ def get_attribute(obj, name, default=_get_attribute_none):
 @dataclasses.dataclass(frozen=True)
 class Connection:
     """A Connector for Nodes.
-    instance: either a Node or FunctionFuture
-    attribute:
-        Node.attribute
+
+    Instance
+    --------
+        Either a Node or FunctionFuture.
+
+    Attributes
+    ----------
+    attribute : Node.attribute
         or FunctionFuture.result
-        or None if the class is passed and not an attribute
+        or None if the class is passed and not an attribute.
     """
 
     instance: any
@@ -144,32 +211,45 @@ class Connection:
     item: any = None
 
     def __post_init__(self):
+        """Raise a Valueerror if a private attribute is called."""
         if self.attribute is not None and self.attribute.startswith("_"):
             raise ValueError("Private attributes are not allowed.")
 
     def __getitem__(self, item):
+        """Create a new object of the same type as self with values from changes."""
         return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
     def __iter__(self):
+        """Raise TypeError when iterating over itself."""
         raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
+        """Add Method of the Connection class.
+
+        Adds instances onto eachother.
+
+        Raises
+        ------
+        TypeError when two types cannot be added.
+        """
         if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
             return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        """Enable 'sum([a, b], [])'"""
+        """Enable 'sum([a, b], [])'."""
         return self if other == [] else self.__add__(other)
 
     @property
     def uuid(self):
+        """Gets value of the UUID."""
         return self.instance.uuid
 
     @property
     def result(self):
+        """Returns the instance and if available, also the attribute."""
         if self.attribute:
             result = getattr(self.instance, self.attribute)
         elif isinstance(self.instance, (FunctionFuture, self.__class__)):
@@ -190,7 +270,6 @@ class CombinedConnections:
 
     Examples
     --------
-
     >>> import znflow
     >>> @znflow.nodfiy
     >>> def add(size) -> list:
@@ -235,17 +314,20 @@ class CombinedConnections:
             raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        """Enable 'sum([a, b], [])'"""
+        """Enable 'sum([a, b], [])'."""
         return self if other == [] else self.__add__(other)
 
     def __getitem__(self, item):
+        """Create a new object of the same type as self with values from changes."""
         return dataclasses.replace(self, item=item)
 
     def __iter__(self):
+        """Raise TypeError when iterating over itself."""
         raise TypeError(f"Can not iterate over {self}.")
 
     @property
     def result(self):
+        """TODO."""
         try:
             results = []
             for connection in self.connections:
@@ -260,6 +342,15 @@ class CombinedConnections:
 
 @dataclasses.dataclass
 class FunctionFuture(NodeBaseMixin):
+    """A class that creates a future object out of a function.
+
+    Attributes
+    ----------
+    function : callable
+    args : tuple
+    kwargs : dict
+    """
+
     function: typing.Callable
     args: typing.Tuple
     kwargs: typing.Dict
@@ -270,21 +361,35 @@ class FunctionFuture(NodeBaseMixin):
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
     def run(self):
+        """Run Method of the FunctionFuture class.
+
+        Executes the function with the given arguments and saves the result.
+        """
         self.result = self.function(*self.args, **self.kwargs)
 
     def __getitem__(self, item):
+        """Get the object with all the information of the Connection class."""
         return Connection(instance=self, attribute=None, item=item)
 
     def __iter__(self):
+        """Raise TypeError when iterating over itself."""
         raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
+        """Add Method of the FunctionFuture class.
+
+        Adds instances onto eachother.
+
+        Raises
+        ------
+        TypeError when two types cannot be added.
+        """
         if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
             return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
     def __radd__(self, other):
-        """Enable 'sum([a, b], [])'"""
+        """Enable 'sum([a, b], [])'."""
         return self if other == [] else self.__add__(other)

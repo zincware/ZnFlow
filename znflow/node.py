@@ -1,3 +1,4 @@
+"""The node module of ZnFlow."""
 from __future__ import annotations
 
 import functools

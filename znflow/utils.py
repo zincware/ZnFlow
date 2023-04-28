@@ -39,7 +39,6 @@ class IterableHandler(abc.ABC):
     @functools.singledispatchmethod
     def _handle(self, value, **kwargs):
         """Fallback handling if no siggledispatch was triggered."""
-
         result = self.default(value, **kwargs)
         if result is not value:
             self.updated = True

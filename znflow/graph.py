@@ -1,3 +1,4 @@
+"""The graph module of ZnFlow."""
 import functools
 import logging
 import typing
