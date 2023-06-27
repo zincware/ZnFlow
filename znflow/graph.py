@@ -72,7 +72,7 @@ class DiGraph(nx.MultiDiGraph):
     def _update_node_attributes(self, node_instance: Node, updater) -> None:
         """Apply an updater to all attributes of a node."""
         for attribute in dir(node_instance):
-            if attribute.startswith("_") or attribute in Node._protected_:
+            if attribute.startswith("_") or attribute in node_instance._protected_:
                 # We do not allow connections to private attributes.
                 continue
             if isinstance(getattr(type(node_instance), attribute, None), property):
