@@ -3,7 +3,9 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import typing
+from typing import Any
 from uuid import UUID
+from znflow import exceptions
 
 
 @contextlib.contextmanager
@@ -177,6 +179,14 @@ class Connection:
         else:
             result = self.instance
         return result[self.item] if self.item else result
+    
+    def __getattribute__(self, __name: str) -> Any:
+        try:
+            return super().__getattribute__(__name)
+        except AttributeError as e:
+            raise exceptions.ConnectionAttributeError(
+                "Connection does not support further attributes to its result."
+            ) from e
 
 
 @dataclasses.dataclass(frozen=True)
