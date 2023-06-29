@@ -16,10 +16,6 @@ distributed = { version = "^2022.12.1", optional = true }
 dask-jobqueue = { version = "^0.8.1", optional = true }
 bokeh = { version = "^2.4.2", optional = true }
 
-[tool.poetry.group.lint.dependencies]
-black = "^23.3.0"
-isort = "^5.12.0"
-ruff = "^0.0.261"
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.2.1"
@@ -29,6 +25,10 @@ attrs = "^22.2.0"
 
 [tool.poetry.group.notebook.dependencies]
 jupyterlab = "^3.5.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
 
 [tool.poetry.extras]
 dask = ["dask", "distributed", "dask-jobqueue", "bokeh"]
@@ -61,3 +61,6 @@ select = ["E", "F"] #, "D"] #, "N", "C", "ANN"]
 extend-ignore = [
     "D213", "D203"
 ]
+
+[tool.codespell]
+skip = "poetry.lock,examples/*,tmp/*"
