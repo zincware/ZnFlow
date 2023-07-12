@@ -17,7 +17,7 @@ class NodeWithExternal(znflow.Node):
         self.value = 42
 
 
-def test_external_node():
+def test_external_node_run():
     with znflow.DiGraph() as graph:
         node = NodeWithExternal()
 
@@ -26,37 +26,37 @@ def test_external_node():
     assert node.value is None
 
 
-# @dataclasses.dataclass
-# class ExternalNode(znflow.Node):
+@dataclasses.dataclass
+class ExternalNode(znflow.Node):
+    _external_ = True
 
-#     _external_ = True
+    @property
+    def number(self) -> int:
+        return 42
 
-#     @property
-#     def number(self) -> int:
-#         return 42
+    def run(self) -> None:
+        pass
 
-#     def run(self) -> None:
-#         pass
 
-# @dataclasses.dataclass
-# class AddNumber(znflow.Node):
-#     input: int
-#     shift: int
+@dataclasses.dataclass
+class AddNumber(znflow.Node):
+    input: int
+    shift: int
 
-#     result: int = None
+    result: int = None
 
-#     def run(self) -> None:
-#         self.result = self.input + self.shift
+    def run(self) -> None:
+        self.result = self.input + self.shift
 
-# def test_external_node():
 
-#     node = ExternalNode()
+def test_external_node():
+    node = ExternalNode()
 
-#     with znflow.DiGraph() as graph:
-#         # add_number = AddNumber(input=42, shift=1)
-#         add_number = AddNumber(shift=1, input=node.number)
+    with znflow.DiGraph() as graph:
+        # add_number = AddNumber(input=42, shift=1)
+        add_number = AddNumber(shift=1, input=node.number)
 
-#     graph.run()
+    graph.run()
 
-#     assert add_number.shift == 1
-#     assert add_number.result == 43
+    assert add_number.shift == 1
+    assert add_number.result == 43

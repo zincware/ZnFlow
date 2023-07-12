@@ -170,6 +170,10 @@ class Connection:
         return self.instance.uuid
 
     @property
+    def _external_(self):
+        return self.instance._external_
+
+    @property
     def result(self):
         if self.attribute:
             result = getattr(self.instance, self.attribute)
