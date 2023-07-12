@@ -88,6 +88,7 @@ class NodeBaseMixin:
     """
 
     _graph_ = empty
+    _external_ = False
     _uuid: UUID = None
 
     _protected_ = [

@@ -139,9 +139,10 @@ class DiGraph(nx.MultiDiGraph):
     def run(self):
         for node_uuid in self.get_sorted_nodes():
             node = self.nodes[node_uuid]["value"]
-            # update connectors
-            self._update_node_attributes(node, handler.UpdateConnectors())
-            node.run()
+            if not node._external_:
+                # update connectors
+                self._update_node_attributes(node, handler.UpdateConnectors())
+                node.run()
 
     def write_graph(self, *args):
         for node in args:
