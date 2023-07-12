@@ -53,10 +53,20 @@ def test_external_node():
     node = ExternalNode()
 
     with znflow.DiGraph() as graph:
-        # add_number = AddNumber(input=42, shift=1)
         add_number = AddNumber(shift=1, input=node.number)
 
     graph.run()
 
     assert add_number.shift == 1
     assert add_number.result == 43
+
+
+# TODO with _external_ = False raise the correct error
+
+# def test_not_external_node():
+#     node = ExternalNode()
+#     node._external_ = False
+
+#     with znflow.DiGraph() as graph:
+#         with pytest.raises(znflow.NotExternalNodeError):
+#             add_number = AddNumber(shift=1, input=node.number)
