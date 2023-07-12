@@ -4,6 +4,7 @@ import importlib.metadata
 import logging
 import sys
 
+from znflow import exceptions
 from znflow.base import (
     CombinedConnections,
     Connection,
@@ -16,7 +17,6 @@ from znflow.combine import combine
 from znflow.graph import DiGraph
 from znflow.node import Node, nodify
 from znflow.visualize import draw
-from znflow import exceptions
 
 __version__ = importlib.metadata.version(__name__)
 
