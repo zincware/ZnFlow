@@ -99,7 +99,7 @@ class DiGraph(nx.MultiDiGraph):
         if isinstance(node_for_adding, NodeBaseMixin):
             super().add_node(node_for_adding.uuid, value=node_for_adding, **attr)
         else:
-            raise ValueError("Only Nodes are supported.")
+            raise ValueError(f"Only Nodes are supported, found '{node_for_adding}'.")
 
     def add_connections(self, u_of_edge, v_of_edge, **attr):
         log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
@@ -139,9 +139,10 @@ class DiGraph(nx.MultiDiGraph):
     def run(self):
         for node_uuid in self.get_sorted_nodes():
             node = self.nodes[node_uuid]["value"]
-            # update connectors
-            self._update_node_attributes(node, handler.UpdateConnectors())
-            node.run()
+            if not node._external_:
+                # update connectors
+                self._update_node_attributes(node, handler.UpdateConnectors())
+                node.run()
 
     def write_graph(self, *args):
         for node in args:
