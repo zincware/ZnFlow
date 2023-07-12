@@ -49,6 +49,27 @@ class AddNumber(znflow.Node):
         self.result = self.input + self.shift
 
 
+@dataclasses.dataclass
+class AddNumberFromNodes(znflow.Node):
+    input: znflow.Node
+    shift: int
+
+    result: int = None
+
+    def run(self) -> None:
+        self.result = self.input.number + self.shift
+
+
+@dataclasses.dataclass
+class SumNumbers(znflow.Node):
+    inputs: list[int]
+
+    result: int = None
+
+    def run(self) -> None:
+        self.result = sum(self.inputs)
+
+
 def test_external_node():
     node = ExternalNode()
 
@@ -59,6 +80,30 @@ def test_external_node():
 
     assert add_number.shift == 1
     assert add_number.result == 43
+
+
+def test_external_node_from_node():
+    node = ExternalNode()
+
+    with znflow.DiGraph() as graph:
+        add_number = AddNumberFromNodes(shift=1, input=node)
+
+    graph.run()
+
+    assert add_number.shift == 1
+    assert add_number.result == 43
+
+
+def test_external_node_lists():
+    node1 = ExternalNode()
+    node2 = ExternalNode()
+
+    with znflow.DiGraph() as graph:
+        sum_numbers = SumNumbers(inputs=[node1.number, node2.number])
+
+    graph.run()
+
+    assert sum_numbers.result == 84
 
 
 # TODO with _external_ = False raise the correct error
