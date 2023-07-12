@@ -47,7 +47,7 @@ class DiGraph(nx.MultiDiGraph):
                 "Something went wrong. DiGraph was changed inside the context manager."
             )
         set_graph(empty)
-        for node in self.nodes:
+        for node in list(self.nodes):  # create a copy of the keys
             node_instance = self.nodes[node]["value"]
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")
             if isinstance(node_instance, FunctionFuture):
@@ -105,10 +105,13 @@ class DiGraph(nx.MultiDiGraph):
         log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             if u_of_edge.uuid not in self:
-                raise ValueError(
-                    f"The source node (uuid={u_of_edge.uuid}, connection={u_of_edge}) is"
-                    " not in the graph."
-                )
+                if u_of_edge._external_:
+                    self.add_node(u_of_edge.instance)
+                else:
+                    raise ValueError(
+                        f"The source node (uuid={u_of_edge.uuid}, connection={u_of_edge})"
+                        " is not in the graph."
+                    )
             if (
                 v_of_edge.uuid not in self
             ):  # this might be impossible to reach. Let me know if you found a way.

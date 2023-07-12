@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "znflow"
-version = "0.1.12"
+version = "0.1.13"
 description = "A general purpose framework for building and running computational graphs."
 authors = ["zincwarecode <zincwarecode@gmail.com>"]
 license = "Apache-2.0"
