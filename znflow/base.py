@@ -88,6 +88,7 @@ class NodeBaseMixin:
     """
 
     _graph_ = empty
+    _external_ = False
     _uuid: UUID = None
 
     _protected_ = [
@@ -167,6 +168,10 @@ class Connection:
     @property
     def uuid(self):
         return self.instance.uuid
+
+    @property
+    def _external_(self):
+        return self.instance._external_
 
     @property
     def result(self):
