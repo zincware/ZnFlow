@@ -4,6 +4,7 @@ import importlib.metadata
 import logging
 import sys
 
+from znflow import exceptions
 from znflow.base import (
     CombinedConnections,
     Connection,
@@ -31,6 +32,7 @@ __all__ = [
     "Property",
     "CombinedConnections",
     "combine",
+    "exceptions",
 ]
 
 with contextlib.suppress(ImportError):
