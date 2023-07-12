@@ -62,7 +62,7 @@ class AddNumberFromNodes(znflow.Node):
 
 @dataclasses.dataclass
 class SumNumbers(znflow.Node):
-    inputs: list[int]
+    inputs: list
 
     result: int = None
 
