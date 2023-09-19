@@ -37,7 +37,7 @@ repos:
         additional_dependencies: ["tomli"]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: 'v0.0.288'
+    rev: 'v0.0.290'
     hooks:
       - id: ruff
         args: ['--fix']
