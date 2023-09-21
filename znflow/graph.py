@@ -1,3 +1,4 @@
+import contextlib
 import functools
 import logging
 import typing
@@ -9,7 +10,7 @@ from znflow.base import (
     Connection,
     FunctionFuture,
     NodeBaseMixin,
-    empty,
+    empty_graph,
     get_graph,
     set_graph,
 )
@@ -21,6 +22,8 @@ log = logging.getLogger(__name__)
 class DiGraph(nx.MultiDiGraph):
     def __init__(self, *args, disable=False, **kwargs):
         self.disable = disable
+        self._groups = {}
+        self.active_group = None
         super().__init__(*args, **kwargs)
 
     @property
@@ -34,7 +37,7 @@ class DiGraph(nx.MultiDiGraph):
     def __enter__(self):
         if self.disable:
             return self
-        if get_graph() is not empty:
+        if get_graph() is not empty_graph:
             raise ValueError("DiGraph already exists. Nested Graphs are not supported.")
         set_graph(self)
         return self
@@ -46,7 +49,7 @@ class DiGraph(nx.MultiDiGraph):
             raise ValueError(
                 "Something went wrong. DiGraph was changed inside the context manager."
             )
-        set_graph(empty)
+        set_graph(empty_graph)
         for node in list(self.nodes):  # create a copy of the keys
             node_instance = self.nodes[node]["value"]
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")
@@ -155,3 +158,56 @@ class DiGraph(nx.MultiDiGraph):
                 self.add_node(node)
         with self:
             pass
+
+    @contextlib.contextmanager
+    def group(
+        self, name: typing.Union[str, typing.Tuple[str]]
+    ) -> typing.Generator[str, None, None]:
+        """Create a group of nodes.
+
+        Allows to group nodes together, independent of their order in the graph.
+
+        The group can be created within the graph context manager.
+        Alternatively, the group can be created outside of the graph context manager,
+        implicitly opening and closing the graph context manager.
+
+        Attributes
+        ----------
+            name : str|tuple[str]
+                Name of the group. If the name is already used, the nodes will be added
+                to the existing group.
+
+        Raises
+        ------
+            TypeError
+                If a group with the same name is already active. Nested groups are not
+                supported.
+
+        Yields
+        ------
+            str
+                Name of the group.
+        """
+        if self.active_group is not None:
+            raise TypeError(
+                f"Nested groups are not supported. Group with name '{self.active_group}'"
+                " is still active."
+            )
+
+        existing_nodes = self.get_sorted_nodes()
+
+        try:
+            self.active_group = name
+            if get_graph() is empty_graph:
+                with self:
+                    yield name
+            else:
+                yield name
+        finally:
+            self.active_group = None
+            for node_uuid in self.nodes:
+                if node_uuid not in existing_nodes:
+                    self._groups.setdefault(name, []).append(node_uuid)
+
+    def get_group(self, name: str) -> typing.List[str]:
+        return self._groups[name]

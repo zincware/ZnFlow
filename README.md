@@ -95,7 +95,7 @@ print(n3.results)
 # >>> 7.5
 ```
 
-## Dask Support
+### Dask Support
 
 ZnFlow comes with support for [Dask](https://www.dask.org/) to run your graph:
 
@@ -232,7 +232,29 @@ Instead, you can also use the `znflow.disable_graph` decorator / context manager
 to disable the graph for a specific block of code or the `znflow.Property` as a
 drop-in replacement for `property`.
 
-# Supported Frameworks
+### Groups
+
+It is possible to create groups of `znflow.nodify` or `znflow.Nodes` independent
+from the graph structure. To create a group you can use
+`with graph.group(<name>)`. To access the group members, use
+`graph.get_group(<name>) -> list`.
+
+```python
+import znflow
+
+@znflow.nodify
+def compute_mean(x, y):
+    return (x + y) / 2
+
+graph = znflow.DiGraph()
+
+with graph.group("grp1"):
+    n1 = compute_mean(2, 4)
+
+assert n1.uuid in graph.get_group("grp1")
+```
+
+## Supported Frameworks
 
 ZnFlow includes tests to ensure compatibility with:
 

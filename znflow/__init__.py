@@ -11,7 +11,9 @@ from znflow.base import (
     FunctionFuture,
     Property,
     disable_graph,
+    empty_graph,
     get_attribute,
+    get_graph,
 )
 from znflow.combine import combine
 from znflow.graph import DiGraph
@@ -33,6 +35,8 @@ __all__ = [
     "CombinedConnections",
     "combine",
     "exceptions",
+    "get_graph",
+    "empty_graph",
 ]
 
 with contextlib.suppress(ImportError):

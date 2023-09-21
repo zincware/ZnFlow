@@ -16,7 +16,7 @@ def disable_graph(*args, **kwargs):
     This can be useful, if you e.g. want to use 'get_attribute'.
     """
     graph = get_graph()
-    set_graph(empty)
+    set_graph(empty_graph)
     try:
         yield
     finally:
@@ -77,11 +77,11 @@ class Property:
 
 
 @dataclasses.dataclass(frozen=True)
-class Empty:
+class EmptyGraph:
     """An empty class used as a default value for _graph_."""
 
 
-empty = Empty()
+empty_graph = EmptyGraph()
 
 
 class NodeBaseMixin:
@@ -91,11 +91,18 @@ class NodeBaseMixin:
 
     Attributes
     ----------
-    _graph_ : DiGraph
-    uuid : UUID
+        _graph_ : DiGraph
+            The graph this node belongs to.
+            This is only available within the graph context.
+        uuid : UUID
+            The unique identifier of this node.
+        _external_ : bool
+            If true, the node is allowed to be created outside of a graph context.
+            In this case connections can be created to this node, otherwise
+            an exception is raised.
     """
 
-    _graph_ = empty
+    _graph_ = empty_graph
     _external_ = False
     _uuid: UUID = None
 
@@ -141,15 +148,21 @@ def get_attribute(obj, name, default=_get_attribute_none):
 @dataclasses.dataclass(frozen=True)
 class Connection:
     """A Connector for Nodes.
-    instance: either a Node or FunctionFuture
-    attribute:
-        Node.attribute
-        or FunctionFuture.result
-        or None if the class is passed and not an attribute
+
+    Attributes
+    ----------
+        instance: Node|FunctionFuture
+            the object this connection points to
+        attribute: str
+            Node.attribute
+            or FunctionFuture.result
+            or None if the class is passed and not an attribute
+        item: any
+            any slice or list index to be applied to the result
     """
 
     instance: any
-    attribute: any
+    attribute: str
     item: any = None
 
     def __post_init__(self):
