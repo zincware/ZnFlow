@@ -1,5 +1,7 @@
-import znflow
 import pytest
+
+import znflow
+
 
 class PlainNode(znflow.Node):
     def __init__(self, value):
@@ -8,12 +10,14 @@ class PlainNode(znflow.Node):
     def run(self):
         self.value += 1
 
+
 def test_empty_grp_name():
     graph = znflow.DiGraph()
 
     with pytest.raises(TypeError):
-        with graph.group(): # name required
+        with graph.group():  # name required
             pass
+
 
 def test_grp():
     graph = znflow.DiGraph()
@@ -24,7 +28,7 @@ def test_grp():
         assert graph.active_group == grp_name
 
         node = PlainNode(1)
-    
+
     assert graph.active_group is None
     graph.run()
 
@@ -33,6 +37,7 @@ def test_grp():
     assert node.uuid in graph.nodes
     assert grp_name in graph._groups
     assert graph.get_group(grp_name) == [node.uuid]
+
 
 def test_muliple_grps():
     graph = znflow.DiGraph()
@@ -77,8 +82,9 @@ def test_nested_grps():
     with graph.group("my_grp") as grp_name:
         assert graph.active_group == grp_name
         with pytest.raises(TypeError):
-            with graph.group("my_grp2") as grp_name2:
+            with graph.group("my_grp2"):
                 pass
+
 
 def test_grp_with_existing_nodes():
     with znflow.DiGraph() as graph:
@@ -104,6 +110,7 @@ def test_grp_with_existing_nodes():
     assert grp_name in graph._groups
 
     assert graph.get_group(grp_name) == [node2.uuid]
+
 
 def test_grp_with_multiple_nodes():
     with znflow.DiGraph() as graph:

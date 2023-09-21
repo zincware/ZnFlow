@@ -92,13 +92,13 @@ class NodeBaseMixin:
     Attributes
     ----------
         _graph_ : DiGraph
-            The graph this node belongs to. 
+            The graph this node belongs to.
             This is only available within the graph context.
         uuid : UUID
             The unique identifier of this node.
         _external_ : bool
             If true, the node is allowed to be created outside of a graph context.
-            In this case connections can be created to this node, otherwise 
+            In this case connections can be created to this node, otherwise
             an exception is raised.
     """
 
