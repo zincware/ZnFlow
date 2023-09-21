@@ -80,6 +80,7 @@ class Property:
 class Empty:
     """An empty class used as a default value for _graph_."""
 
+
 empty = Empty()
 
 
