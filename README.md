@@ -234,9 +234,10 @@ drop-in replacement for `property`.
 
 ### Groups
 
-It is possible to create groups of `znflow.nodify` or `znflow.Nodes` independent from the graph structure.
-To create a group you can use `with graph.group(<name>)`.
-To access the group members, use `graph.get_group(<name>) -> list`.
+It is possible to create groups of `znflow.nodify` or `znflow.Nodes` independent
+from the graph structure. To create a group you can use
+`with graph.group(<name>)`. To access the group members, use
+`graph.get_group(<name>) -> list`.
 
 ```python
 import znflow
