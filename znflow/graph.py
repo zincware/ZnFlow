@@ -10,7 +10,7 @@ from znflow.base import (
     Connection,
     FunctionFuture,
     NodeBaseMixin,
-    empty,
+    empty_graph,
     get_graph,
     set_graph,
 )
@@ -37,7 +37,7 @@ class DiGraph(nx.MultiDiGraph):
     def __enter__(self):
         if self.disable:
             return self
-        if get_graph() is not empty:
+        if get_graph() is not empty_graph:
             raise ValueError("DiGraph already exists. Nested Graphs are not supported.")
         set_graph(self)
         return self
@@ -49,7 +49,7 @@ class DiGraph(nx.MultiDiGraph):
             raise ValueError(
                 "Something went wrong. DiGraph was changed inside the context manager."
             )
-        set_graph(empty)
+        set_graph(empty_graph)
         for node in list(self.nodes):  # create a copy of the keys
             node_instance = self.nodes[node]["value"]
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")
@@ -160,7 +160,7 @@ class DiGraph(nx.MultiDiGraph):
             pass
 
     @contextlib.contextmanager
-    def group(self, name: str) -> typing.Generator[str, None, None]:
+    def group(self, name: typing.Union[str, typing.Tuple[str]]) -> typing.Generator[str, None, None]:
         """Create a group of nodes.
 
         Allows to group nodes together, independent of their order in the graph.
@@ -171,7 +171,7 @@ class DiGraph(nx.MultiDiGraph):
 
         Attributes
         ----------
-            name : str
+            name : str|tuple[str]
                 Name of the group. If the name is already used, the nodes will be added
                 to the existing group.
 
@@ -196,7 +196,7 @@ class DiGraph(nx.MultiDiGraph):
 
         try:
             self.active_group = name
-            if get_graph() is empty:
+            if get_graph() is empty_graph:
                 with self:
                     yield name
             else:

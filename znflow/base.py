@@ -16,11 +16,11 @@ def disable_graph(*args, **kwargs):
     This can be useful, if you e.g. want to use 'get_attribute'.
     """
     graph = get_graph()
-    set_graph(empty)
+    set_graph(empty_graph)
     try:
         yield
     finally:
-        set_graph(graph)
+        set_graph(empty_graph)
 
 
 class Property:
@@ -77,11 +77,11 @@ class Property:
 
 
 @dataclasses.dataclass(frozen=True)
-class Empty:
+class EmptyGraph:
     """An empty class used as a default value for _graph_."""
 
 
-empty = Empty()
+empty_graph = EmptyGraph()
 
 
 class NodeBaseMixin:
@@ -102,7 +102,7 @@ class NodeBaseMixin:
             an exception is raised.
     """
 
-    _graph_ = empty
+    _graph_ = empty_graph
     _external_ = False
     _uuid: UUID = None
 

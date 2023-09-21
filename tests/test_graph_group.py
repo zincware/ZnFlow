@@ -187,3 +187,21 @@ def test_reopen_grps():
 
     assert len(graph._groups) == 1
     assert len(graph) == 2
+
+def test_tuple_grp_names():
+    graph = znflow.DiGraph()
+
+    assert graph.active_group is None
+    with graph.group(("grp", "1")) as grp_name:
+        assert graph.active_group == grp_name
+
+        node = PlainNode(1)
+    
+    assert graph.active_group is None
+    graph.run()
+
+    assert grp_name == ("grp", "1")
+    assert node.value == 2
+    assert node.uuid in graph.nodes
+    assert grp_name in graph._groups
+    assert graph.get_group(grp_name) == [node.uuid]
