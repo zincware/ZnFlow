@@ -76,7 +76,12 @@ class Property:
         return prop
 
 
-empty = object()
+@dataclasses.dataclass(frozen=True)
+class Empty:
+    """An empty class used as a default value for _graph_."""
+
+
+empty = Empty()
 
 
 class NodeBaseMixin:
