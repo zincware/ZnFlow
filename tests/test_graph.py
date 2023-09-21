@@ -4,7 +4,6 @@ import pytest
 import zninit
 
 import znflow
-from znflow.base import empty
 
 
 class PlainNode(znflow.Node):
@@ -76,7 +75,7 @@ def test_changed_graph():
     with pytest.raises(ValueError):
         with znflow.DiGraph():
             znflow.base.NodeBaseMixin._graph_ = znflow.DiGraph()
-    znflow.base.NodeBaseMixin._graph_ = empty  # reset after test
+    znflow.base.NodeBaseMixin._graph_ = znflow.empty_graph  # reset after test
 
 
 def test_add_others():
@@ -159,9 +158,9 @@ def test_disable_graph():
         node1 = DataclassNode(value=42)
         assert node1._graph_ is graph
         with znflow.base.disable_graph():
-            assert node1._graph_ is empty
+            assert node1._graph_ is znflow.empty_graph
         assert node1._graph_ is graph
-    assert node1._graph_ is empty
+    assert node1._graph_ is znflow.empty_graph
 
 
 def test_get_attribute():
