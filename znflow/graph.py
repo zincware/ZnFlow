@@ -161,6 +161,31 @@ class DiGraph(nx.MultiDiGraph):
 
     @contextlib.contextmanager
     def group(self, name: str) -> typing.Generator[str, None, None]:
+        """Create a group of nodes.
+        
+        Allows to group nodes together, independent of their order in the graph.
+        
+        The group can be created within the graph context manager.
+        Alternatively, the group can be created outside of the graph context manager,
+        implicitly opening and closing the graph context manager.
+
+        Attributes
+        ----------
+            name : str
+                Name of the group. If the name is already used, the nodes will be added
+                to the existing group.
+        
+        Raises
+        ------
+            TypeError
+                If a group with the same name is already active. Nested groups are not
+                supported.
+        
+        Yields
+        ------
+            str
+                Name of the group.
+        """
         if self.active_group is not None:
             raise TypeError(
                 f"Nested groups are not supported. Group with name '{self.active_group}'"
