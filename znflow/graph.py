@@ -1,6 +1,7 @@
 import functools
 import logging
 import typing
+import contextlib
 
 import networkx as nx
 
@@ -21,6 +22,8 @@ log = logging.getLogger(__name__)
 class DiGraph(nx.MultiDiGraph):
     def __init__(self, *args, disable=False, **kwargs):
         self.disable = disable
+        self._groups = {}
+        self.active_group = None
         super().__init__(*args, **kwargs)
 
     @property
@@ -155,3 +158,27 @@ class DiGraph(nx.MultiDiGraph):
                 self.add_node(node)
         with self:
             pass
+        
+    @contextlib.contextmanager
+    def group(self, name: str) -> typing.Generator[str, None, None]:
+
+        if self.active_group is not None:
+            raise TypeError(f"Nested groups are not supported. Group with name '{self.active_group}' is still active.")
+        
+        existing_nodes = self.get_sorted_nodes()
+
+        try:
+            self.active_group = name
+            if get_graph() is empty:
+                with self:
+                    yield name
+            else:
+                yield name
+        finally:
+            self.active_group = None
+            for node_uuid in self.nodes:
+                if node_uuid not in existing_nodes:
+                    self._groups.setdefault(name, []).append(node_uuid)
+    
+    def get_group(self, name: str) -> typing.List[str]:
+        return self._groups[name]
