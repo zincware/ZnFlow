@@ -160,7 +160,9 @@ class DiGraph(nx.MultiDiGraph):
             pass
 
     @contextlib.contextmanager
-    def group(self, name: typing.Union[str, typing.Tuple[str]]) -> typing.Generator[str, None, None]:
+    def group(
+        self, name: typing.Union[str, typing.Tuple[str]]
+    ) -> typing.Generator[str, None, None]:
         """Create a group of nodes.
 
         Allows to group nodes together, independent of their order in the graph.

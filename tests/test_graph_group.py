@@ -188,6 +188,7 @@ def test_reopen_grps():
     assert len(graph._groups) == 1
     assert len(graph) == 2
 
+
 def test_tuple_grp_names():
     graph = znflow.DiGraph()
 
@@ -196,7 +197,7 @@ def test_tuple_grp_names():
         assert graph.active_group == grp_name
 
         node = PlainNode(1)
-    
+
     assert graph.active_group is None
     graph.run()
 

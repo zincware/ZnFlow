@@ -15,7 +15,7 @@ def disable_graph(*args, **kwargs):
 
     This can be useful, if you e.g. want to use 'get_attribute'.
     """
-    graph = get_graph()
+    get_graph()
     set_graph(empty_graph)
     try:
         yield
