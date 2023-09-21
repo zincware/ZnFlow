@@ -155,18 +155,19 @@ def test_grp_with_multiple_nodes():
     assert len(graph._groups) == 1
     assert len(graph) == 4
 
+
 def test_reopen_grps():
     with znflow.DiGraph() as graph:
         with graph.group("my_grp") as grp_name:
             assert graph.active_group == grp_name
 
             node = PlainNode(1)
-        
+
         with graph.group("my_grp") as grp_name2:
             assert graph.active_group == grp_name2
 
             node2 = PlainNode(2)
-        
+
     assert graph.active_group is None
 
     graph.run()
