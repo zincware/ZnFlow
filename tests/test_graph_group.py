@@ -206,3 +206,15 @@ def test_tuple_grp_names():
     assert node.uuid in graph.nodes
     assert grp_name in graph._groups
     assert graph.get_group(grp_name) == [node.uuid]
+
+def test_grp_nodify():
+    @znflow.nodify
+    def compute_mean(x, y):
+        return (x + y) / 2
+
+    graph = znflow.DiGraph()
+
+    with graph.group("grp1"):
+        n1 = compute_mean(2, 4)
+
+    assert n1.uuid in graph.get_group("grp1")
