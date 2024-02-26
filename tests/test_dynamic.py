@@ -89,6 +89,7 @@ def test_resolvce_only_run_relevant_nodes():
     assert node2.outputs == 1235
     assert node1.outputs == 6
 
+
 def test_connections_remain():
     graph = znflow.DiGraph()
     with graph:
@@ -96,4 +97,3 @@ def test_connections_remain():
         result = znflow.resolve(node1.outputs)
         assert isinstance(result, int)
         assert isinstance(node1.outputs, znflow.Connection)
-            
