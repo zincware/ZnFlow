@@ -9,6 +9,8 @@ class AddOne(znflow.Node):
     outputs: float = None
 
     def run(self):
+        # if self.outputs is not None:
+        #     raise ValueError("Node has already been run")
         self.outputs = self.inputs + 1
 
 
@@ -57,3 +59,26 @@ def test_break_loop_multiple():
     assert (znflow.resolve(node1.outputs) > 5 or
             znflow.resolve(node2.outputs) > 5 or
             znflow.resolve(node1.outputs) == 3 and znflow.resolve(node2.outputs) == 3)
+
+
+def test_resolvce_only_run_relevant_nodes():
+    """Test that when using resolve only nodes that are direct predecessors are run."""
+    # Check by asserting None to the output of the second node
+    graph = znflow.DiGraph()
+    with graph:
+        node1 = AddOne(inputs=1)
+        node2 = AddOne(inputs=1234)
+        for _ in range(10):
+            node1 = AddOne(inputs=node1.outputs)
+            if znflow.resolve(node1.outputs) > 5:
+                break
+    
+    # this has to be executed, because of the resolve
+    assert node1.outputs == 6 
+    
+    # this should not be executed, because it is not relevant to the resolve
+    assert node2.outputs is None 
+
+    graph.run()
+    assert node2.outputs == 1235
+    assert node1.outputs == 6

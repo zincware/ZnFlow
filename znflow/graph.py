@@ -142,13 +142,29 @@ class DiGraph(nx.MultiDiGraph):
             all_pipelines += nx.dfs_postorder_nodes(reverse, stage)
         return list(dict.fromkeys(all_pipelines))  # remove duplicates but keep order
 
-    def run(self):
-        for node_uuid in self.get_sorted_nodes():
-            node = self.nodes[node_uuid]["value"]
-            if not node._external_:
-                # update connectors
-                self._update_node_attributes(node, handler.UpdateConnectors())
-                node.run()
+    def run(self, nodes: typing.Optional[typing.List[NodeBaseMixin]] = None):
+        if nodes is not None:
+            for node_uuid in self.reverse():
+                node = self.nodes[node_uuid]["value"]
+                if node in nodes:
+                    predecessors = list(self.predecessors(node.uuid))
+                    for predecessor in predecessors:
+                        predecessor_node = self.nodes[predecessor]["value"]
+                        print(f"Predecessor: {predecessor_node}")
+                        self._update_node_attributes(
+                            predecessor_node, handler.UpdateConnectors()
+                        )
+                        predecessor_node.run()
+                    self._update_node_attributes(node, handler.UpdateConnectors())
+                    print(f"Node: {node}")
+                    node.run()
+        else:
+            for node_uuid in self.get_sorted_nodes():
+                node = self.nodes[node_uuid]["value"]
+                if not node._external_:
+                    # update connectors
+                    self._update_node_attributes(node, handler.UpdateConnectors())
+                    node.run()
 
     def write_graph(self, *args):
         for node in args:

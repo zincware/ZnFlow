@@ -8,6 +8,9 @@ from uuid import UUID
 
 from znflow import exceptions
 
+if typing.TYPE_CHECKING:
+    from znflow.graph import DiGraph
+
 
 @contextlib.contextmanager
 def disable_graph(*args, **kwargs):
@@ -126,7 +129,7 @@ class NodeBaseMixin:
         raise NotImplementedError
 
 
-def get_graph():
+def get_graph() -> DiGraph:
     return NodeBaseMixin._graph_
 
 
