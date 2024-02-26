@@ -1,5 +1,6 @@
-import znflow
 import dataclasses
+
+import znflow
 
 
 @dataclasses.dataclass
@@ -9,6 +10,7 @@ class AddOne(znflow.Node):
 
     def run(self):
         self.outputs = self.inputs + 1
+
 
 def test_break_loop():
     graph = znflow.DiGraph()
