@@ -142,15 +142,19 @@ class DiGraph(nx.MultiDiGraph):
             all_pipelines += nx.dfs_postorder_nodes(reverse, stage)
         return list(dict.fromkeys(all_pipelines))  # remove duplicates but keep order
 
-    def run(self, nodes: typing.Optional[typing.List[NodeBaseMixin]] = None, immutable_nodes: bool = True):
+    def run(
+        self,
+        nodes: typing.Optional[typing.List[NodeBaseMixin]] = None,
+        immutable_nodes: bool = True,
+    ):
         """Run the graph.
-        
+
         Attributes
         ----------
         nodes : list[Node]
             The nodes to run. If None, all nodes are run.
         immutable_nodes : bool
-            If True, the nodes are assumed to be immutable and 
+            If True, the nodes are assumed to be immutable and
             will not be rerun. If you change the inputs of a node
             after it has been run, the outputs will not be updated.
         """
@@ -163,7 +167,9 @@ class DiGraph(nx.MultiDiGraph):
                     predecessors = list(self.predecessors(node.uuid))
                     for predecessor in predecessors:
                         predecessor_node = self.nodes[predecessor]["value"]
-                        if immutable_nodes and self.nodes[predecessor].get("available", False):
+                        if immutable_nodes and self.nodes[predecessor].get(
+                            "available", False
+                        ):
                             continue
                         self._update_node_attributes(
                             predecessor_node, handler.UpdateConnectors()

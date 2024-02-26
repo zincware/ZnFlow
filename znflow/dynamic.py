@@ -14,7 +14,7 @@ def resolve(value: t.Union[Connection, t.Any], immutable_nodes: bool = True) -> 
     value : Connection
         The connection to resolve.
     immutable_nodes : bool
-        If True, the nodes are assumed to be immutable and 
+        If True, the nodes are assumed to be immutable and
         will not be rerun. If you change the inputs of a node
         after it has been run, the outputs will not be updated.
 
