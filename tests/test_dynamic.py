@@ -1,7 +1,7 @@
 import dataclasses
 
 import znflow
-
+import pytest
 
 @dataclasses.dataclass
 class AddOne(znflow.Node):
@@ -14,9 +14,10 @@ class AddOne(znflow.Node):
         self.outputs = self.inputs + 1
 
 
-def test_break_loop():
+@pytest.mark.parametrize("deployment", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+def test_break_loop(deployment):
     """Test loop breaking when output exceeds 5."""
-    graph = znflow.DiGraph()
+    graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)
         for _ in range(10):
@@ -32,10 +33,10 @@ def test_break_loop():
     # Assert the final output value
     assert node1.outputs == 6
 
-
-def test_break_loop_multiple():
+@pytest.mark.parametrize("deployment", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+def test_break_loop_multiple(deployment):
     """Test loop breaking with multiple nodes and different conditions."""
-    graph = znflow.DiGraph()
+    graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)
         node2 = AddOne(inputs=node1.outputs)  # Add another node in the loop
@@ -67,10 +68,11 @@ def test_break_loop_multiple():
     )
 
 
-def test_resolvce_only_run_relevant_nodes():
+@pytest.mark.parametrize("deployment", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+def test_resolvce_only_run_relevant_nodes(deployment):
     """Test that when using resolve only nodes that are direct predecessors are run."""
     # Check by asserting None to the output of the second node
-    graph = znflow.DiGraph()
+    graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)
         node2 = AddOne(inputs=1234)
@@ -90,8 +92,9 @@ def test_resolvce_only_run_relevant_nodes():
     assert node1.outputs == 6
 
 
-def test_connections_remain():
-    graph = znflow.DiGraph()
+@pytest.mark.parametrize("deployment", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+def test_connections_remain(deployment):
+    graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)
         result = znflow.resolve(node1.outputs)
@@ -99,8 +102,9 @@ def test_connections_remain():
         assert isinstance(node1.outputs, znflow.Connection)
 
 
-def test_loop_over_results():
-    graph = znflow.DiGraph()
+@pytest.mark.parametrize("deployment", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+def test_loop_over_results(deployment):
+    graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=5)
         nodes = []
