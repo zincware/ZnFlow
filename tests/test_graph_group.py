@@ -252,6 +252,7 @@ def test_grp_len():
 
     assert len(grp) == 2
 
+
 def test_grp_getitem():
     graph = znflow.DiGraph()
 
@@ -263,6 +264,7 @@ def test_grp_getitem():
     assert grp[n2.uuid] == n2
     with pytest.raises(KeyError):
         grp["foo"]
+
 
 def test_grp_nodes():
     graph = znflow.DiGraph()
