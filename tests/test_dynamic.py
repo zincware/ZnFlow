@@ -106,7 +106,7 @@ def test_loop_over_results():
         nodes = []
         for idx in range(znflow.resolve(node1.outputs)):
             nodes.append(AddOne(inputs=idx))
-        
+
     graph.run()
     assert len(nodes) == 6
     assert [node.outputs for node in nodes] == [1, 2, 3, 4, 5, 6]
