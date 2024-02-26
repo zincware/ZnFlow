@@ -1,18 +1,22 @@
 import dataclasses
 import typing as t
 
-from networkx import predecessor
+
 from znflow import handler
 
 if t.TYPE_CHECKING:
     from znflow.graph import DiGraph
+
+
 @dataclasses.dataclass
 class VanillaDeployment:
     graph: "DiGraph"
 
     def run(self, nodes: t.Optional[t.List] = None):
         for node_uuid in self.graph.get_sorted_nodes():
-            if self.graph.immutable_nodes and self.graph.nodes[node_uuid].get("available", False):
+            if self.graph.immutable_nodes and self.graph.nodes[node_uuid].get(
+                "available", False
+            ):
                 continue
             node = self.graph.nodes[node_uuid]["value"]
             if nodes is None:
@@ -26,9 +30,9 @@ class VanillaDeployment:
                     predecessors = list(self.graph.predecessors(node_uuid))
                     for predecessor in predecessors:
                         predecessor_node = self.graph.nodes[predecessor]["value"]
-                        if self.graph.immutable_nodes and self.graph.nodes[predecessor].get(
-                            "available", False
-                        ):
+                        if self.graph.immutable_nodes and self.graph.nodes[
+                            predecessor
+                        ].get("available", False):
                             continue
                         self.graph._update_node_attributes(
                             predecessor_node, handler.UpdateConnectors()

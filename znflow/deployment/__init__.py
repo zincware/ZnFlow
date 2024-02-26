@@ -1,4 +1,5 @@
 import contextlib
+
 from .vanilla import VanillaDeployment
 
 __all__ = ["VanillaDeployment"]

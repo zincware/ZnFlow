@@ -16,8 +16,8 @@ from znflow.base import (
     get_graph,
     set_graph,
 )
-from znflow.node import Node
 from znflow.deployment import VanillaDeployment
+from znflow.node import Node
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +46,9 @@ class Group:
 
 
 class DiGraph(nx.MultiDiGraph):
-    def __init__(self, *args, disable=False, immutable_nodes=True, deployment=None, **kwargs):
+    def __init__(
+        self, *args, disable=False, immutable_nodes=True, deployment=None, **kwargs
+    ):
         """
         Attributes
         ----------
