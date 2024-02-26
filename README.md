@@ -262,6 +262,4 @@ ZnFlow includes tests to ensure compatibility with:
 - `dataclasses`
 - `ZnInit`
 - `attrs`
-
-It is currently **not** compatible with pydantic. I don't know what pydantic
-does internally and wasn't able to find a workaround.
+- `pydantic` (experimental)
