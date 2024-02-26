@@ -219,3 +219,32 @@ def test_grp_nodify():
         n1 = compute_mean(2, 4)
 
     assert n1.uuid in graph.get_group("grp1").uuids
+
+def test_grp_iter():
+    graph = znflow.DiGraph()
+
+    with graph.group("grp1") as grp:
+        n1 = PlainNode(1)
+        n2 = PlainNode(2)
+
+    assert list(grp) == [n1.uuid, n2.uuid]
+
+def test_grp_contains():
+    graph = znflow.DiGraph()
+
+    with graph.group("grp1") as grp:
+        n1 = PlainNode(1)
+        n2 = PlainNode(2)
+
+    assert n1.uuid in grp
+    assert n2.uuid in grp
+    assert "foo" not in grp
+
+def test_grp_len():
+    graph = znflow.DiGraph()
+
+    with graph.group("grp1") as grp:
+        n1 = PlainNode(1)
+        n2 = PlainNode(2)
+
+    assert len(grp) == 2

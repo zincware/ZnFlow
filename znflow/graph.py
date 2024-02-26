@@ -26,6 +26,15 @@ class Group:
     names: tuple[str, ...]
     uuids: list[uuid.UUID] = dataclasses.field(default_factory=list)
 
+    def __iter__(self) -> typing.Iterator[uuid.UUID]:
+        return iter(self.uuids)
+
+    def __len__(self) -> int:
+        return len(self.uuids)
+    
+    def __contains__(self, item) -> bool:
+        return item in self.uuids
+
 
 class DiGraph(nx.MultiDiGraph):
     def __init__(self, *args, disable=False, immutable_nodes=True, **kwargs):
