@@ -109,9 +109,9 @@ class DiGraph(nx.MultiDiGraph):
             )
 
     def add_node(self, node_for_adding, this_uuid=None, **attr):
-        if this_uuid is None:
-            this_uuid = node_for_adding.uuid
         if isinstance(node_for_adding, NodeBaseMixin):
+            if this_uuid is None:
+                this_uuid = node_for_adding.uuid
             super().add_node(this_uuid, value=node_for_adding, **attr)
         else:
             raise ValueError(f"Only Nodes are supported, found '{node_for_adding}'.")
