@@ -3,7 +3,7 @@ import typing as t
 from znflow.base import Connection, disable_graph, get_graph
 
 
-def resolve(value: t.Union[Connection, t.Any]):
+def resolve(value: t.Union[Connection, t.Any]) -> t.Any:
     """Resolve a Connection to its actual value.
 
     Allows dynamic resolution of connections to their actual values 
@@ -25,12 +25,11 @@ def resolve(value: t.Union[Connection, t.Any]):
         return value
     # get the actual value
     with disable_graph():
-        # if the node has not been run yet, run it
         result = value.result
-    if result is None:
-        graph = get_graph()
-    else:
+    if result is not None:
         return result
+    # we assume, that if the result is None, the node has not been run yet
+    graph = get_graph()
 
     with disable_graph():
         graph.run(nodes=[value.instance])
