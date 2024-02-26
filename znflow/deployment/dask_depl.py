@@ -7,12 +7,14 @@ import uuid
 from dask.distributed import Client, Future
 from networkx.classes.reportviews import NodeView
 
-from znflow.graph import DiGraph
 from znflow.handler import (
     LoadNodeFromDeploymentResults,
     UpdateConnectionsWithPredecessor,
 )
 from znflow.node import Node
+if typing.TYPE_CHECKING:
+    from znflow.graph import DiGraph
+
 
 
 def node_submit(node, **kwargs):
@@ -61,7 +63,7 @@ class DaskDeployment:
 
     """
 
-    graph: DiGraph
+    graph: "DiGraph"
     client: Client = dataclasses.field(default_factory=Client)
     results: typing.Dict[uuid.UUID, Future] = dataclasses.field(
         default_factory=dict, init=False
@@ -109,6 +111,7 @@ class DaskDeployment:
             Returns an instance of obj which is updated with the results from Dask.
 
         """
+        from znflow import DiGraph
         if isinstance(obj, NodeView):
             data = LoadNodeFromDeploymentResults()(dict(obj), results=self.results)
             return {x: v["value"] for x, v in data.items()}
