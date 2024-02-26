@@ -1,7 +1,9 @@
 import contextlib
 import functools
 import logging
+from tkinter.font import names
 import typing
+import dataclasses
 
 import networkx as nx
 
@@ -18,6 +20,10 @@ from znflow.node import Node
 
 log = logging.getLogger(__name__)
 
+@dataclasses.dataclass
+class Group:
+    names: tuple[str, ...]
+    nodes: list = dataclasses.field(default_factory=list)
 
 class DiGraph(nx.MultiDiGraph):
     def __init__(self, *args, disable=False, immutable_nodes=True, **kwargs):
@@ -32,7 +38,7 @@ class DiGraph(nx.MultiDiGraph):
         self.disable = disable
         self.immutable_nodes = immutable_nodes
         self._groups = {}
-        self.active_group = None
+        self.active_group: typing.Union[Group, None] = None
 
         super().__init__(*args, **kwargs)
 
@@ -211,8 +217,8 @@ class DiGraph(nx.MultiDiGraph):
 
     @contextlib.contextmanager
     def group(
-        self, name: typing.Union[str, typing.Tuple[str]]
-    ) -> typing.Generator[str, None, None]:
+        self, *names: str
+    ) -> typing.Generator[Group, None, None]:
         """Create a group of nodes.
 
         Allows to group nodes together, independent of their order in the graph.
@@ -223,9 +229,10 @@ class DiGraph(nx.MultiDiGraph):
 
         Attributes
         ----------
-            name : str|tuple[str]
+            *names : str
                 Name of the group. If the name is already used, the nodes will be added
-                to the existing group.
+                to the existing group. Multiple names can be provided to create nested
+                groups.
 
         Raises
         ------
@@ -238,6 +245,8 @@ class DiGraph(nx.MultiDiGraph):
             str
                 Name of the group.
         """
+        if len(names) == 0:
+            raise ValueError("At least one name must be provided.")
         if self.active_group is not None:
             raise TypeError(
                 f"Nested groups are not supported. Group with name '{self.active_group}'"
@@ -246,18 +255,21 @@ class DiGraph(nx.MultiDiGraph):
 
         existing_nodes = self.get_sorted_nodes()
 
+        group = self._groups.get(names, Group(names, []))
+
         try:
-            self.active_group = name
+            self.active_group = group
             if get_graph() is empty_graph:
                 with self:
-                    yield name
+                    yield group
             else:
-                yield name
+                yield group
         finally:
             self.active_group = None
             for node_uuid in self.nodes:
                 if node_uuid not in existing_nodes:
-                    self._groups.setdefault(name, []).append(node_uuid)
+                    self._groups[group.names] = group
+                    group.nodes.append(node_uuid)
 
-    def get_group(self, name: str) -> typing.List[str]:
-        return self._groups[name]
+    def get_group(self, *names: str) -> Group:
+        return self._groups[names]
