@@ -1,9 +1,8 @@
 import contextlib
+import dataclasses
 import functools
 import logging
-from tkinter.font import names
 import typing
-import dataclasses
 
 import networkx as nx
 
@@ -20,10 +19,12 @@ from znflow.node import Node
 
 log = logging.getLogger(__name__)
 
+
 @dataclasses.dataclass
 class Group:
     names: tuple[str, ...]
     nodes: list = dataclasses.field(default_factory=list)
+
 
 class DiGraph(nx.MultiDiGraph):
     def __init__(self, *args, disable=False, immutable_nodes=True, **kwargs):
@@ -216,9 +217,7 @@ class DiGraph(nx.MultiDiGraph):
             pass
 
     @contextlib.contextmanager
-    def group(
-        self, *names: str
-    ) -> typing.Generator[Group, None, None]:
+    def group(self, *names: str) -> typing.Generator[Group, None, None]:
         """Create a group of nodes.
 
         Allows to group nodes together, independent of their order in the graph.
