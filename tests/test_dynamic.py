@@ -97,3 +97,16 @@ def test_connections_remain():
         result = znflow.resolve(node1.outputs)
         assert isinstance(result, int)
         assert isinstance(node1.outputs, znflow.Connection)
+
+
+def test_loop_over_results():
+    graph = znflow.DiGraph()
+    with graph:
+        node1 = AddOne(inputs=5)
+        nodes = []
+        for idx in range(znflow.resolve(node1.outputs)):
+            nodes.append(AddOne(inputs=idx))
+        
+    graph.run()
+    assert len(nodes) == 6
+    assert [node.outputs for node in nodes] == [1, 2, 3, 4, 5, 6]
