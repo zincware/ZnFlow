@@ -8,17 +8,17 @@ def resolve(value: t.Union[Connection, t.Any]):
 
     Allows dynamic resolution of connections to their actual values within a graph context.
     This will run all Nodes up to this connection.
-    
+
     Attributes
     ----------
     value : Connection
         The connection to resolve.
-    
+
     Returns
     -------
     t.Any
         The actual value of the connection.
-    
+
     """
     # TODO: support nodify as well
     if not isinstance(value, (Connection)):

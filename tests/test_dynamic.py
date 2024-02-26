@@ -59,9 +59,12 @@ def test_break_loop_multiple():
     assert len(graph) <= 10  # Maximum number of iterations allowed
 
     # Assert that at least one node's output exceeds 5 or both reach 3
-    assert (znflow.resolve(node1.outputs) > 5 or
-            znflow.resolve(node2.outputs) > 5 or
-            znflow.resolve(node1.outputs) == 3 and znflow.resolve(node2.outputs) == 3)
+    assert (
+        znflow.resolve(node1.outputs) > 5
+        or znflow.resolve(node2.outputs) > 5
+        or znflow.resolve(node1.outputs) == 3
+        and znflow.resolve(node2.outputs) == 3
+    )
 
 
 def test_resolvce_only_run_relevant_nodes():
@@ -75,12 +78,12 @@ def test_resolvce_only_run_relevant_nodes():
             node1 = AddOne(inputs=node1.outputs)
             if znflow.resolve(node1.outputs) > 5:
                 break
-    
+
     # this has to be executed, because of the resolve
-    assert node1.outputs == 6 
-    
+    assert node1.outputs == 6
+
     # this should not be executed, because it is not relevant to the resolve
-    assert node2.outputs is None 
+    assert node2.outputs is None
 
     graph.run()
     assert node2.outputs == 1235
