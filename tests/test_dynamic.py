@@ -1,5 +1,6 @@
-import znflow
 import dataclasses
+
+import znflow
 
 
 @dataclasses.dataclass

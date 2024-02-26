@@ -16,10 +16,10 @@ from znflow.base import (
     get_graph,
 )
 from znflow.combine import combine
+from znflow.dynamic import resolve
 from znflow.graph import DiGraph
 from znflow.node import Node, nodify
 from znflow.visualize import draw
-from znflow.dynamic import resolve
 
 __version__ = importlib.metadata.version(__name__)
 
