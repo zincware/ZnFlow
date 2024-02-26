@@ -1,4 +1,5 @@
 """The 'ZnFlow' visualization module."""
+
 import math
 
 import networkx as nx

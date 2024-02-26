@@ -1,4 +1,5 @@
 """Test the 'znflow.DiGraph' class."""
+
 import znflow
 
 
