@@ -13,16 +13,16 @@ class AddOne(znflow.Node):
 
 
 def test_update_after_exit():
-    graph = znflow.DiGraph()
+    graph = znflow.DiGraph(immutable_nodes=False)
     with graph:
         node1 = AddOne(inputs=1)
 
     node1.inputs = 2
-    graph.run(immutable_nodes=False)
+    graph.run()
     assert node1.outputs == 3
 
     node1.inputs = 3
-    graph.run(immutable_nodes=False)
+    graph.run()
     assert node1.outputs == 4
 
 
