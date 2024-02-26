@@ -6,7 +6,7 @@ from znflow.base import Connection, disable_graph, get_graph
 def resolve(value: t.Union[Connection, t.Any]) -> t.Any:
     """Resolve a Connection to its actual value.
 
-    Allows dynamic resolution of connections to their actual values 
+    Allows dynamic resolution of connections to their actual values
     within a graph context. This will run all Nodes up to this connection.
 
     Attributes
