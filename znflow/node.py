@@ -4,7 +4,6 @@ import functools
 import inspect
 import uuid
 
-
 from znflow.base import (
     Connection,
     FunctionFuture,
