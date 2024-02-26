@@ -29,7 +29,7 @@ def test_single_nodify():
     with znflow.DiGraph() as graph:
         node1 = compute_sum(1, 2, 3)
 
-    depl = znflow.deployment.Deployment(graph=graph)
+    depl = znflow.deployment.DaskDeployment(graph=graph)
     depl.submit_graph()
 
     assert depl.get_results(node1) == 6
@@ -39,7 +39,7 @@ def test_single_Node():
     with znflow.DiGraph() as graph:
         node1 = ComputeSum(inputs=[1, 2, 3])
 
-    depl = znflow.deployment.Deployment(graph=graph)
+    depl = znflow.deployment.DaskDeployment(graph=graph)
     depl.submit_graph()
 
     node1 = depl.get_results(node1)
@@ -52,7 +52,7 @@ def test_multiple_nodify():
         node2 = compute_sum(4, 5, 6)
         node3 = compute_sum(node1, node2)
 
-    depl = znflow.deployment.Deployment(graph=graph)
+    depl = znflow.deployment.DaskDeployment(graph=graph)
     depl.submit_graph()
 
     assert depl.get_results(node1) == 6
@@ -66,7 +66,7 @@ def test_multiple_Node():
         node2 = ComputeSum(inputs=[4, 5, 6])
         node3 = ComputeSum(inputs=[node1.outputs, node2.outputs])
 
-    depl = znflow.deployment.Deployment(graph=graph)
+    depl = znflow.deployment.DaskDeployment(graph=graph)
     depl.submit_graph()
 
     node1 = depl.get_results(node1)
@@ -85,7 +85,7 @@ def test_multiple_nodify_and_Node():
         node4 = ComputeSum(inputs=[node1, node2.outputs, node3])
         node5 = add_to_ComputeSum(node4)
 
-    depl = znflow.deployment.Deployment(graph=graph)
+    depl = znflow.deployment.DaskDeployment(graph=graph)
     depl.submit_graph()
 
     results = depl.get_results(graph.nodes)
@@ -112,7 +112,7 @@ def test_concatenate():
         forces = [get_forces() for _ in range(10)]
         forces = concatenate(forces)
 
-    deployment = znflow.deployment.Deployment(
+    deployment = znflow.deployment.DaskDeployment(
         graph=graph,
     )
     deployment.submit_graph()

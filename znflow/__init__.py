@@ -43,10 +43,9 @@ __all__ = [
     "Group",
 ]
 
-with contextlib.suppress(ImportError):
-    from znflow import deployment
+from znflow import deployment
 
-    __all__ += ["deployment"]
+__all__ += ["deployment"]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)

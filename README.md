@@ -134,7 +134,7 @@ with znflow.DiGraph() as graph:
     n3 = ComputeMean(n1.results, n2)
 
 client = Client()
-deployment = znflow.deployment.Deployment(graph=graph, client=client)
+deployment = znflow.deployment.DaskDeployment(graph=graph, client=client)
 deployment.submit_graph()
 
 n3 = deployment.get_results(n3)
