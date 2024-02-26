@@ -31,7 +31,7 @@ class Group:
 
     def __len__(self) -> int:
         return len(self.uuids)
-    
+
     def __contains__(self, item) -> bool:
         return item in self.uuids
 
