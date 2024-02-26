@@ -1,4 +1,5 @@
 """Utils of the 'ZnFlow' package."""
+
 import abc
 import functools
 
