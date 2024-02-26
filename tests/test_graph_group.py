@@ -251,3 +251,26 @@ def test_grp_len():
         PlainNode(2)
 
     assert len(grp) == 2
+
+def test_grp_getitem():
+    graph = znflow.DiGraph()
+
+    with graph.group("grp1") as grp:
+        n1 = PlainNode(1)
+        n2 = PlainNode(2)
+
+    assert grp[n1.uuid] == n1
+    assert grp[n2.uuid] == n2
+    with pytest.raises(KeyError):
+        grp["foo"]
+
+def test_grp_nodes():
+    graph = znflow.DiGraph()
+
+    with graph.group("grp1") as grp:
+        n1 = PlainNode(1)
+        n2 = PlainNode(2)
+
+    assert grp.nodes == [n1, n2]
+    assert grp.uuids == [n1.uuid, n2.uuid]
+    assert grp.names == ("grp1",)

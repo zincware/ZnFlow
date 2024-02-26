@@ -24,7 +24,8 @@ log = logging.getLogger(__name__)
 @dataclasses.dataclass
 class Group:
     names: tuple[str, ...]
-    uuids: list[uuid.UUID] = dataclasses.field(default_factory=list)
+    uuids: list[uuid.UUID]
+    graph: "DiGraph"
 
     def __iter__(self) -> typing.Iterator[uuid.UUID]:
         return iter(self.uuids)
@@ -34,7 +35,13 @@ class Group:
 
     def __contains__(self, item) -> bool:
         return item in self.uuids
-
+    
+    def __getitem__(self, item) -> NodeBaseMixin:
+        return self.graph.nodes[item]["value"]
+    
+    @property
+    def nodes(self) -> typing.List[NodeBaseMixin]:
+        return [self.graph.nodes[uuid_]["value"] for uuid_ in self.uuids]
 
 class DiGraph(nx.MultiDiGraph):
     def __init__(self, *args, disable=False, immutable_nodes=True, **kwargs):
@@ -264,7 +271,7 @@ class DiGraph(nx.MultiDiGraph):
 
         existing_nodes = self.get_sorted_nodes()
 
-        group = self._groups.get(names, Group(names, []))
+        group = self._groups.get(names, Group(names=names, uuids=[], graph=self))
 
         try:
             self.active_group = group
