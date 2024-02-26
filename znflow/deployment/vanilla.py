@@ -3,13 +3,11 @@ import typing as t
 
 from znflow import handler
 
-if t.TYPE_CHECKING:
-    from znflow.graph import DiGraph
+from .base import DeploymentBase
 
 
 @dataclasses.dataclass
-class VanillaDeployment:
-    graph: "DiGraph"
+class VanillaDeployment(DeploymentBase):
 
     def run(self, nodes: t.Optional[t.List] = None):
         for node_uuid in self.graph.get_sorted_nodes():

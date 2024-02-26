@@ -61,7 +61,8 @@ class DiGraph(nx.MultiDiGraph):
         self.immutable_nodes = immutable_nodes
         self._groups = {}
         self.active_group: typing.Union[Group, None] = None
-        self.deploment = deployment or VanillaDeployment(self)
+        self.deploment = deployment or VanillaDeployment()
+        self.deploment.set_graph(self)
 
         super().__init__(*args, **kwargs)
 
