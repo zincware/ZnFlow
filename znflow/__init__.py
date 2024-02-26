@@ -19,6 +19,7 @@ from znflow.combine import combine
 from znflow.graph import DiGraph
 from znflow.node import Node, nodify
 from znflow.visualize import draw
+from znflow.dynamic import resolve
 
 __version__ = importlib.metadata.version(__name__)
 
@@ -37,6 +38,7 @@ __all__ = [
     "exceptions",
     "get_graph",
     "empty_graph",
+    "resolve",
 ]
 
 with contextlib.suppress(ImportError):
