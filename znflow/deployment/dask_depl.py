@@ -12,9 +12,9 @@ from znflow.handler import (
     UpdateConnectionsWithPredecessor,
 )
 from znflow.node import Node
+
 if typing.TYPE_CHECKING:
     from znflow.graph import DiGraph
-
 
 
 def node_submit(node, **kwargs):
@@ -112,6 +112,7 @@ class DaskDeployment:
 
         """
         from znflow import DiGraph
+
         if isinstance(obj, NodeView):
             data = LoadNodeFromDeploymentResults()(dict(obj), results=self.results)
             return {x: v["value"] for x, v in data.items()}

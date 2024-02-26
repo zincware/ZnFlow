@@ -1,7 +1,6 @@
 import dataclasses
 import typing as t
 
-
 from znflow import handler
 
 if t.TYPE_CHECKING:
