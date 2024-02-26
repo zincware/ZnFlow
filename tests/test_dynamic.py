@@ -43,9 +43,12 @@ def test_break_loop_multiple():
             node2 = AddOne(inputs=node2.outputs)
 
             # Break if either node's output exceeds 5 or both reach 3
-            if (znflow.resolve(node1.outputs) > 5 or
-                znflow.resolve(node2.outputs) > 5 or
-                znflow.resolve(node1.outputs) == 3 and znflow.resolve(node2.outputs) == 3):
+            if (
+                znflow.resolve(node1.outputs) > 5
+                or znflow.resolve(node2.outputs) > 5
+                or znflow.resolve(node1.outputs) == 3
+                and znflow.resolve(node2.outputs) == 3
+            ):
                 break
 
     graph.run()
@@ -54,6 +57,9 @@ def test_break_loop_multiple():
     assert len(graph) <= 10  # Maximum number of iterations allowed
 
     # Assert that at least one node's output exceeds 5 or both reach 3
-    assert (znflow.resolve(node1.outputs) > 5 or
-            znflow.resolve(node2.outputs) > 5 or
-            znflow.resolve(node1.outputs) == 3 and znflow.resolve(node2.outputs) == 3)
+    assert (
+        znflow.resolve(node1.outputs) > 5
+        or znflow.resolve(node2.outputs) > 5
+        or znflow.resolve(node1.outputs) == 3
+        and znflow.resolve(node2.outputs) == 3
+    )
