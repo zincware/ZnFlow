@@ -36,7 +36,7 @@ def test_grp():
     assert node.value == 2
     assert node.uuid in graph.nodes
     assert grp.names in graph._groups
-    assert graph.get_group("my_grp").nodes == [node.uuid]
+    assert graph.get_group("my_grp").uuids == [node.uuid]
 
     assert len(graph._groups) == 1
     assert len(graph) == 1
@@ -75,8 +75,8 @@ def test_muliple_grps():
     assert grp.names in graph._groups
     assert grp2.names in graph._groups
 
-    assert graph.get_group(*grp.names).nodes == [node.uuid]
-    assert graph.get_group(*grp2.names).nodes == [node2.uuid]
+    assert graph.get_group(*grp.names).uuids == [node.uuid]
+    assert graph.get_group(*grp2.names).uuids == [node2.uuid]
 
     assert len(graph._groups) == 2
     assert len(graph) == 2
@@ -115,7 +115,7 @@ def test_grp_with_existing_nodes():
 
     assert grp.names in graph._groups
 
-    assert graph.get_group(*grp.names).nodes == [node2.uuid]
+    assert graph.get_group(*grp.names).uuids == [node2.uuid]
 
     assert len(graph._groups) == 1
     assert len(graph) == 2
@@ -150,7 +150,7 @@ def test_grp_with_multiple_nodes():
 
     assert grp.names in graph._groups
 
-    assert graph.get_group(*grp.names).nodes == [node3.uuid, node4.uuid]
+    assert graph.get_group(*grp.names).uuids == [node3.uuid, node4.uuid]
 
     assert len(graph._groups) == 1
     assert len(graph) == 4
@@ -183,7 +183,7 @@ def test_reopen_grps():
 
     assert grp.names in graph._groups
 
-    assert graph.get_group(*grp.names).nodes == [node.uuid, node2.uuid]
+    assert graph.get_group(*grp.names).uuids == [node.uuid, node2.uuid]
 
     assert len(graph._groups) == 1
     assert len(graph) == 2
@@ -205,7 +205,7 @@ def test_tuple_grp_names():
     assert node.value == 2
     assert node.uuid in graph.nodes
     assert grp.names in graph._groups
-    assert graph.get_group(*grp.names).nodes == [node.uuid]
+    assert graph.get_group(*grp.names).uuids == [node.uuid]
 
 
 def test_grp_nodify():
@@ -218,4 +218,4 @@ def test_grp_nodify():
     with graph.group("grp1"):
         n1 = compute_mean(2, 4)
 
-    assert n1.uuid in graph.get_group("grp1").nodes
+    assert n1.uuid in graph.get_group("grp1").uuids

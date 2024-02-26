@@ -3,6 +3,7 @@ import dataclasses
 import functools
 import logging
 import typing
+import uuid
 
 import networkx as nx
 
@@ -23,7 +24,7 @@ log = logging.getLogger(__name__)
 @dataclasses.dataclass
 class Group:
     names: tuple[str, ...]
-    nodes: list = dataclasses.field(default_factory=list)
+    uuids: list[uuid.UUID] = dataclasses.field(default_factory=list)
 
 
 class DiGraph(nx.MultiDiGraph):
@@ -241,8 +242,8 @@ class DiGraph(nx.MultiDiGraph):
 
         Yields
         ------
-            str
-                Name of the group.
+            Group:
+                A group of containing the nodes that are added within the context manager.
         """
         if len(names) == 0:
             raise ValueError("At least one name must be provided.")
@@ -268,7 +269,7 @@ class DiGraph(nx.MultiDiGraph):
             for node_uuid in self.nodes:
                 if node_uuid not in existing_nodes:
                     self._groups[group.names] = group
-                    group.nodes.append(node_uuid)
+                    group.uuids.append(node_uuid)
 
     def get_group(self, *names: str) -> Group:
         return self._groups[names]
