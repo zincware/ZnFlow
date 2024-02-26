@@ -17,7 +17,7 @@ from znflow.base import (
 )
 from znflow.combine import combine
 from znflow.dynamic import resolve
-from znflow.graph import DiGraph
+from znflow.graph import DiGraph, Group
 from znflow.node import Node, nodify
 from znflow.visualize import draw
 
@@ -39,6 +39,7 @@ __all__ = [
     "get_graph",
     "empty_graph",
     "resolve",
+    "Group",
 ]
 
 with contextlib.suppress(ImportError):
