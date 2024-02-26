@@ -9,8 +9,8 @@ class AddOne(znflow.Node):
     outputs: int = None
 
     def run(self):
-        # if self.outputs is not None:
-        #     raise ValueError("Node has already been run")
+        if self.outputs is not None:
+            raise ValueError("Node has already been run")
         self.outputs = self.inputs + 1
 
 
