@@ -113,7 +113,9 @@ class NodeBaseMixin:
         "_graph_",
         "uuid",
         "_uuid",
-    ]  # TODO consider adding regex patterns
+        "model_fields", # pydantic
+        "model_computed_fields", # pydantic
+    ]
 
     @property
     def uuid(self):

@@ -4,6 +4,8 @@ import functools
 import inspect
 import uuid
 
+from pytest import mark
+
 from znflow.base import (
     Connection,
     FunctionFuture,
@@ -14,21 +16,23 @@ from znflow.base import (
 )
 
 
-def _mark_init_in_construction(cls):
+def _mark_init_in_construction(cls, this_uuid=None):
     if "__init__" in dir(cls):
 
         def wrap_init(func):
-            if getattr(func, "_already_wrapped", False):
-                # if the function is already wrapped, return it
-                #  TODO this is solving the error but not the root cause
-                return func
+            if hasattr(func, "_znflow_func"):
+                # we wrap the original function, thereby updating the
+                # uuid to be unique.
+                func = func._znflow_func
 
             @functools.wraps(cls.__init__)
             def wrapper(self, *args, **kwargs):
                 func(self, *args, **kwargs)
                 self._in_construction = False
+                if this_uuid is not None:
+                    self._uuid = this_uuid
 
-            wrapper._already_wrapped = True
+            wrapper._znflow_func = func
 
             return wrapper
 
@@ -46,6 +50,7 @@ class Node(NodeBaseMixin):
         return Connection(self, other)
 
     def __new__(cls, *args, **kwargs):
+        this_uuid = uuid.uuid4()
         try:
             instance = super().__new__(cls, *args, **kwargs)
         except TypeError:
@@ -53,13 +58,18 @@ class Node(NodeBaseMixin):
             # but even dataclasses seem to have an __init__ afterwards.
             # print("TypeError: ...")
             instance = super().__new__(cls)
-        _mark_init_in_construction(cls)
-        instance.uuid = uuid.uuid4()
+        
+        try:
+            instance.uuid = this_uuid
+            _mark_init_in_construction(cls, None)
+        except AttributeError:
+            # pydantic edge case
+            _mark_init_in_construction(cls, this_uuid)
 
         # Connect the Node to the Graph
         graph = get_graph()
         if graph is not empty_graph:
-            graph.add_node(instance)
+            graph.add_node(instance, this_uuid=this_uuid)
         return instance
 
     def __getattribute__(self, item):
