@@ -1,6 +1,7 @@
 import dataclasses
 
 import attrs
+import pydantic
 import pytest
 import zninit
 
@@ -58,6 +59,17 @@ class AttrsNode(znflow.Node):
         return znflow.get_attribute(self, "value")
 
 
+class PydanticNode(pydantic.BaseModel, znflow.Node):
+    value: pydantic.SkipValidation[int]
+
+    def run(self):
+        self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
+
 @znflow.nodify
 def add(value):
     return value
@@ -68,15 +80,20 @@ def compute_sum(*args):
     return sum(args)
 
 
-@pytest.mark.parametrize("cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode])
+@pytest.mark.parametrize(
+    "cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode, PydanticNode]
+)
 def test_Node_init(cls):
-    with pytest.raises((TypeError, AttributeError)):
+    with pytest.raises((TypeError, AttributeError, pydantic.ValidationError)):
         # TODO only raise TypeError and not AttributeError when TypeError is expected.
+        # Pydantic does not raise TypeError, but ValidationError
         with znflow.DiGraph():
             cls()
 
 
-@pytest.mark.parametrize("cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode])
+@pytest.mark.parametrize(
+    "cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode, PydanticNode]
+)
 def test_Node(cls):
     with znflow.DiGraph() as graph:
         node = cls(value=42)
@@ -94,8 +111,12 @@ def test_Node(cls):
     assert graph.nodes[node.uuid]["value"] is node
 
 
-@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
-@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
+@pytest.mark.parametrize(
+    "cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
+)
+@pytest.mark.parametrize(
+    "cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
+)
 def test_ConnectionNodeNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -132,7 +153,9 @@ def test_ConnectionNodifyNodify(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls1", [add])
-@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
+@pytest.mark.parametrize(
+    "cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
+)
 def test_ConnectionNodeNodify(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -151,7 +174,9 @@ def test_ConnectionNodeNodify(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls2", [add])
-@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
+@pytest.mark.parametrize(
+    "cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
+)
 def test_ConnectionNodifyNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -167,7 +192,9 @@ def test_ConnectionNodifyNode(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls2", [compute_sum])
-@pytest.mark.parametrize("cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
+@pytest.mark.parametrize(
+    "cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
+)
 def test_ConnectionNodifyMultiNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -190,7 +217,9 @@ def test_ConnectionNodifyMultiNode(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls1", [compute_sum])
-@pytest.mark.parametrize("cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode])
+@pytest.mark.parametrize(
+    "cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
+)
 def test_ConnectionNodeMultiNodify(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(42)

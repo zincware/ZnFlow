@@ -1,34 +1,35 @@
 [tool.poetry]
 name = "znflow"
-version = "0.1.14"
+version = "0.1.15"
 description = "A general purpose framework for building and running computational graphs."
 authors = ["zincwarecode <zincwarecode@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-networkx = "^3.0"
-matplotlib = "^3.6.3"
+python = "^3.9"
+networkx = "^3"
+matplotlib = "^3"
 
-dask = { version = "^2022.12.1", optional = true }
-distributed = { version = "^2022.12.1", optional = true }
-dask-jobqueue = { version = "^0.8.1", optional = true }
-bokeh = { version = "^2.4.2", optional = true }
+dask = { version = "^2022", optional = true }
+distributed = { version = "^2022", optional = true }
+dask-jobqueue = { version = "^0.8", optional = true }
+bokeh = { version = "^2", optional = true }
 
 
 [tool.poetry.group.tests.dependencies]
-pytest = "^7.2.1"
-coverage = "^6.5.0"
-zninit = "^0.1.8"
-attrs = "^22.2.0"
+pytest = "^7"
+coverage = "^6"
+zninit = "^0.1"
+attrs = "^22"
+pydantic = "^2.6.2"
 
 [tool.poetry.group.notebook.dependencies]
-jupyterlab = "^3.5.1"
+jupyterlab = "^3"
 
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.3.3"
+pre-commit = "^3"
 
 [tool.poetry.extras]
 dask = ["dask", "distributed", "dask-jobqueue", "bokeh"]

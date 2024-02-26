@@ -237,7 +237,7 @@ drop-in replacement for `property`.
 It is possible to create groups of `znflow.nodify` or `znflow.Nodes` independent
 from the graph structure. To create a group you can use
 `with graph.group(<name>)`. To access the group members, use
-`graph.get_group(<name>) -> list`.
+`graph.get_group(<name>) -> znflow.Group`.
 
 ```python
 import znflow
@@ -262,6 +262,4 @@ ZnFlow includes tests to ensure compatibility with:
 - `dataclasses`
 - `ZnInit`
 - `attrs`
-
-It is currently **not** compatible with pydantic. I don't know what pydantic
-does internally and wasn't able to find a workaround.
+- `pydantic` (experimental)

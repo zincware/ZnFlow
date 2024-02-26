@@ -8,6 +8,9 @@ from uuid import UUID
 
 from znflow import exceptions
 
+if typing.TYPE_CHECKING:
+    from znflow.graph import DiGraph
+
 
 @contextlib.contextmanager
 def disable_graph(*args, **kwargs):
@@ -110,7 +113,9 @@ class NodeBaseMixin:
         "_graph_",
         "uuid",
         "_uuid",
-    ]  # TODO consider adding regex patterns
+        "model_fields",  # pydantic
+        "model_computed_fields",  # pydantic
+    ]
 
     @property
     def uuid(self):
@@ -126,7 +131,7 @@ class NodeBaseMixin:
         raise NotImplementedError
 
 
-def get_graph():
+def get_graph() -> DiGraph:
     return NodeBaseMixin._graph_
 
 

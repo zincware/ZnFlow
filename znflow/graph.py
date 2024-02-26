@@ -1,7 +1,9 @@
 import contextlib
+import dataclasses
 import functools
 import logging
 import typing
+import uuid
 
 import networkx as nx
 
@@ -19,11 +21,44 @@ from znflow.node import Node
 log = logging.getLogger(__name__)
 
 
+@dataclasses.dataclass
+class Group:
+    names: tuple[str, ...]
+    uuids: list[uuid.UUID]
+    graph: "DiGraph"
+
+    def __iter__(self) -> typing.Iterator[uuid.UUID]:
+        return iter(self.uuids)
+
+    def __len__(self) -> int:
+        return len(self.uuids)
+
+    def __contains__(self, item) -> bool:
+        return item in self.uuids
+
+    def __getitem__(self, item) -> NodeBaseMixin:
+        return self.graph.nodes[item]["value"]
+
+    @property
+    def nodes(self) -> typing.List[NodeBaseMixin]:
+        return [self.graph.nodes[uuid_]["value"] for uuid_ in self.uuids]
+
+
 class DiGraph(nx.MultiDiGraph):
-    def __init__(self, *args, disable=False, **kwargs):
+    def __init__(self, *args, disable=False, immutable_nodes=True, **kwargs):
+        """
+        Attributes
+        ----------
+        immutable_nodes : bool
+            If True, the nodes are assumed to be immutable and
+            will not be rerun. If you change the inputs of a node
+            after it has been run, the outputs will not be updated.
+        """
         self.disable = disable
+        self.immutable_nodes = immutable_nodes
         self._groups = {}
-        self.active_group = None
+        self.active_group: typing.Union[Group, None] = None
+
         super().__init__(*args, **kwargs)
 
     @property
@@ -98,9 +133,11 @@ class DiGraph(nx.MultiDiGraph):
                 value, node_instance=node_instance, attribute=attribute
             )
 
-    def add_node(self, node_for_adding, **attr):
+    def add_node(self, node_for_adding, this_uuid=None, **attr):
         if isinstance(node_for_adding, NodeBaseMixin):
-            super().add_node(node_for_adding.uuid, value=node_for_adding, **attr)
+            if this_uuid is None:
+                this_uuid = node_for_adding.uuid
+            super().add_node(this_uuid, value=node_for_adding, **attr)
         else:
             raise ValueError(f"Only Nodes are supported, found '{node_for_adding}'.")
 
@@ -142,13 +179,51 @@ class DiGraph(nx.MultiDiGraph):
             all_pipelines += nx.dfs_postorder_nodes(reverse, stage)
         return list(dict.fromkeys(all_pipelines))  # remove duplicates but keep order
 
-    def run(self):
-        for node_uuid in self.get_sorted_nodes():
-            node = self.nodes[node_uuid]["value"]
-            if not node._external_:
-                # update connectors
-                self._update_node_attributes(node, handler.UpdateConnectors())
-                node.run()
+    def run(
+        self,
+        nodes: typing.Optional[typing.List[NodeBaseMixin]] = None,
+    ):
+        """Run the graph.
+
+        Attributes
+        ----------
+        nodes : list[Node]
+            The nodes to run. If None, all nodes are run.
+        """
+        if nodes is not None:
+            for node_uuid in self.reverse():
+                if self.immutable_nodes and self.nodes[node_uuid].get("available", False):
+                    continue
+                node = self.nodes[node_uuid]["value"]
+                if node in nodes:
+                    predecessors = list(self.predecessors(node.uuid))
+                    for predecessor in predecessors:
+                        predecessor_node = self.nodes[predecessor]["value"]
+                        if self.immutable_nodes and self.nodes[predecessor].get(
+                            "available", False
+                        ):
+                            continue
+                        self._update_node_attributes(
+                            predecessor_node, handler.UpdateConnectors()
+                        )
+                        predecessor_node.run()
+                        if self.immutable_nodes:
+                            self.nodes[predecessor]["available"] = True
+                    self._update_node_attributes(node, handler.UpdateConnectors())
+                    node.run()
+                    if self.immutable_nodes:
+                        self.nodes[node_uuid]["available"] = True
+        else:
+            for node_uuid in self.get_sorted_nodes():
+                if self.immutable_nodes and self.nodes[node_uuid].get("available", False):
+                    continue
+                node = self.nodes[node_uuid]["value"]
+                if not node._external_:
+                    # update connectors
+                    self._update_node_attributes(node, handler.UpdateConnectors())
+                    node.run()
+                    if self.immutable_nodes:
+                        self.nodes[node_uuid]["available"] = True
 
     def write_graph(self, *args):
         for node in args:
@@ -160,9 +235,7 @@ class DiGraph(nx.MultiDiGraph):
             pass
 
     @contextlib.contextmanager
-    def group(
-        self, name: typing.Union[str, typing.Tuple[str]]
-    ) -> typing.Generator[str, None, None]:
+    def group(self, *names: str) -> typing.Generator[Group, None, None]:
         """Create a group of nodes.
 
         Allows to group nodes together, independent of their order in the graph.
@@ -173,9 +246,10 @@ class DiGraph(nx.MultiDiGraph):
 
         Attributes
         ----------
-            name : str|tuple[str]
+            *names : str
                 Name of the group. If the name is already used, the nodes will be added
-                to the existing group.
+                to the existing group. Multiple names can be provided to create nested
+                groups.
 
         Raises
         ------
@@ -185,9 +259,11 @@ class DiGraph(nx.MultiDiGraph):
 
         Yields
         ------
-            str
-                Name of the group.
+            Group:
+                A group of containing the nodes that are added within the context manager.
         """
+        if len(names) == 0:
+            raise ValueError("At least one name must be provided.")
         if self.active_group is not None:
             raise TypeError(
                 f"Nested groups are not supported. Group with name '{self.active_group}'"
@@ -196,18 +272,21 @@ class DiGraph(nx.MultiDiGraph):
 
         existing_nodes = self.get_sorted_nodes()
 
+        group = self._groups.get(names, Group(names=names, uuids=[], graph=self))
+
         try:
-            self.active_group = name
+            self.active_group = group
             if get_graph() is empty_graph:
                 with self:
-                    yield name
+                    yield group
             else:
-                yield name
+                yield group
         finally:
             self.active_group = None
             for node_uuid in self.nodes:
                 if node_uuid not in existing_nodes:
-                    self._groups.setdefault(name, []).append(node_uuid)
+                    self._groups[group.names] = group
+                    group.uuids.append(node_uuid)
 
-    def get_group(self, name: str) -> typing.List[str]:
-        return self._groups[name]
+    def get_group(self, *names: str) -> Group:
+        return self._groups[names]
