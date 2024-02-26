@@ -31,7 +31,7 @@ def resolve(value: t.Union[Connection, t.Any]):
         graph = get_graph()
     else:
         return result
-    
+
     with disable_graph():
         graph.run(nodes=[value.instance])
         result = value.result
