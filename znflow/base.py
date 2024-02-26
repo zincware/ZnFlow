@@ -113,8 +113,8 @@ class NodeBaseMixin:
         "_graph_",
         "uuid",
         "_uuid",
-        "model_fields", # pydantic
-        "model_computed_fields", # pydantic
+        "model_fields",  # pydantic
+        "model_computed_fields",  # pydantic
     ]
 
     @property

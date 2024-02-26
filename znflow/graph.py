@@ -108,7 +108,7 @@ class DiGraph(nx.MultiDiGraph):
                 value, node_instance=node_instance, attribute=attribute
             )
 
-    def add_node(self, node_for_adding, this_uuid = None, **attr):
+    def add_node(self, node_for_adding, this_uuid=None, **attr):
         if this_uuid is None:
             this_uuid = node_for_adding.uuid
         if isinstance(node_for_adding, NodeBaseMixin):

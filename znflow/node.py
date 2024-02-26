@@ -4,7 +4,6 @@ import functools
 import inspect
 import uuid
 
-from pytest import mark
 
 from znflow.base import (
     Connection,
@@ -58,7 +57,7 @@ class Node(NodeBaseMixin):
             # but even dataclasses seem to have an __init__ afterwards.
             # print("TypeError: ...")
             instance = super().__new__(cls)
-        
+
         try:
             instance.uuid = this_uuid
             _mark_init_in_construction(cls, None)
