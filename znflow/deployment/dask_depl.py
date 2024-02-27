@@ -90,9 +90,7 @@ class DaskDeployment(DeploymentBase):
                 print(future.result())
                 if isinstance(node, Node):
                     node.__dict__.update(self.results[node.uuid].result().__dict__)
-                    self.graph._update_node_attributes(
-                        node, handler.UpdateConnectors()
-                    )
+                    self.graph._update_node_attributes(node, handler.UpdateConnectors())
                 else:
                     node.result = self.results[node.uuid].result().result
             except KeyError:
