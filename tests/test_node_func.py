@@ -1,5 +1,6 @@
 import dataclasses
 import random
+
 import pytest
 
 import znflow
@@ -29,6 +30,7 @@ def test_eager():
     compute_sum.run()
     n3 = random_number(compute_sum.outputs)
     assert n3 == 0.2903973544626711
+
 
 @pytest.mark.parametrize(
     "deployment",
