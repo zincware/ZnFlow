@@ -5,7 +5,7 @@ import typing
 import typing as t
 import uuid
 
-from dask.distributed import Client, Future
+from dask.distributed import Client, Future, wait
 
 from znflow import handler
 from znflow.handler import UpdateConnectionsWithPredecessor
@@ -89,6 +89,8 @@ class DaskDeployment(DeploymentBase):
                     self.graph._update_node_attributes(node, handler.UpdateConnectors())
                 else:
                     node.result = self.results[node.uuid].result().result
+    
+        # wait(self.results.values())
 
 
 # @dataclasses.dataclass

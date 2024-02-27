@@ -3,7 +3,7 @@ import dataclasses
 import dask.config
 import pytest
 
-dask.config.set({"distributed.worker.daemon": False})
+from distributed.utils_test import client, loop, cluster_fixture, loop_in_thread, cleanup # noqa: F401
 
 import znflow
 
@@ -18,13 +18,24 @@ class AddOne(znflow.Node):
             raise ValueError("Node has already been run")
         self.outputs = self.inputs + 1
 
+@pytest.fixture
+def vanilla_deployment():
+    return znflow.deployment.VanillaDeployment()
+
+@pytest.fixture
+def dask_deployment(client):
+    return znflow.deployment.DaskDeployment(client=client)
+
+
 
 @pytest.mark.parametrize(
     "deployment",
-    [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()],
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_break_loop(deployment):
+def test_break_loop(request, deployment):
     """Test loop breaking when output exceeds 5."""
+    deployment = request.getfixturevalue(deployment)
+    
     graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)
@@ -44,10 +55,11 @@ def test_break_loop(deployment):
 
 @pytest.mark.parametrize(
     "deployment",
-    [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()],
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_break_loop_multiple(deployment):
+def test_break_loop_multiple(request, deployment):
     """Test loop breaking with multiple nodes and different conditions."""
+    deployment = request.getfixturevalue(deployment)
     graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)
@@ -82,11 +94,12 @@ def test_break_loop_multiple(deployment):
 
 @pytest.mark.parametrize(
     "deployment",
-    [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()],
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_resolvce_only_run_relevant_nodes(deployment):
+def test_resolvce_only_run_relevant_nodes(request, deployment):
     """Test that when using resolve only nodes that are direct predecessors are run."""
     # Check by asserting None to the output of the second node
+    deployment = request.getfixturevalue(deployment)
     graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)
@@ -109,9 +122,10 @@ def test_resolvce_only_run_relevant_nodes(deployment):
 
 @pytest.mark.parametrize(
     "deployment",
-    [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()],
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_connections_remain(deployment):
+def test_connections_remain(request, deployment):
+    deployment = request.getfixturevalue(deployment)
     graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)
@@ -122,9 +136,10 @@ def test_connections_remain(deployment):
 
 @pytest.mark.parametrize(
     "deployment",
-    [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()],
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_loop_over_results(deployment):
+def test_loop_over_results(request, deployment):
+    deployment = request.getfixturevalue(deployment)
     graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=5)
