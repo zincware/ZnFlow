@@ -7,10 +7,8 @@ import uuid
 
 from dask.distributed import Client, Future
 
-from znflow.handler import (
-    UpdateConnectionsWithPredecessor,
-)
 from znflow import handler
+from znflow.handler import UpdateConnectionsWithPredecessor
 from znflow.node import Node
 
 from .base import DeploymentBase
@@ -58,7 +56,7 @@ class DaskDeployment(DeploymentBase):
     )
 
     def run(self, nodes: t.Optional[list] = None):
-        if nodes is not "ABC":
+        if nodes != "ABC":
             for node_uuid in self.graph.reverse():
                 assert self.graph.immutable_nodes
                 node = self.graph.nodes[node_uuid]["value"]
@@ -75,7 +73,9 @@ class DaskDeployment(DeploymentBase):
                             node_submit,
                             node=node,
                             predecessors={
-                                x: self.results[x] for x in self.results if x in predecessors
+                                x: self.results[x]
+                                for x in self.results
+                                if x in predecessors
                             },
                             pure=False,
                         )
@@ -88,7 +88,8 @@ class DaskDeployment(DeploymentBase):
                     node.__dict__.update(self.results[node.uuid].result().__dict__)
                     self.graph._update_node_attributes(node, handler.UpdateConnectors())
                 else:
-                    node.result = self.results[node.uuid].result().result                    
+                    node.result = self.results[node.uuid].result().result
+
 
 # @dataclasses.dataclass
 # class DaskDeployment:

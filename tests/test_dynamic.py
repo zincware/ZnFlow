@@ -1,7 +1,8 @@
 import dataclasses
 
-import pytest
 import dask.config
+import pytest
+
 dask.config.set({"distributed.worker.daemon": False})
 
 import znflow
