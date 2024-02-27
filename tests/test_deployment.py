@@ -2,9 +2,18 @@ import dataclasses
 
 import numpy as np
 import pytest
+from distributed.utils_test import client, loop, cluster_fixture, loop_in_thread, cleanup # noqa: F401
+
 
 import znflow
 
+@pytest.fixture
+def vanilla_deployment():
+    return znflow.deployment.VanillaDeployment()
+
+@pytest.fixture
+def dask_deployment(client):
+    return znflow.deployment.DaskDeployment(client=client)
 
 @znflow.nodify
 def compute_sum(*args):
@@ -27,11 +36,13 @@ def add_to_ComputeSum(instance: ComputeSum):
 
 
 @pytest.mark.parametrize(
-    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_single_nodify(depl):
+def test_single_nodify(request, deployment):
+    deployment = request.getfixturevalue(deployment)
 
-    with znflow.DiGraph(deployment=depl) as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         node1 = compute_sum(1, 2, 3)
 
     graph.run()
@@ -40,11 +51,13 @@ def test_single_nodify(depl):
 
 
 @pytest.mark.parametrize(
-    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_single_Node(depl):
+def test_single_Node(request, deployment):
+    deployment = request.getfixturevalue(deployment)
 
-    with znflow.DiGraph(deployment=depl) as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         node1 = ComputeSum(inputs=[1, 2, 3])
 
     graph.run()
@@ -52,11 +65,13 @@ def test_single_Node(depl):
 
 
 @pytest.mark.parametrize(
-    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_multiple_nodify(depl):
+def test_multiple_nodify(request, deployment):
+    deployment = request.getfixturevalue(deployment)
 
-    with znflow.DiGraph(deployment=depl) as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         node1 = compute_sum(1, 2, 3)
         node2 = compute_sum(4, 5, 6)
         node3 = compute_sum(node1, node2)
@@ -69,11 +84,13 @@ def test_multiple_nodify(depl):
 
 
 @pytest.mark.parametrize(
-    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_multiple_Node(depl):
+def test_multiple_Node(request, deployment):
+    deployment = request.getfixturevalue(deployment)
 
-    with znflow.DiGraph(deployment=depl) as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         node1 = ComputeSum(inputs=[1, 2, 3])
         node2 = ComputeSum(inputs=[4, 5, 6])
         node3 = ComputeSum(inputs=[node1.outputs, node2.outputs])
@@ -86,11 +103,13 @@ def test_multiple_Node(depl):
 
 
 @pytest.mark.parametrize(
-    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_multiple_nodify_and_Node(depl):
+def test_multiple_nodify_and_Node(request, deployment):
+    deployment = request.getfixturevalue(deployment)
 
-    with znflow.DiGraph(deployment=depl) as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         node1 = compute_sum(1, 2, 3)
         node2 = ComputeSum(inputs=[4, 5, 6])
         node3 = compute_sum(node1, node2.outputs)
@@ -117,11 +136,13 @@ def concatenate(forces):
 
 
 @pytest.mark.parametrize(
-    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
 )
-def test_concatenate(depl):
+def test_concatenate(request, deployment):
+    deployment = request.getfixturevalue(deployment)
 
-    with znflow.DiGraph(deployment=depl) as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         forces = [get_forces() for _ in range(10)]
         forces = concatenate(forces)
 
