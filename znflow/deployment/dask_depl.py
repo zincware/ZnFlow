@@ -13,6 +13,7 @@ from znflow.handler import (
     LoadNodeFromDeploymentResults,
     UpdateConnectionsWithPredecessor,
 )
+from znflow import handler
 from znflow.node import Node
 
 if typing.TYPE_CHECKING:
@@ -57,32 +58,37 @@ class DaskDeployment(DeploymentBase):
     )
 
     def run(self, nodes: t.Optional[list] = None):
-        # if nodes is None:
-        for node_uuid in self.graph.reverse():
-            node = self.graph.nodes[node_uuid]["value"]
-            predecessors = list(self.graph.predecessors(node.uuid))
+        if nodes is not "ABC":
+            for node_uuid in self.graph.reverse():
+                assert self.graph.immutable_nodes
+                node = self.graph.nodes[node_uuid]["value"]
+                predecessors = list(self.graph.predecessors(node.uuid))
 
-            if len(predecessors) == 0:
-                self.results[node.uuid] = self.client.submit(  # TODO how to name
-                    node_submit, node=node, pure=False
-                )
-            else:
-                self.results[node.uuid] = self.client.submit(
-                    node_submit,
-                    node=node,
-                    predecessors={
-                        x: self.results[x] for x in self.results if x in predecessors
-                    },
-                    pure=False,
-                )
-        # load the results when done
-        for node_uuid in self.graph.reverse():
-            node = self.graph.nodes[node_uuid]["value"]
-            # assume node is FunctionFuture
-            if isinstance(node, Node):
-                node.__dict__.update(self.results[node.uuid].result().__dict__)
-            else:
-                node.result = self.results[node.uuid].result().result                    
+                if len(predecessors) == 0:
+                    if node.uuid not in self.results:
+                        self.results[node.uuid] = self.client.submit(  # TODO how to name
+                            node_submit, node=node, pure=False
+                        )
+                else:
+                    if node.uuid not in self.results:
+                        self.results[node.uuid] = self.client.submit(
+                            node_submit,
+                            node=node,
+                            predecessors={
+                                x: self.results[x] for x in self.results if x in predecessors
+                            },
+                            pure=False,
+                        )
+            # load the results when done
+            for node_uuid in self.graph.reverse():
+                node = self.graph.nodes[node_uuid]["value"]
+                future = self.results[node.uuid]
+                print(future.result())
+                if isinstance(node, Node):
+                    node.__dict__.update(self.results[node.uuid].result().__dict__)
+                    self.graph._update_node_attributes(node, handler.UpdateConnectors())
+                else:
+                    node.result = self.results[node.uuid].result().result                    
 
 # @dataclasses.dataclass
 # class DaskDeployment:

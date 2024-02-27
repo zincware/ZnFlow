@@ -2,6 +2,8 @@ import dataclasses
 
 import znflow
 import pytest
+import dask.config
+dask.config.set({"distributed.worker.daemon": False})
 
 @dataclasses.dataclass
 class AddOne(znflow.Node):
