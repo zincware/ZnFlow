@@ -110,6 +110,7 @@ def test_Node(cls):
     assert node.uuid in graph
     assert graph.nodes[node.uuid]["value"] is node
 
+
 @pytest.mark.parametrize(
     "cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
 )
@@ -170,6 +171,7 @@ def test_ConnectionNodeNodify(cls1, cls2):
     # we have one connection, so we use 0
     assert edge[0]["u_attr"] is None
     assert edge[0]["v_attr"] == "value"
+
 
 @pytest.mark.parametrize("cls2", [add])
 @pytest.mark.parametrize(
@@ -239,6 +241,7 @@ def test_ConnectionNodeMultiNodify(cls1, cls2):
     assert edge2[0]["u_attr"] is None
     assert edge2[0]["v_attr"] == "value"
 
+
 def test_Connection():
     with znflow.DiGraph() as graph:
         node1 = PlainNode(value=42)
@@ -287,6 +290,7 @@ class ListConnection(znflow.Node):
     def run(self):
         return sum(self.nodes)
 
+
 @pytest.mark.parametrize(
     "deployment",
     ["vanilla_deployment", "dask_deployment"],
@@ -327,6 +331,7 @@ def test_DictionaryConnection(deployment, request):
     assert isinstance(edge2, dict)
     assert edge2[0]["u_attr"] == "value"
     assert edge2[0]["v_attr"] == "nodes"
+
 
 @pytest.mark.parametrize(
     "deployment",
