@@ -58,6 +58,7 @@ def test_ConvertInputs(cls):
     graph.run()
     assert node3.result == 3.0
 
+
 @pytest.mark.parametrize(
     "deployment",
     ["vanilla_deployment", "dask_deployment"],
