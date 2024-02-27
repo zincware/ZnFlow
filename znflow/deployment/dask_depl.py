@@ -87,7 +87,6 @@ class DaskDeployment(DeploymentBase):
             node = self.graph.nodes[node_uuid]["value"]
             try:
                 future = self.results[node.uuid]
-                print(future.result())
                 if isinstance(node, Node):
                     node.__dict__.update(self.results[node.uuid].result().__dict__)
                     self.graph._update_node_attributes(node, handler.UpdateConnectors())
