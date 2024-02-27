@@ -5,7 +5,7 @@ import typing
 import typing as t
 import uuid
 
-from dask.distributed import Client, Future, wait
+from dask.distributed import Client, Future
 
 from znflow import handler
 from znflow.handler import UpdateConnectionsWithPredecessor
@@ -99,8 +99,10 @@ class DaskDeployment(DeploymentBase):
 
                     if len(predecessors) == 0:
                         if node.uuid not in self.results:
-                            self.results[node.uuid] = self.client.submit(  # TODO how to name
-                                node_submit, node=node, pure=False
+                            self.results[node.uuid] = (
+                                self.client.submit(  # TODO how to name
+                                    node_submit, node=node, pure=False
+                                )
                             )
                     else:
                         if node.uuid not in self.results:
@@ -130,7 +132,9 @@ class DaskDeployment(DeploymentBase):
                     print(future.result())
                     if isinstance(node, Node):
                         node.__dict__.update(self.results[node.uuid].result().__dict__)
-                        self.graph._update_node_attributes(node, handler.UpdateConnectors())
+                        self.graph._update_node_attributes(
+                            node, handler.UpdateConnectors()
+                        )
                     else:
                         node.result = self.results[node.uuid].result().result
                 except KeyError:

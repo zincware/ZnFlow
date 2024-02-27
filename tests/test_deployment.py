@@ -5,6 +5,7 @@ import pytest
 
 import znflow
 
+
 @znflow.nodify
 def compute_sum(*args):
     return sum(args)

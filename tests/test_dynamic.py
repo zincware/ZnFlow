@@ -2,7 +2,6 @@ import dataclasses
 
 import pytest
 
-
 import znflow
 
 
@@ -24,7 +23,7 @@ class AddOne(znflow.Node):
 def test_break_loop(request, deployment):
     """Test loop breaking when output exceeds 5."""
     deployment = request.getfixturevalue(deployment)
-    
+
     graph = znflow.DiGraph(deployment=deployment)
     with graph:
         node1 = AddOne(inputs=1)

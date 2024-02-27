@@ -1,12 +1,19 @@
-from distributed.utils_test import client, loop, cluster_fixture, loop_in_thread, cleanup # noqa: F401
-
 import pytest
+from distributed.utils_test import (  # noqa: F401
+    cleanup,
+    client,
+    cluster_fixture,
+    loop,
+    loop_in_thread,
+)
+
 import znflow
 
 
 @pytest.fixture
 def vanilla_deployment():
     return znflow.deployment.VanillaDeployment()
+
 
 @pytest.fixture
 def dask_deployment(client):
