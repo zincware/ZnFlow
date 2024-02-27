@@ -60,82 +60,52 @@ class DaskDeployment(DeploymentBase):
             for node_uuid in self.graph.reverse():
                 assert self.graph.immutable_nodes
                 node = self.graph.nodes[node_uuid]["value"]
-                predecessors = list(self.graph.predecessors(node.uuid))
-
-                if len(predecessors) == 0:
-                    if node.uuid not in self.results:
-                        self.results[node.uuid] = self.client.submit(  # TODO how to name
-                            node_submit, node=node, pure=False
-                        )
-                else:
-                    if node.uuid not in self.results:
-                        self.results[node.uuid] = self.client.submit(
-                            node_submit,
-                            node=node,
-                            predecessors={
-                                x: self.results[x]
-                                for x in self.results
-                                if x in predecessors
-                            },
-                            pure=False,
-                        )
-            # load the results when done
-            for node_uuid in self.graph.reverse():
-                node = self.graph.nodes[node_uuid]["value"]
-                future = self.results[node.uuid]
-                print(future.result())
-                if isinstance(node, Node):
-                    node.__dict__.update(self.results[node.uuid].result().__dict__)
-                    self.graph._update_node_attributes(node, handler.UpdateConnectors())
-                else:
-                    node.result = self.results[node.uuid].result().result
+                self._run_predecessors(node_uuid)
+                self._run_node(node, node_uuid)
+            self._load_results(nodes)
 
         else:
             for node_uuid in self.graph.reverse():
                 assert self.graph.immutable_nodes
                 node = self.graph.nodes[node_uuid]["value"]
                 if node in nodes:
-                    predecessors = list(self.graph.predecessors(node.uuid))
+                    self._run_predecessors(node_uuid)
+                    self._run_node(node, node_uuid)
+            self._load_results(nodes)
 
-                    if len(predecessors) == 0:
-                        if node.uuid not in self.results:
-                            self.results[node.uuid] = (
-                                self.client.submit(  # TODO how to name
-                                    node_submit, node=node, pure=False
-                                )
-                            )
-                    else:
-                        if node.uuid not in self.results:
-                            for predecessor in predecessors:
-                                # submit the predecessors first
-                                _node = self.graph.nodes[predecessor]["value"]
-                                if _node.uuid not in self.results:
-                                    self.results[predecessor] = self.client.submit(
-                                        node_submit, node=_node, pure=False
-                                    )
+    def _run_node(self, node, node_uuid):
+        predecessors = list(self.graph.predecessors(node.uuid))
+        if node.uuid not in self.results:
+            self.results[node.uuid] = self.client.submit(
+                node_submit,
+                node=node,
+                predecessors={
+                    x: self.results[x] for x in self.results if x in predecessors
+                },
+                pure=False,
+            )
 
-                            self.results[node.uuid] = self.client.submit(
-                                node_submit,
-                                node=node,
-                                predecessors={
-                                    x: self.results[x]
-                                    for x in self.results
-                                    if x in predecessors
-                                },
-                                pure=False,
-                            )
-            # load the results when done
-            for node_uuid in self.graph.reverse():
-                node = self.graph.nodes[node_uuid]["value"]
-                try:
-                    future = self.results[node.uuid]
-                    print(future.result())
-                    if isinstance(node, Node):
-                        node.__dict__.update(self.results[node.uuid].result().__dict__)
-                        self.graph._update_node_attributes(
-                            node, handler.UpdateConnectors()
-                        )
-                    else:
-                        node.result = self.results[node.uuid].result().result
-                except KeyError:
-                    pass
+    def _run_predecessors(self, node_uuid):
+        predecessors = list(self.graph.predecessors(node_uuid))
+        for predecessor in predecessors:
+            predecessor_node = self.graph.nodes[predecessor]["value"]
+            predecessor_available = self.graph.nodes[predecessor].get("available", False)
+
+            if not (self.graph.immutable_nodes and predecessor_available):
+                self._run_node(predecessor_node, predecessor)
+
+    def _load_results(self, nodes):
+        for node_uuid in self.graph.reverse():
+            node = self.graph.nodes[node_uuid]["value"]
+            try:
+                future = self.results[node.uuid]
+                print(future.result())
+                if isinstance(node, Node):
+                    node.__dict__.update(self.results[node.uuid].result().__dict__)
+                    self.graph._update_node_attributes(
+                        node, handler.UpdateConnectors()
+                    )
+                else:
+                    node.result = self.results[node.uuid].result().result
+            except KeyError:
+                pass
