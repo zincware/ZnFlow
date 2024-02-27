@@ -6,6 +6,7 @@ import typing as t
 import uuid
 
 from dask.distributed import Client, Future
+from matplotlib.pylab import f
 
 from znflow import handler
 from znflow.handler import UpdateConnectionsWithPredecessor
@@ -69,6 +70,7 @@ class DaskDeployment(DeploymentBase):
                     x: self.results[x] for x in self.results if x in predecessors
                 },
                 pure=False,
+                key=f"{node.__class__.__name__}-{node.uuid}",
             )
             if self.graph.immutable_nodes:
                 self.graph.nodes[node_uuid]["available"] = True
