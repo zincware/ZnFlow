@@ -1,9 +1,7 @@
 import dataclasses
 
-import dask.config
 import pytest
 
-from distributed.utils_test import client, loop, cluster_fixture, loop_in_thread, cleanup # noqa: F401
 
 import znflow
 
@@ -17,15 +15,6 @@ class AddOne(znflow.Node):
         if self.outputs is not None:
             raise ValueError("Node has already been run")
         self.outputs = self.inputs + 1
-
-@pytest.fixture
-def vanilla_deployment():
-    return znflow.deployment.VanillaDeployment()
-
-@pytest.fixture
-def dask_deployment(client):
-    return znflow.deployment.DaskDeployment(client=client)
-
 
 
 @pytest.mark.parametrize(
