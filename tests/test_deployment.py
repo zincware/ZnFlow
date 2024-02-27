@@ -26,26 +26,34 @@ def add_to_ComputeSum(instance: ComputeSum):
     return instance.outputs + 1
 
 
-@pytest.mark.parametrize("depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+@pytest.mark.parametrize(
+    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+)
 def test_single_nodify(depl):
 
     with znflow.DiGraph(deployment=depl) as graph:
         node1 = compute_sum(1, 2, 3)
-    
+
     graph.run()
 
     assert node1.result == 6
 
-@pytest.mark.parametrize("depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+
+@pytest.mark.parametrize(
+    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+)
 def test_single_Node(depl):
-    
+
     with znflow.DiGraph(deployment=depl) as graph:
         node1 = ComputeSum(inputs=[1, 2, 3])
 
     graph.run()
     assert node1.outputs == 6
 
-@pytest.mark.parametrize("depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+
+@pytest.mark.parametrize(
+    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+)
 def test_multiple_nodify(depl):
 
     with znflow.DiGraph(deployment=depl) as graph:
@@ -59,7 +67,10 @@ def test_multiple_nodify(depl):
     assert node2.result == 15
     assert node3.result == 21
 
-@pytest.mark.parametrize("depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+
+@pytest.mark.parametrize(
+    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+)
 def test_multiple_Node(depl):
 
     with znflow.DiGraph(deployment=depl) as graph:
@@ -74,7 +85,9 @@ def test_multiple_Node(depl):
     assert node3.outputs == 21
 
 
-@pytest.mark.parametrize("depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+@pytest.mark.parametrize(
+    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+)
 def test_multiple_nodify_and_Node(depl):
 
     with znflow.DiGraph(deployment=depl) as graph:
@@ -102,7 +115,10 @@ def get_forces():
 def concatenate(forces):
     return np.concatenate(forces)
 
-@pytest.mark.parametrize("depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()])
+
+@pytest.mark.parametrize(
+    "depl", [znflow.deployment.VanillaDeployment(), znflow.deployment.DaskDeployment()]
+)
 def test_concatenate(depl):
 
     with znflow.DiGraph(deployment=depl) as graph:
