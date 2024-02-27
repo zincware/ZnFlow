@@ -16,5 +16,5 @@ def vanilla_deployment():
 
 
 @pytest.fixture
-def dask_deployment(client):
+def dask_deployment(client): # noqa: F811
     return znflow.deployment.DaskDeployment(client=client)
