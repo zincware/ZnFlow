@@ -6,7 +6,6 @@ import typing as t
 import uuid
 
 from dask.distributed import Client, Future
-from matplotlib.pylab import f
 
 from znflow import handler
 from znflow.handler import UpdateConnectionsWithPredecessor
