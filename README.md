@@ -127,25 +127,22 @@ class ComputeMean(znflow.Node):
     def run(self):
         self.results = (self.x + self.y) / 2
 
-with znflow.DiGraph() as graph:
+
+client = Client()
+deployment = znflow.deployment.DaskDeployment(client=client)
+
+
+with znflow.DiGraph(deployment=deployment) as graph:
     n1 = ComputeMean(2, 8)
     n2 = compute_mean(13, 7)
     # connecting classes and functions to a Node
     n3 = ComputeMean(n1.results, n2)
 
-client = Client()
-deployment = znflow.deployment.DaskDeployment(graph=graph, client=client)
-deployment.submit_graph()
+graph.run()
 
-n3 = deployment.get_results(n3)
 print(n3)
 # >>> ComputeMean(x=5.0, y=10.0, results=7.5)
 ```
-
-We need to get the updated instance from the Dask worker via
-`Deployment.get_results`. Due to the way Dask works, an inplace update is not
-possible. To retrieve the full graph, you can use
-`Deployment.get_results(graph.nodes)` instead.
 
 ### Working with lists
 
