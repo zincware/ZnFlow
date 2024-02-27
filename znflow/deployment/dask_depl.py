@@ -56,22 +56,8 @@ class DaskDeployment(DeploymentBase):
     )
 
     def run(self, nodes: t.Optional[list] = None):
-        if nodes is None:
-            for node_uuid in self.graph.reverse():
-                assert self.graph.immutable_nodes
-                node = self.graph.nodes[node_uuid]["value"]
-                self._run_predecessors(node_uuid)
-                self._run_node(node, node_uuid)
-            self._load_results(nodes)
-
-        else:
-            for node_uuid in self.graph.reverse():
-                assert self.graph.immutable_nodes
-                node = self.graph.nodes[node_uuid]["value"]
-                if node in nodes:
-                    self._run_predecessors(node_uuid)
-                    self._run_node(node, node_uuid)
-            self._load_results(nodes)
+        super().run(nodes)
+        self._load_results(nodes)
 
     def _run_node(self, node, node_uuid):
         predecessors = list(self.graph.predecessors(node.uuid))
