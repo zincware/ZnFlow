@@ -88,11 +88,11 @@ class DaskDeployment(DeploymentBase):
         for node_uuid in self.graph.reverse():
             node = self.graph.nodes[node_uuid]["value"]
             try:
-                future = self.results[node.uuid]
+                result = self.results[node.uuid].result()
                 if isinstance(node, Node):
-                    node.__dict__.update(self.results[node.uuid].result().__dict__)
+                    node.__dict__.update(result.__dict__)
                     self.graph._update_node_attributes(node, handler.UpdateConnectors())
                 else:
-                    node.result = self.results[node.uuid].result().result
+                    node.result = result.result
             except KeyError:
                 pass
