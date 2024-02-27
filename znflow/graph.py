@@ -61,8 +61,8 @@ class DiGraph(nx.MultiDiGraph):
         self.immutable_nodes = immutable_nodes
         self._groups = {}
         self.active_group: typing.Union[Group, None] = None
-        self.deploment = deployment or VanillaDeployment()
-        self.deploment.set_graph(self)
+        self.deployment = deployment or VanillaDeployment()
+        self.deployment.set_graph(self)
 
         super().__init__(*args, **kwargs)
 
@@ -195,7 +195,7 @@ class DiGraph(nx.MultiDiGraph):
         nodes : list[Node]
             The nodes to run. If None, all nodes are run.
         """
-        self.deploment.run(nodes)
+        self.deployment.run(nodes)
 
     def write_graph(self, *args):
         for node in args:

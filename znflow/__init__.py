@@ -20,6 +20,7 @@ from znflow.dynamic import resolve
 from znflow.graph import DiGraph, Group
 from znflow.node import Node, nodify
 from znflow.visualize import draw
+from znflow import deployment
 
 __version__ = importlib.metadata.version(__name__)
 
@@ -40,11 +41,8 @@ __all__ = [
     "empty_graph",
     "resolve",
     "Group",
+    "deployment",
 ]
-
-from znflow import deployment
-
-__all__ += ["deployment"]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
