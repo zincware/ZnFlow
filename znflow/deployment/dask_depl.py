@@ -87,7 +87,7 @@ class DaskDeployment(DeploymentBase):
         self.graph.nodes[node_uuid]["available"] = True
 
     def _load_results(self):
-        # TODO: only load nodes that have acutally changed
+        # TODO: only load nodes that have actually changed
         for node_uuid in self.graph.reverse():
             node = self.graph.nodes[node_uuid]["value"]
             try:
