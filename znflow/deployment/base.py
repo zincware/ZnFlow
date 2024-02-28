@@ -16,9 +16,6 @@ class DeploymentBase(abc.ABC):
             nodes = [node.uuid for node in nodes]
         
         for node_uuid in nodes:
-            node_available = self.graph.nodes[node_uuid].get("available", False)
-            if self.graph.immutable_nodes and node_available:
-                continue
             self._run_node(node_uuid)
 
     def set_graph(self, graph: "DiGraph"):

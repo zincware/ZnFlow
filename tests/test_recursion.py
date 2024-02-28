@@ -25,11 +25,16 @@ def setrecursionlimit(limit: int):
     finally:
         sys.setrecursionlimit(_limit)
 
-
+@pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment"],
+    # "dask_deployment" struggles with recursion limit
+)
 @pytest.mark.parametrize("depth", [1, 10, 100, 1000])
-def test_AddOneLoop(depth):
+def test_AddOneLoop(depth, deployment, request):
+    deployment = request.getfixturevalue(deployment)
     with setrecursionlimit(100):
-        with znflow.DiGraph() as graph:
+        with znflow.DiGraph(deployment=deployment) as graph:
             start = AddOne(0)
             for _ in range(depth):
                 start = AddOne(start.x)
