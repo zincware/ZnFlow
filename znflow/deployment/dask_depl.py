@@ -64,21 +64,18 @@ class DaskDeployment(DeploymentBase):
         predecessors = list(self.graph.predecessors(node_uuid))
         for predecessor in predecessors:
             self._run_node(predecessor)
-        
+
         node_available = self.graph.nodes[node_uuid].get("available", False)
         if self.graph.immutable_nodes and node_available:
             return
 
-
         self.results[node_uuid] = self.client.submit(
-                node_submit,
-                node=node,
-                predecessors={
-                    x: self.results[x] for x in self.results if x in predecessors
-                },
-                pure=False,
-                key=f"{node.__class__.__name__}-{node_uuid}",
-            )
+            node_submit,
+            node=node,
+            predecessors={x: self.results[x] for x in self.results if x in predecessors},
+            pure=False,
+            key=f"{node.__class__.__name__}-{node_uuid}",
+        )
         if self.graph.immutable_nodes:
             self.graph.nodes[node_uuid]["available"] = True
 

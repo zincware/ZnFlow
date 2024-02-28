@@ -14,7 +14,7 @@ class DeploymentBase(abc.ABC):
         else:
             # convert nodes to UUIDs
             nodes = [node.uuid for node in nodes]
-        
+
         for node_uuid in nodes:
             node_available = self.graph.nodes[node_uuid].get("available", False)
             if self.graph.immutable_nodes and node_available:
@@ -27,4 +27,3 @@ class DeploymentBase(abc.ABC):
     @abc.abstractmethod
     def _run_node(self, node_uuid):
         pass
-

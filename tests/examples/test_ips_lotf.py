@@ -1,13 +1,17 @@
 """Mock version of IPS LotF workflow for testing purposes."""
+
 import dataclasses
-import znflow
 import random
+
 import pytest
+
+import znflow
+
 
 @dataclasses.dataclass
 class AddData(znflow.Node):
     file: str
-    
+
     def run(self):
         if self.file is None:
             raise ValueError("File is None")
@@ -16,6 +20,7 @@ class AddData(znflow.Node):
     @property
     def atoms(self):
         return "Atoms"
+
 
 @dataclasses.dataclass
 class TrainModel(znflow.Node):
@@ -28,6 +33,7 @@ class TrainModel(znflow.Node):
         self.model = "Model"
         print(f"Model: {self.model}")
 
+
 @dataclasses.dataclass
 class MD(znflow.Node):
     model: str
@@ -38,6 +44,7 @@ class MD(znflow.Node):
             raise ValueError("Model is None")
         self.atoms = "Atoms"
         print(f"Atoms: {self.atoms}")
+
 
 @dataclasses.dataclass
 class EvaluateModel(znflow.Node):
@@ -52,10 +59,8 @@ class EvaluateModel(znflow.Node):
         self.metrics = random.random()
         print(f"Metrics: {self.metrics}")
 
-@pytest.mark.parametrize(
-    "deployment",
-    ["vanilla_deployment", "dask_deployment"]
-)
+
+@pytest.mark.parametrize("deployment", ["vanilla_deployment", "dask_deployment"])
 def test_lotf(deployment, request):
     deployment = request.getfixturevalue(deployment)
 
@@ -72,6 +77,5 @@ def test_lotf(deployment, request):
             if znflow.resolve(metrics.metrics) == pytest.approx(0.623, 1e-3):
                 # break loop after 6th iteration
                 break
-    
-    assert len(graph) == 22
 
+    assert len(graph) == 22

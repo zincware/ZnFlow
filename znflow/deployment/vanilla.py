@@ -1,6 +1,5 @@
 import dataclasses
 
-from networkx import predecessor
 
 from znflow import handler
 
