@@ -1,6 +1,8 @@
 import dataclasses
 import random
 
+import pytest
+
 import znflow
 
 
@@ -30,8 +32,13 @@ def test_eager():
     assert n3 == 0.2903973544626711
 
 
-def test_graph():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
+)
+def test_graph(deployment, request):
+    deployment = request.getfixturevalue(deployment)
+    with znflow.DiGraph(deployment=deployment) as graph:
         n1 = random_number(5)
         n2 = random_number(10)
         compute_sum = ComputeSum(inputs=[n1, n2])

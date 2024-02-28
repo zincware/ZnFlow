@@ -291,8 +291,13 @@ class ListConnection(znflow.Node):
         return sum(self.nodes)
 
 
-def test_DictionaryConnection():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
+)
+def test_DictionaryConnection(deployment, request):
+    deployment = request.getfixturevalue(deployment)
+    with znflow.DiGraph(deployment=deployment) as graph:
         node1 = PlainNode(value=42)
         node2 = PlainNode(value=42)
         node3 = DictionaryConnection(nodes={"node1": node1.value, "node2": node2.value})
@@ -328,8 +333,13 @@ def test_DictionaryConnection():
     assert edge2[0]["v_attr"] == "nodes"
 
 
-def test_ListConnection():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
+)
+def test_ListConnection(deployment, request):
+    deployment = request.getfixturevalue(deployment)
+    with znflow.DiGraph(deployment=deployment) as graph:
         node1 = PlainNode(value=42)
         node2 = PlainNode(value=42)
         node3 = ListConnection(nodes=[node1.value, node2.value])

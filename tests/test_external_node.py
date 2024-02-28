@@ -5,6 +5,8 @@ These nodes are not run but only used as a source of data.
 
 import dataclasses
 
+import pytest
+
 import znflow
 
 
@@ -18,8 +20,13 @@ class NodeWithExternal(znflow.Node):
         self.value = 42
 
 
-def test_external_node_run():
-    with znflow.DiGraph() as graph:
+@pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment"],
+)
+def test_external_node_run(deployment, request):
+    deployment = request.getfixturevalue(deployment)
+    with znflow.DiGraph(deployment=deployment) as graph:
         node = NodeWithExternal()
 
     graph.run()
@@ -71,10 +78,15 @@ class SumNumbers(znflow.Node):
         self.result = sum(self.inputs)
 
 
-def test_external_node():
+@pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment"],
+)
+def test_external_node(deployment, request):
+    deployment = request.getfixturevalue(deployment)
     node = ExternalNode()
 
-    with znflow.DiGraph() as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         add_number = AddNumber(shift=1, input=node.number)
 
     graph.run()
@@ -83,10 +95,15 @@ def test_external_node():
     assert add_number.result == 43
 
 
-def test_external_node_from_node():
+@pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment"],
+)
+def test_external_node_from_node(deployment, request):
+    deployment = request.getfixturevalue(deployment)
     node = ExternalNode()
 
-    with znflow.DiGraph() as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         add_number = AddNumberFromNodes(shift=1, input=node)
 
     graph.run()
@@ -95,11 +112,16 @@ def test_external_node_from_node():
     assert add_number.result == 43
 
 
-def test_external_node_lists():
+@pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment"],
+)
+def test_external_node_lists(deployment, request):
+    deployment = request.getfixturevalue(deployment)
     node1 = ExternalNode()
     node2 = ExternalNode()
 
-    with znflow.DiGraph() as graph:
+    with znflow.DiGraph(deployment=deployment) as graph:
         sum_numbers = SumNumbers(inputs=[node1.number, node2.number])
 
     graph.run()

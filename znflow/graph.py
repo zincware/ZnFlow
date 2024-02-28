@@ -16,6 +16,7 @@ from znflow.base import (
     get_graph,
     set_graph,
 )
+from znflow.deployment import VanillaDeployment
 from znflow.node import Node
 
 log = logging.getLogger(__name__)
@@ -45,7 +46,9 @@ class Group:
 
 
 class DiGraph(nx.MultiDiGraph):
-    def __init__(self, *args, disable=False, immutable_nodes=True, **kwargs):
+    def __init__(
+        self, *args, disable=False, immutable_nodes=True, deployment=None, **kwargs
+    ):
         """
         Attributes
         ----------
@@ -58,6 +61,8 @@ class DiGraph(nx.MultiDiGraph):
         self.immutable_nodes = immutable_nodes
         self._groups = {}
         self.active_group: typing.Union[Group, None] = None
+        self.deployment = deployment or VanillaDeployment()
+        self.deployment.set_graph(self)
 
         super().__init__(*args, **kwargs)
 
@@ -190,40 +195,7 @@ class DiGraph(nx.MultiDiGraph):
         nodes : list[Node]
             The nodes to run. If None, all nodes are run.
         """
-        if nodes is not None:
-            for node_uuid in self.reverse():
-                if self.immutable_nodes and self.nodes[node_uuid].get("available", False):
-                    continue
-                node = self.nodes[node_uuid]["value"]
-                if node in nodes:
-                    predecessors = list(self.predecessors(node.uuid))
-                    for predecessor in predecessors:
-                        predecessor_node = self.nodes[predecessor]["value"]
-                        if self.immutable_nodes and self.nodes[predecessor].get(
-                            "available", False
-                        ):
-                            continue
-                        self._update_node_attributes(
-                            predecessor_node, handler.UpdateConnectors()
-                        )
-                        predecessor_node.run()
-                        if self.immutable_nodes:
-                            self.nodes[predecessor]["available"] = True
-                    self._update_node_attributes(node, handler.UpdateConnectors())
-                    node.run()
-                    if self.immutable_nodes:
-                        self.nodes[node_uuid]["available"] = True
-        else:
-            for node_uuid in self.get_sorted_nodes():
-                if self.immutable_nodes and self.nodes[node_uuid].get("available", False):
-                    continue
-                node = self.nodes[node_uuid]["value"]
-                if not node._external_:
-                    # update connectors
-                    self._update_node_attributes(node, handler.UpdateConnectors())
-                    node.run()
-                    if self.immutable_nodes:
-                        self.nodes[node_uuid]["available"] = True
+        self.deployment.run(nodes)
 
     def write_graph(self, *args):
         for node in args:

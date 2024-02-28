@@ -60,10 +60,15 @@ def test_ConvertInputs(cls):
 
 
 @pytest.mark.parametrize(
+    "deployment",
+    ["vanilla_deployment", "dask_deployment"],
+)
+@pytest.mark.parametrize(
     "cls", [ConvertInputsPlain, ConverInputsZnInit, ConvertInputsDataclass]
 )
-def test_ConvertInputsNoAttribute(cls):
-    with znflow.DiGraph() as graph:
+def test_ConvertInputsNoAttribute(cls, deployment, request):
+    deployment = request.getfixturevalue(deployment)
+    with znflow.DiGraph(deployment=deployment) as graph:
         node1 = cls(inputs="1")
         node2 = cls(inputs="2")
         node3 = compute_sum_inputs(node1, node2)

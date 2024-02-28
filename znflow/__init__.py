@@ -1,11 +1,10 @@
 """The 'ZnFlow' package."""
 
-import contextlib
 import importlib.metadata
 import logging
 import sys
 
-from znflow import exceptions
+from znflow import deployment, exceptions
 from znflow.base import (
     CombinedConnections,
     Connection,
@@ -41,12 +40,8 @@ __all__ = [
     "empty_graph",
     "resolve",
     "Group",
+    "deployment",
 ]
-
-with contextlib.suppress(ImportError):
-    from znflow import deployment
-
-    __all__ += ["deployment"]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
