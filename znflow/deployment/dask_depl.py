@@ -48,6 +48,7 @@ def node_submit(node, **kwargs):
     return node
 
 
+# TODO: release the future objects
 @dataclasses.dataclass
 class DaskDeployment(DeploymentBase):
     client: Client = dataclasses.field(default_factory=Client)
@@ -57,7 +58,7 @@ class DaskDeployment(DeploymentBase):
 
     def run(self, nodes: t.Optional[list] = None):
         super().run(nodes)
-        self._load_results(nodes)
+        self._load_results()
 
     def _run_node(self, node_uuid):
         node = self.graph.nodes[node_uuid]["value"]
@@ -85,7 +86,8 @@ class DaskDeployment(DeploymentBase):
         )
         self.graph.nodes[node_uuid]["available"] = True
 
-    def _load_results(self, nodes):
+    def _load_results(self):
+        # TODO: only load nodes that have acutally changed
         for node_uuid in self.graph.reverse():
             node = self.graph.nodes[node_uuid]["value"]
             try:
