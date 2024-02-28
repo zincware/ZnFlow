@@ -14,7 +14,7 @@ class DeploymentBase(abc.ABC):
         else:
             # convert nodes to UUIDs
             nodes = [node.uuid for node in nodes]
-        
+
         for node_uuid in nodes:
             self._run_node(node_uuid)
 
@@ -24,4 +24,3 @@ class DeploymentBase(abc.ABC):
     @abc.abstractmethod
     def _run_node(self, node_uuid):
         pass
-

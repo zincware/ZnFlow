@@ -67,13 +67,12 @@ class DaskDeployment(DeploymentBase):
             if self.graph.immutable_nodes and predecessor_available:
                 continue
             self._run_node(predecessor)
-        
+
         node_available = self.graph.nodes[node_uuid].get("available", False)
         if self.graph.immutable_nodes and node_available:
             return
         if node._external_:
             raise NotImplementedError("External nodes are not supported in Dask deployment")
-
 
         self.results[node_uuid] = self.client.submit(
                 node_submit,
