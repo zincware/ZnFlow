@@ -5,8 +5,9 @@ These nodes are not run but only used as a source of data.
 
 import dataclasses
 
-import znflow
 import pytest
+
+import znflow
 
 
 @dataclasses.dataclass
@@ -76,6 +77,7 @@ class SumNumbers(znflow.Node):
     def run(self) -> None:
         self.result = sum(self.inputs)
 
+
 @pytest.mark.parametrize(
     "deployment",
     ["vanilla_deployment"],
@@ -92,6 +94,7 @@ def test_external_node(deployment, request):
     assert add_number.shift == 1
     assert add_number.result == 43
 
+
 @pytest.mark.parametrize(
     "deployment",
     ["vanilla_deployment"],
@@ -107,6 +110,7 @@ def test_external_node_from_node(deployment, request):
 
     assert add_number.shift == 1
     assert add_number.result == 43
+
 
 @pytest.mark.parametrize(
     "deployment",

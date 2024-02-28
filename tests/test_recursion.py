@@ -25,6 +25,7 @@ def setrecursionlimit(limit: int):
     finally:
         sys.setrecursionlimit(_limit)
 
+
 @pytest.mark.parametrize(
     "deployment",
     ["vanilla_deployment"],

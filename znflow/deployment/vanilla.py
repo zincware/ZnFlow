@@ -1,6 +1,5 @@
 import dataclasses
 
-
 from znflow import handler
 
 from .base import DeploymentBase
@@ -17,7 +16,6 @@ class VanillaDeployment(DeploymentBase):
             if self.graph.immutable_nodes and predecessor_available:
                 continue
             self._run_node(predecessor)
-
 
         node_available = self.graph.nodes[node_uuid].get("available", False)
         if self.graph.immutable_nodes and node_available:

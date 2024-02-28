@@ -72,17 +72,17 @@ class DaskDeployment(DeploymentBase):
         if self.graph.immutable_nodes and node_available:
             return
         if node._external_:
-            raise NotImplementedError("External nodes are not supported in Dask deployment")
+            raise NotImplementedError(
+                "External nodes are not supported in Dask deployment"
+            )
 
         self.results[node_uuid] = self.client.submit(
-                node_submit,
-                node=node,
-                predecessors={
-                    x: self.results[x] for x in self.results if x in predecessors
-                },
-                pure=False,
-                key=f"{node.__class__.__name__}-{node_uuid}",
-            )
+            node_submit,
+            node=node,
+            predecessors={x: self.results[x] for x in self.results if x in predecessors},
+            pure=False,
+            key=f"{node.__class__.__name__}-{node_uuid}",
+        )
         self.graph.nodes[node_uuid]["available"] = True
 
     def _load_results(self, nodes):
