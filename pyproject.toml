@@ -15,6 +15,7 @@ dask = { version = "^2022", optional = true }
 distributed = { version = "^2022", optional = true }
 dask-jobqueue = { version = "^0.8", optional = true }
 bokeh = { version = "^2", optional = true }
+covalent = "^0.232.0.post1"
 
 
 [tool.poetry.group.tests.dependencies]
