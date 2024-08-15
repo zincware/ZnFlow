@@ -70,7 +70,7 @@ class Node(NodeBaseMixin):
             graph.add_node(instance, this_uuid=this_uuid)
         return instance
 
-    def __getattribute__(self, item):
+    def __getattribute__(self, item: str):
         if item.startswith("_"):
             return super().__getattribute__(item)
         if self._graph_ not in [empty_graph, None]:
@@ -80,7 +80,7 @@ class Node(NodeBaseMixin):
                         f"'{self.__class__.__name__}' object has no attribute '{item}'"
                     )
 
-            if item not in type(self)._protected_:
+            if item not in self._protected_:
                 if self._in_construction:
                     return super().__getattribute__(item)
                 return Connection(instance=self, attribute=item)
