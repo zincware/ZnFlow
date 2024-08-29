@@ -1,3 +1,7 @@
+import functools
+
+import pytest
+
 import znflow
 
 
@@ -8,6 +12,13 @@ class PlainNode(znflow.Node):
     """
 
     @property
+    def result(self):
+        raise TypeError("This value is not available until the node is run.")
+
+
+class NodeCachedProperty(znflow.Node):
+
+    @functools.cached_property
     def result(self):
         raise TypeError("This value is not available until the node is run.")
 
@@ -32,6 +43,20 @@ def test_PlainNode():
         con = node1.result
 
     assert isinstance(con, znflow.Connection)
+
+    with pytest.raises(TypeError):
+        con.result
+
+
+def test_NodeCachedProperty():
+    with znflow.DiGraph():
+        node1 = NodeCachedProperty()
+        con = node1.result
+
+    assert isinstance(con, znflow.Connection)
+
+    with pytest.raises(TypeError):
+        con.result
 
 
 def test_ConnectResults():
