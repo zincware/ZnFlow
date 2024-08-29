@@ -9,7 +9,6 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 networkx = "^3"
-matplotlib = "^3"
 
 dask = { version = "^2022", optional = true }
 distributed = { version = "^2022", optional = true }
