@@ -10,10 +10,8 @@ readme = "README.md"
 python = "^3.9"
 networkx = "^3"
 
-dask = { version = "^2022", optional = true }
-distributed = { version = "^2022", optional = true }
-dask-jobqueue = { version = "^0.8", optional = true }
-bokeh = { version = "^2", optional = true }
+dask = { version = "^2024", optional = true }
+distributed = { version = "^2024", optional = true }
 
 
 [tool.poetry.group.tests.dependencies]
