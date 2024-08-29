@@ -59,7 +59,7 @@ class DiGraph(nx.MultiDiGraph):
         """
         self.disable = disable
         self.immutable_nodes = immutable_nodes
-        self._groups = {}
+        self.groups = {}
         self.active_group: typing.Union[Group, None] = None
         self.deployment = deployment or VanillaDeployment()
         self.deployment.set_graph(self)
@@ -244,25 +244,29 @@ class DiGraph(nx.MultiDiGraph):
 
         existing_nodes = self.get_sorted_nodes()
 
-        group = self._groups.get(names, Group(names=names, uuids=[], graph=self))
+        group = self.groups.get(names, Group(names=names, uuids=[], graph=self))
+
+        def finalize_group():
+            for node_uuid in self.nodes:
+                if node_uuid not in existing_nodes:
+                    self.groups[group.names] = group
+                    group.uuids.append(node_uuid)
 
         try:
             self.active_group = group
             if get_graph() is empty_graph:
                 with self:
-                    yield group
-                    for node_uuid in self.nodes:
-                        if node_uuid not in existing_nodes:
-                            self._groups[group.names] = group
-                            group.uuids.append(node_uuid)
+                    try:
+                        yield group
+                    finally:
+                        finalize_group()
             else:
-                yield group
-                for node_uuid in self.nodes:
-                    if node_uuid not in existing_nodes:
-                        self._groups[group.names] = group
-                        group.uuids.append(node_uuid)
+                try:
+                    yield group
+                finally:
+                    finalize_group()
         finally:
             self.active_group = None
 
     def get_group(self, *names: str) -> Group:
-        return self._groups[names]
+        return self.groups[names]
