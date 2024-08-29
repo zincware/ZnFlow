@@ -35,10 +35,10 @@ def test_grp():
     assert grp.names == ("my_grp",)
     assert node.value == 2
     assert node.uuid in graph.nodes
-    assert grp.names in graph._groups
+    assert grp.names in graph.groups
     assert graph.get_group("my_grp").uuids == [node.uuid]
 
-    assert len(graph._groups) == 1
+    assert len(graph.groups) == 1
     assert len(graph) == 1
 
 
@@ -72,13 +72,13 @@ def test_muliple_grps():
     assert node.uuid in graph.nodes
     assert node2.uuid in graph.nodes
 
-    assert grp.names in graph._groups
-    assert grp2.names in graph._groups
+    assert grp.names in graph.groups
+    assert grp2.names in graph.groups
 
     assert graph.get_group(*grp.names).uuids == [node.uuid]
     assert graph.get_group(*grp2.names).uuids == [node2.uuid]
 
-    assert len(graph._groups) == 2
+    assert len(graph.groups) == 2
     assert len(graph) == 2
 
 
@@ -113,11 +113,11 @@ def test_grp_with_existing_nodes():
     assert node.uuid in graph.nodes
     assert node2.uuid in graph.nodes
 
-    assert grp.names in graph._groups
+    assert grp.names in graph.groups
 
     assert graph.get_group(*grp.names).uuids == [node2.uuid]
 
-    assert len(graph._groups) == 1
+    assert len(graph.groups) == 1
     assert len(graph) == 2
 
 
@@ -148,11 +148,11 @@ def test_grp_with_multiple_nodes():
     assert node3.uuid in graph.nodes
     assert node4.uuid in graph.nodes
 
-    assert grp.names in graph._groups
+    assert grp.names in graph.groups
 
     assert graph.get_group(*grp.names).uuids == [node3.uuid, node4.uuid]
 
-    assert len(graph._groups) == 1
+    assert len(graph.groups) == 1
     assert len(graph) == 4
 
 
@@ -181,11 +181,11 @@ def test_reopen_grps():
     assert node.uuid in graph.nodes
     assert node2.uuid in graph.nodes
 
-    assert grp.names in graph._groups
+    assert grp.names in graph.groups
 
     assert graph.get_group(*grp.names).uuids == [node.uuid, node2.uuid]
 
-    assert len(graph._groups) == 1
+    assert len(graph.groups) == 1
     assert len(graph) == 2
 
 
@@ -204,7 +204,7 @@ def test_tuple_grp_names():
     assert grp.names == ("grp", "1")
     assert node.value == 2
     assert node.uuid in graph.nodes
-    assert grp.names in graph._groups
+    assert grp.names in graph.groups
     assert graph.get_group(*grp.names).uuids == [node.uuid]
 
 
