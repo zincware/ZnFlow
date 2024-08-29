@@ -17,7 +17,6 @@ class PlainNode(znflow.Node):
 
 
 class NodeCachedProperty(znflow.Node):
-
     @functools.cached_property
     def result(self):
         raise TypeError("This value is not available until the node is run.")
