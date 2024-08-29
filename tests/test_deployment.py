@@ -119,7 +119,6 @@ def test_multiple_nodify_and_Node(request, deployment):
 @znflow.nodify
 def get_forces():
     return [random.random() for _ in range(3)]
-    
 
 
 @znflow.nodify
