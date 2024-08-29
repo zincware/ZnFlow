@@ -1,6 +1,8 @@
-import znflow
 import functools
+
 import pytest
+
+import znflow
 
 
 class PlainNode(znflow.Node):
@@ -12,7 +14,8 @@ class PlainNode(znflow.Node):
     @property
     def result(self):
         raise TypeError("This value is not available until the node is run.")
-    
+
+
 class NodeCachedProperty(znflow.Node):
 
     @functools.cached_property
