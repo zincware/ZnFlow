@@ -1,6 +1,8 @@
 """Test for raising an error when building a graph."""
-import znflow
+
 import dataclasses
+
+import znflow
 
 
 @dataclasses.dataclass
