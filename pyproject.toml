@@ -7,11 +7,12 @@ license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.10,<4.0"
 networkx = "^3"
 
 dask = { version = "^2024", optional = true }
 distributed = { version = "^2024", optional = true }
+numpy = ">=1.19,<3.0"
 
 
 [tool.poetry.group.tests.dependencies]
