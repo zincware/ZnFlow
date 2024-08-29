@@ -555,18 +555,18 @@ toml = ["tomli"]
 
 [[package]]
 name = "dask"
-version = "2024.8.1"
+version = "2024.8.0"
 description = "Parallel PyData with Task Scheduling"
 optional = true
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 files = [
-    {file = "dask-2024.8.1-py3-none-any.whl", hash = "sha256:b8b58cba91dc9c057c8676dcc80b8bc321602b4dfd21529d33b03b55d428e2c3"},
-    {file = "dask-2024.8.1.tar.gz", hash = "sha256:4254e43ac8c3affad2b22952f126b00a00f52c87caae91c068d8e395a4ad1a72"},
+    {file = "dask-2024.8.0-py3-none-any.whl", hash = "sha256:250ea3df30d4a25958290eec4f252850091c6cfaed82d098179c3b25bba18309"},
+    {file = "dask-2024.8.0.tar.gz", hash = "sha256:f1fec39373d2f101bc045529ad4e9b30e34e6eb33b7aa0fa7073aec7b1bf9eee"},
 ]
 
 [package.dependencies]
 click = ">=8.1"
-cloudpickle = ">=3.0.0"
+cloudpickle = ">=1.5.0"
 fsspec = ">=2021.09.0"
 importlib-metadata = {version = ">=4.13.0", markers = "python_version < \"3.12\""}
 packaging = ">=20.0"
@@ -579,7 +579,7 @@ array = ["numpy (>=1.21)"]
 complete = ["dask[array,dataframe,diagnostics,distributed]", "lz4 (>=4.3.2)", "pyarrow (>=7.0)", "pyarrow-hotfix"]
 dataframe = ["dask-expr (>=1.1,<1.2)", "dask[array]", "pandas (>=2.0)"]
 diagnostics = ["bokeh (>=2.4.2)", "jinja2 (>=2.10.3)"]
-distributed = ["distributed (==2024.8.1)"]
+distributed = ["distributed (==2024.8.0)"]
 test = ["pandas[test]", "pre-commit", "pytest", "pytest-cov", "pytest-rerunfailures", "pytest-timeout", "pytest-xdist"]
 
 [[package]]
@@ -648,30 +648,30 @@ files = [
 
 [[package]]
 name = "distributed"
-version = "2024.8.1"
+version = "2024.8.0"
 description = "Distributed scheduler for Dask"
 optional = true
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 files = [
-    {file = "distributed-2024.8.1-py3-none-any.whl", hash = "sha256:03f5d3fe7a407cdc16dd2bc25dff4900b72f8dee896b7174eebe8a10b42d8c06"},
-    {file = "distributed-2024.8.1.tar.gz", hash = "sha256:82394ceb68b91118717148dbe182cff679f32621812bd7b2bc27eaaa8589f962"},
+    {file = "distributed-2024.8.0-py3-none-any.whl", hash = "sha256:11af55d22dd6e04eb868b87f166b8f59ef1b300f659f87c016643b7f98280ec6"},
+    {file = "distributed-2024.8.0.tar.gz", hash = "sha256:b99caf0a7f257f59477a70a334e081c1241f7cd9860211cc669742e6450e1310"},
 ]
 
 [package.dependencies]
 click = ">=8.0"
-cloudpickle = ">=2.0.0"
-dask = "2024.8.1"
+cloudpickle = ">=1.5.0"
+dask = "2024.8.0"
 jinja2 = ">=2.10.3"
 locket = ">=1.0.0"
-msgpack = ">=1.0.2"
+msgpack = ">=1.0.0"
 packaging = ">=20.0"
-psutil = ">=5.8.0"
-pyyaml = ">=5.4.1"
+psutil = ">=5.7.2"
+pyyaml = ">=5.3.1"
 sortedcontainers = ">=2.0.5"
 tblib = ">=1.6.0"
-toolz = ">=0.11.2"
-tornado = ">=6.2.0"
-urllib3 = ">=1.26.5"
+toolz = ">=0.10.0"
+tornado = ">=6.0.4"
+urllib3 = ">=1.24.3"
 zict = ">=3.0.0"
 
 [[package]]
@@ -822,7 +822,7 @@ files = [
 name = "importlib-metadata"
 version = "8.4.0"
 description = "Read metadata from Python packages"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "importlib_metadata-8.4.0-py3-none-any.whl", hash = "sha256:66f342cc6ac9818fc6ff340576acd24d65ba0b3efabb2b4ac08b598965a4a2f1"},
@@ -883,13 +883,13 @@ test = ["flaky", "ipyparallel", "pre-commit", "pytest (>=7.0)", "pytest-asyncio 
 
 [[package]]
 name = "ipython"
-version = "8.26.0"
+version = "8.18.1"
 description = "IPython: Productive Interactive Computing"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 files = [
-    {file = "ipython-8.26.0-py3-none-any.whl", hash = "sha256:e6b347c27bdf9c32ee9d31ae85defc525755a1869f14057e900675b9e8d6e6ff"},
-    {file = "ipython-8.26.0.tar.gz", hash = "sha256:1cec0fbba8404af13facebe83d04436a7434c7400e59f47acf467c64abd0956c"},
+    {file = "ipython-8.18.1-py3-none-any.whl", hash = "sha256:e8267419d72d81955ec1177f8a29aaa90ac80ad647499201119e2f05e99aa397"},
+    {file = "ipython-8.18.1.tar.gz", hash = "sha256:ca6f079bb33457c66e233e4580ebfc4128855b4cf6370dddd73842a9563e8a27"},
 ]
 
 [package.dependencies]
@@ -898,26 +898,25 @@ decorator = "*"
 exceptiongroup = {version = "*", markers = "python_version < \"3.11\""}
 jedi = ">=0.16"
 matplotlib-inline = "*"
-pexpect = {version = ">4.3", markers = "sys_platform != \"win32\" and sys_platform != \"emscripten\""}
+pexpect = {version = ">4.3", markers = "sys_platform != \"win32\""}
 prompt-toolkit = ">=3.0.41,<3.1.0"
 pygments = ">=2.4.0"
 stack-data = "*"
-traitlets = ">=5.13.0"
-typing-extensions = {version = ">=4.6", markers = "python_version < \"3.12\""}
+traitlets = ">=5"
+typing-extensions = {version = "*", markers = "python_version < \"3.10\""}
 
 [package.extras]
-all = ["ipython[black,doc,kernel,matplotlib,nbconvert,nbformat,notebook,parallel,qtconsole]", "ipython[test,test-extra]"]
+all = ["black", "curio", "docrepr", "exceptiongroup", "ipykernel", "ipyparallel", "ipywidgets", "matplotlib", "matplotlib (!=3.2.0)", "nbconvert", "nbformat", "notebook", "numpy (>=1.22)", "pandas", "pickleshare", "pytest (<7)", "pytest (<7.1)", "pytest-asyncio (<0.22)", "qtconsole", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "stack-data", "testpath", "trio", "typing-extensions"]
 black = ["black"]
-doc = ["docrepr", "exceptiongroup", "intersphinx-registry", "ipykernel", "ipython[test]", "matplotlib", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "sphinxcontrib-jquery", "tomli", "typing-extensions"]
+doc = ["docrepr", "exceptiongroup", "ipykernel", "matplotlib", "pickleshare", "pytest (<7)", "pytest (<7.1)", "pytest-asyncio (<0.22)", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "stack-data", "testpath", "typing-extensions"]
 kernel = ["ipykernel"]
-matplotlib = ["matplotlib"]
 nbconvert = ["nbconvert"]
 nbformat = ["nbformat"]
 notebook = ["ipywidgets", "notebook"]
 parallel = ["ipyparallel"]
 qtconsole = ["qtconsole"]
-test = ["packaging", "pickleshare", "pytest", "pytest-asyncio (<0.22)", "testpath"]
-test-extra = ["curio", "ipython[test]", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.23)", "pandas", "trio"]
+test = ["pickleshare", "pytest (<7.1)", "pytest-asyncio (<0.22)", "testpath"]
+test-extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.22)", "pandas", "pickleshare", "pytest (<7.1)", "pytest-asyncio (<0.22)", "testpath", "trio"]
 
 [[package]]
 name = "ipython-genutils"
@@ -1219,6 +1218,7 @@ files = [
 ]
 
 [package.dependencies]
+importlib-metadata = {version = ">=3.6", markers = "python_version < \"3.10\""}
 y-py = ">=0.6.0,<0.7.0"
 
 [package.extras]
@@ -1278,6 +1278,7 @@ files = [
 
 [package.dependencies]
 babel = ">=2.10"
+importlib-metadata = {version = ">=4.8.3", markers = "python_version < \"3.10\""}
 jinja2 = ">=3.0.3"
 json5 = ">=0.9.0"
 jsonschema = ">=4.18.0"
@@ -1519,6 +1520,7 @@ files = [
 beautifulsoup4 = "*"
 bleach = "!=5.0.0"
 defusedxml = "*"
+importlib-metadata = {version = ">=3.6", markers = "python_version < \"3.10\""}
 jinja2 = ">=3.0"
 jupyter-core = ">=4.7"
 jupyterlab-pygments = "*"
@@ -1575,20 +1577,20 @@ files = [
 
 [[package]]
 name = "networkx"
-version = "3.3"
+version = "3.2.1"
 description = "Python package for creating and manipulating graphs and networks"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 files = [
-    {file = "networkx-3.3-py3-none-any.whl", hash = "sha256:28575580c6ebdaf4505b22c6256a2b9de86b316dc63ba9e93abde3d78dfdbcf2"},
-    {file = "networkx-3.3.tar.gz", hash = "sha256:0c127d8b2f4865f59ae9cb8aafcd60b5c70f3241ebd66f7defad7c4ab90126c9"},
+    {file = "networkx-3.2.1-py3-none-any.whl", hash = "sha256:f18c69adc97877c42332c170849c96cefa91881c99a7cb3e95b7c659ebdc1ec2"},
+    {file = "networkx-3.2.1.tar.gz", hash = "sha256:9f1bb5cf3409bf324e0a722c20bdb4c20ee39bf1c30ce8ae499c8502b0b5e0c6"},
 ]
 
 [package.extras]
-default = ["matplotlib (>=3.6)", "numpy (>=1.23)", "pandas (>=1.4)", "scipy (>=1.9,!=1.11.0,!=1.11.1)"]
-developer = ["changelist (==0.5)", "mypy (>=1.1)", "pre-commit (>=3.2)", "rtoml"]
-doc = ["myst-nb (>=1.0)", "numpydoc (>=1.7)", "pillow (>=9.4)", "pydata-sphinx-theme (>=0.14)", "sphinx (>=7)", "sphinx-gallery (>=0.14)", "texext (>=0.6.7)"]
-extra = ["lxml (>=4.6)", "pydot (>=2.0)", "pygraphviz (>=1.12)", "sympy (>=1.10)"]
+default = ["matplotlib (>=3.5)", "numpy (>=1.22)", "pandas (>=1.4)", "scipy (>=1.9,!=1.11.0,!=1.11.1)"]
+developer = ["changelist (==0.4)", "mypy (>=1.1)", "pre-commit (>=3.2)", "rtoml"]
+doc = ["nb2plots (>=0.7)", "nbconvert (<7.9)", "numpydoc (>=1.6)", "pillow (>=9.4)", "pydata-sphinx-theme (>=0.14)", "sphinx (>=7)", "sphinx-gallery (>=0.14)", "texext (>=0.6.7)"]
+extra = ["lxml (>=4.6)", "pydot (>=1.4.2)", "pygraphviz (>=1.11)", "sympy (>=1.10)"]
 test = ["pytest (>=7.2)", "pytest-cov (>=4.0)"]
 
 [[package]]
@@ -2882,7 +2884,7 @@ files = [
 name = "zipp"
 version = "3.20.1"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "zipp-3.20.1-py3-none-any.whl", hash = "sha256:9960cd8967c8f85a56f920d5d507274e74f9ff813a0ab8889a5b5be2daf44064"},
@@ -2916,5 +2918,5 @@ dask = ["dask", "distributed"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.10,<4.0"
-content-hash = "832e8dffa579a349cf5dcd6561dc32dc87967c21809eda8d5551b2bce193874f"
+python-versions = ">=3.9,<4.0"
+content-hash = "7161841f736bfc6bb907b7068f724f8d0a757fe5604612204571382efe220280"

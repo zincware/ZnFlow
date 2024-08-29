@@ -7,7 +7,7 @@ license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.9,<4.0"
 networkx = "^3"
 
 dask = { version = "^2024", optional = true }
