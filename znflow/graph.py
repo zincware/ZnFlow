@@ -251,14 +251,18 @@ class DiGraph(nx.MultiDiGraph):
             if get_graph() is empty_graph:
                 with self:
                     yield group
+                    for node_uuid in self.nodes:
+                        if node_uuid not in existing_nodes:
+                            self._groups[group.names] = group
+                            group.uuids.append(node_uuid)
             else:
                 yield group
+                for node_uuid in self.nodes:
+                    if node_uuid not in existing_nodes:
+                        self._groups[group.names] = group
+                        group.uuids.append(node_uuid)
         finally:
             self.active_group = None
-            for node_uuid in self.nodes:
-                if node_uuid not in existing_nodes:
-                    self._groups[group.names] = group
-                    group.uuids.append(node_uuid)
 
     def get_group(self, *names: str) -> Group:
         return self._groups[names]
