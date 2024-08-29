@@ -2978,4 +2978,4 @@ dask = ["dask", "distributed"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "862691c7dfbffeb85b1884a8249209438d0d1ebe7e435c636dc72a51fa179856"
+content-hash = "44709eaf60f3875c41e3deaaa409dbd8e218d65a58a628f5fc382fa9f75a31cf"
