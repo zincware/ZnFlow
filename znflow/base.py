@@ -216,6 +216,43 @@ class Connection:
             raise exceptions.ConnectionAttributeError(
                 "Connection does not support further attributes to its result."
             ) from e
+        
+    def __eq__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__eq__(other)
+
+
+    def __lt__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__lt__(other)
+    
+    def __le__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__le__(other)
+    
+    def __gt__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__gt__(other)
+    
+    def __ge__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__ge__(other)
+    
+    def __iter__(self):
+        from znflow import resolve
+
+        return resolve(self).__iter__()
+
 
 
 @dataclasses.dataclass(frozen=True)
@@ -327,3 +364,40 @@ class FunctionFuture(NodeBaseMixin):
     def __radd__(self, other):
         """Enable 'sum([a, b], [])'"""
         return self if other == [] else self.__add__(other)
+    
+
+    def __eq__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__eq__(other)
+
+
+    def __lt__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__lt__(other)
+    
+    def __le__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__le__(other)
+    
+    def __gt__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__gt__(other)
+    
+    def __ge__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve
+
+        return resolve(self).__ge__(other)
+    
+    def __iter__(self):
+        from znflow import resolve
+
+        return resolve(self).__iter__()

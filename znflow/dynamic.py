@@ -1,6 +1,6 @@
 import typing as t
 
-from znflow.base import Connection, disable_graph, get_graph
+from znflow.base import Connection, disable_graph, get_graph, FunctionFuture
 
 
 def resolve(value: t.Union[Connection, t.Any]) -> t.Any:
@@ -20,8 +20,7 @@ def resolve(value: t.Union[Connection, t.Any]) -> t.Any:
         The actual value of the connection.
 
     """
-    # TODO: support nodify as well
-    if not isinstance(value, (Connection)):
+    if not isinstance(value, (Connection, FunctionFuture)):
         return value
     # get the actual value
     with disable_graph():
@@ -32,6 +31,9 @@ def resolve(value: t.Union[Connection, t.Any]) -> t.Any:
     graph = get_graph()
 
     with disable_graph():
-        graph.run(nodes=[value.instance])
+        if isinstance(value, FunctionFuture):
+            graph.run(nodes=[value])
+        else:
+            graph.run(nodes=[value.instance])
         result = value.result
     return result
