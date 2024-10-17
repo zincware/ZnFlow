@@ -2,6 +2,7 @@ import dataclasses
 import znflow
 import typing as t
 
+
 @dataclasses.dataclass
 class NodeWithPostInit(znflow.Node):
     input: int
