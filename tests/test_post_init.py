@@ -1,11 +1,11 @@
 import dataclasses
 import znflow
-
+import typing as t
 
 @dataclasses.dataclass
 class NodeWithPostInit(znflow.Node):
     input: int
-    output: int | None = None
+    output: t.Optional[int] = None
 
     def __post_init__(self):
         self.input = self.input * 2
