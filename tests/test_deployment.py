@@ -1,6 +1,6 @@
 import dataclasses
 
-import numpy as np
+import random
 import pytest
 
 import znflow
@@ -118,12 +118,12 @@ def test_multiple_nodify_and_Node(request, deployment):
 
 @znflow.nodify
 def get_forces():
-    return np.random.normal(size=(100, 3))
+    return [random.random() for _ in range(3)]
 
 
 @znflow.nodify
 def concatenate(forces):
-    return np.concatenate(forces)
+    return sum(forces, [])
 
 
 @pytest.mark.parametrize(
@@ -139,5 +139,5 @@ def test_concatenate(request, deployment):
 
     graph.run()
 
-    assert isinstance(forces.result, np.ndarray)
-    assert forces.result.shape == (1000, 3)
+    assert isinstance(forces.result, list)
+    assert len(forces.result) == 30

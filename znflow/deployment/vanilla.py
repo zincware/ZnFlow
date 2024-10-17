@@ -7,7 +7,6 @@ from .base import DeploymentBase
 
 @dataclasses.dataclass
 class VanillaDeployment(DeploymentBase):
-
     def _run_node(self, node_uuid):
         node = self.graph.nodes[node_uuid]["value"]
         predecessors = list(self.graph.predecessors(node_uuid))
