@@ -12,6 +12,12 @@ if typing.TYPE_CHECKING:
     from znflow.graph import DiGraph
 
 
+class _NOT_RESVOLED_TYPE:
+    pass
+
+NOT_RESVOLED = _NOT_RESVOLED_TYPE()
+
+
 @contextlib.contextmanager
 def disable_graph(*args, **kwargs):
     """Temporarily disable set the graph to empty.
@@ -354,7 +360,7 @@ class FunctionFuture(NodeBaseMixin):
     kwargs: typing.Dict
     item: any = None
 
-    result: any = dataclasses.field(default=None, init=False, repr=True)
+    result: any = dataclasses.field(default=NOT_RESVOLED, init=False, repr=True)
 
     _protected_ = NodeBaseMixin._protected_ + ["function", "args", "kwargs"]
 
