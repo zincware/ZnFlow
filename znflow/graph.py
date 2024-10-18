@@ -94,7 +94,7 @@ class DiGraph(nx.MultiDiGraph):
             node_instance = self.nodes[node]["value"]
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")
             if isinstance(node_instance, FunctionFuture):
-                self._update_function_future_arguments(node_instance)
+                pass  # moved to add_node
             elif isinstance(node_instance, Node):
                 # TODO only update Nodes if the graph is not empty
                 self._update_node_attributes(
@@ -146,8 +146,13 @@ class DiGraph(nx.MultiDiGraph):
         else:
             raise ValueError(f"Only Nodes are supported, found '{node_for_adding}'.")
 
+        if isinstance(node_for_adding, FunctionFuture):
+            self._update_function_future_arguments(node_for_adding)
+
     def add_connections(self, u_of_edge, v_of_edge, **attr):
-        log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
+        with contextlib.suppress(TypeError):
+            # zninit does not like __repr__
+            log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             if u_of_edge.uuid not in self:
                 if u_of_edge._external_:

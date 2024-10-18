@@ -9,10 +9,13 @@ class DeploymentBase(abc.ABC):
     graph: "DiGraph"
 
     def run(self, nodes: t.Optional[t.List] = None):
+        # nodes = self.graph.get_sorted_nodes()
         if nodes is None:
             nodes = self.graph.get_sorted_nodes()
         else:
-            # convert nodes to UUIDs
+            # Apparently, we don't need to look for
+            # parent nodes, because when running
+            # a node this is done automatically
             nodes = [node.uuid for node in nodes]
 
         for node_uuid in nodes:

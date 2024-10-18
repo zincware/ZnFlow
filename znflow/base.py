@@ -177,9 +177,6 @@ class Connection:
     def __getitem__(self, item):
         return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
-    def __iter__(self):
-        raise TypeError(f"Can not iterate over {self}.")
-
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
@@ -216,6 +213,59 @@ class Connection:
             raise exceptions.ConnectionAttributeError(
                 "Connection does not support further attributes to its result."
             ) from e
+
+    def __eq__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if isinstance(other, (Connection)):
+            return self.instance == other.instance
+        if isinstance(other, (FunctionFuture)):
+            return False
+
+        if get_graph() is empty_graph:
+            return super().__eq__(other)
+        return resolve(self).__eq__(other)
+
+    def __lt__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if get_graph() is empty_graph:
+            return super().__lt__(other)
+        return resolve(self).__lt__(other)
+
+    def __le__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if get_graph() is empty_graph:
+            return super().__le__(other)
+        return resolve(self).__le__(other)
+
+    def __gt__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if get_graph() is empty_graph:
+            return super().__gt__(other)
+        return resolve(self).__gt__(other)
+
+    def __ge__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if get_graph() is empty_graph:
+            return super().__ge__(other)
+        return resolve(self).__ge__(other)
+
+    def __iter__(self):
+        from znflow import resolve
+
+        try:
+            return resolve(self).__iter__()
+        except AttributeError:
+            raise TypeError(f"'{self}' object is not iterable")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -314,9 +364,6 @@ class FunctionFuture(NodeBaseMixin):
     def __getitem__(self, item):
         return Connection(instance=self, attribute=None, item=item)
 
-    def __iter__(self):
-        raise TypeError(f"Can not iterate over {self}.")
-
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
@@ -327,3 +374,61 @@ class FunctionFuture(NodeBaseMixin):
     def __radd__(self, other):
         """Enable 'sum([a, b], [])'"""
         return self if other == [] else self.__add__(other)
+
+    def __eq__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if isinstance(other, (Connection)):
+            return False
+        if isinstance(other, (FunctionFuture)):
+            return (
+                self.function == other.function
+                and self.args == other.args
+                and self.kwargs == other.kwargs
+                and self.item == other.item
+            )
+
+        if get_graph() is empty_graph:
+            return super().__eq__(other)
+        return resolve(self).__eq__(other)
+
+    def __lt__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if get_graph() is empty_graph:
+            return super().__lt__(other)
+        return resolve(self).__lt__(other)
+
+    def __le__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if get_graph() is empty_graph:
+            return super().__le__(other)
+        return resolve(self).__le__(other)
+
+    def __gt__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if get_graph() is empty_graph:
+            return super().__gt__(other)
+        return resolve(self).__gt__(other)
+
+    def __ge__(self, other) -> bool:
+        """Overwrite for dynamic break points."""
+        from znflow import resolve, get_graph, empty_graph
+
+        if get_graph() is empty_graph:
+            return super().__ge__(other)
+        return resolve(self).__ge__(other)
+
+    def __iter__(self):
+        from znflow import resolve
+
+        try:
+            return resolve(self).__iter__()
+        except AttributeError:
+            raise TypeError(f"'{self}' object is not iterable")

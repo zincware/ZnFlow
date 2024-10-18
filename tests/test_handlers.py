@@ -18,6 +18,7 @@ node_connection = znflow.Connection(node, attribute=None)
         (None, None),
         (future, future_connection),
         (node, node_connection),
+        (node_connection, node),
         (node_connection, node_connection),
     ],
 )
