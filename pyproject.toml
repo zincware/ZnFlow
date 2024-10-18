@@ -1,10 +1,13 @@
 [tool.poetry]
 name = "znflow"
-version = "0.2.1"
+version = "0.2.2"
 description = "A general purpose framework for building and running computational graphs."
 authors = ["zincwarecode <zincwarecode@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
+
+[tool.poetry.urls]
+repository = "https://github.com/zincware/znflow"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"

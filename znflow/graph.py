@@ -247,9 +247,9 @@ class DiGraph(nx.MultiDiGraph):
         group = self.groups.get(names, Group(names=names, uuids=[], graph=self))
 
         def finalize_group():
+            self.groups[group.names] = group
             for node_uuid in self.nodes:
                 if node_uuid not in existing_nodes:
-                    self.groups[group.names] = group
                     group.uuids.append(node_uuid)
 
         try:

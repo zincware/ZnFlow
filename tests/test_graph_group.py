@@ -276,3 +276,24 @@ def test_grp_nodes():
     assert grp.nodes == [n1, n2]
     assert grp.uuids == [n1.uuid, n2.uuid]
     assert grp.names == ("grp1",)
+
+
+def test_empty_grps():
+    graph = znflow.DiGraph()
+
+    with graph.group("grp1") as grp1:
+        pass
+    with graph.group("grp2") as grp2:
+        pass
+
+    assert len(grp1) == 0
+    assert len(grp2) == 0
+    assert grp1.uuids == []
+    assert grp2.uuids == []
+
+    assert grp1.names == ("grp1",)
+    assert grp2.names == ("grp2",)
+
+    assert len(graph.groups) == 2
+    assert grp1.names in graph.groups
+    assert grp2.names in graph.groups
