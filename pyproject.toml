@@ -6,6 +6,9 @@ authors = ["zincwarecode <zincwarecode@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
 
+[tool.poetry.urls]
+repository = "https://github.com/zincware/znflow"
+
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
 networkx = "^3"
