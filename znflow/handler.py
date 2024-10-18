@@ -9,7 +9,9 @@ class AttributeToConnection(utils.IterableHandler):
     def default(self, value):
         if not isinstance(value, (FunctionFuture, Node)):
             return value
-        return value if value._graph_ is None else Connection(instance=value, attribute=None)
+        return (
+            value if value._graph_ is None else Connection(instance=value, attribute=None)
+        )
 
 
 class AddConnectionToGraph(utils.IterableHandler):

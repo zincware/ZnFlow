@@ -1,4 +1,5 @@
 """Test dynamic conenction resolving using magic methods."""
+
 import dataclasses
 import znflow
 import pytest
@@ -17,6 +18,7 @@ class ComputeMean(znflow.Node):
     def no_comparison(self):
         return object()
 
+
 @dataclasses.dataclass
 class ToList(znflow.Node):
     inp1: int
@@ -31,9 +33,11 @@ class ToList(znflow.Node):
 def compute_mean(inp1: int, inp2: int) -> int:
     return (inp1 + inp2) / 2
 
+
 @znflow.nodify
 def to_list(inp1: int, inp2: int) -> list:
     return [inp1, inp2]
+
 
 @znflow.nodify
 def to_tuple(inp1: int, inp2: int) -> tuple:
@@ -54,6 +58,7 @@ def test_connection_equal():
     assert node2.out == 1.5
     assert mean.out == 1.5
 
+
 def test_connection_lt():
     graph = znflow.DiGraph()
 
@@ -66,10 +71,11 @@ def test_connection_lt():
 
         mean = ComputeMean(node1.out, node2.out)
         assert mean.out < 2
-    
+
     assert node1.out == 1.5
     assert node2.out == 1.5
     assert mean.out == 1.5
+
 
 def test_connection_le():
     graph = znflow.DiGraph()
@@ -83,10 +89,11 @@ def test_connection_le():
 
         mean = ComputeMean(node1.out, node2.out)
         assert mean.out <= 1.5
-    
+
     assert node1.out == 1.5
     assert node2.out == 1.5
     assert mean.out == 1.5
+
 
 def test_connection_gt():
     graph = znflow.DiGraph()
@@ -100,7 +107,7 @@ def test_connection_gt():
 
         mean = ComputeMean(node1.out, node2.out)
         assert mean.out > 1
-    
+
     assert node1.out == 1.5
     assert node2.out == 1.5
     assert mean.out == 1.5
@@ -118,10 +125,11 @@ def test_connection_ge():
 
         mean = ComputeMean(node1.out, node2.out)
         assert mean.out >= 1.5
-    
+
     assert node1.out == 1.5
     assert node2.out == 1.5
     assert mean.out == 1.5
+
 
 def test_connection_iter():
     graph = znflow.DiGraph()
@@ -135,7 +143,7 @@ def test_connection_iter():
 
         lst = ToList(node1.out, node2.out)
         assert list(lst.out) == [1.5, 1.5]
-    
+
     assert node1.out == 1.5
     assert node2.out == 1.5
     assert lst.out == [1.5, 1.5]
@@ -150,6 +158,7 @@ def test_function_future_equal():
 
     assert mean.result == 1.5
 
+
 def test_function_future_lt():
     graph = znflow.DiGraph()
 
@@ -161,6 +170,7 @@ def test_function_future_lt():
         assert mean < 2
 
     assert mean.result == 1.5
+
 
 def test_function_future_le():
     graph = znflow.DiGraph()
@@ -174,6 +184,7 @@ def test_function_future_le():
 
     assert mean.result == 1.5
 
+
 def test_function_future_gt():
     graph = znflow.DiGraph()
 
@@ -186,6 +197,7 @@ def test_function_future_gt():
 
     assert mean.result == 1.5
 
+
 def test_function_future_ge():
     graph = znflow.DiGraph()
 
@@ -197,6 +209,7 @@ def test_function_future_ge():
         assert mean >= 1.5
 
     assert mean.result == 1.5
+
 
 def test_function_future_iter():
     graph = znflow.DiGraph()

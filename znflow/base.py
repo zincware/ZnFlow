@@ -388,7 +388,12 @@ class FunctionFuture(NodeBaseMixin):
         if isinstance(other, (Connection)):
             return False
         if isinstance(other, (FunctionFuture)):
-            return self.function == other.function and self.args == other.args and self.kwargs == other.kwargs and self.item == other.item
+            return (
+                self.function == other.function
+                and self.args == other.args
+                and self.kwargs == other.kwargs
+                and self.item == other.item
+            )
 
         if get_graph() is empty_graph:
             return super().__eq__(other)
