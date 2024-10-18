@@ -221,8 +221,10 @@ class Connection:
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
 
-        if isinstance(other, (Connection, FunctionFuture)):
+        if isinstance(other, (Connection)):
             return self.instance == other.instance
+        if isinstance(other, (FunctionFuture)):
+            return False
 
         if get_graph() is empty_graph:
             return super().__eq__(other)
@@ -232,9 +234,6 @@ class Connection:
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
 
-        if isinstance(other, (Connection, FunctionFuture)):
-            return self.instance == other.instance
-
         if get_graph() is empty_graph:
             return super().__lt__(other)
         return resolve(self).__lt__(other)
@@ -242,9 +241,6 @@ class Connection:
     def __le__(self, other) -> bool:
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
-
-        if isinstance(other, (Connection, FunctionFuture)):
-            return self.instance == other.instance
 
         if get_graph() is empty_graph:
             return super().__le__(other)
@@ -254,9 +250,6 @@ class Connection:
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
 
-        if isinstance(other, (Connection, FunctionFuture)):
-            return self.instance == other.instance
-
         if get_graph() is empty_graph:
             return super().__gt__(other)
         return resolve(self).__gt__(other)
@@ -264,9 +257,6 @@ class Connection:
     def __ge__(self, other) -> bool:
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
-
-        if isinstance(other, (Connection, FunctionFuture)):
-            return self.instance == other.instance
 
         if get_graph() is empty_graph:
             return super().__ge__(other)
@@ -396,9 +386,9 @@ class FunctionFuture(NodeBaseMixin):
         from znflow import resolve, get_graph, empty_graph
 
         if isinstance(other, (Connection)):
-            return self.instance == other.instance
+            return False
         if isinstance(other, (FunctionFuture)):
-            return self.function == other.function
+            return self.function == other.function and self.args == other.args and self.kwargs == other.kwargs and self.item == other.item
 
         if get_graph() is empty_graph:
             return super().__eq__(other)
@@ -408,9 +398,6 @@ class FunctionFuture(NodeBaseMixin):
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
 
-        if isinstance(other, (Connection, FunctionFuture)):
-            return self.instance == other.instance
-
         if get_graph() is empty_graph:
             return super().__lt__(other)
         return resolve(self).__lt__(other)
@@ -418,9 +405,6 @@ class FunctionFuture(NodeBaseMixin):
     def __le__(self, other) -> bool:
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
-
-        if isinstance(other, (Connection, FunctionFuture)):
-            return self.instance == other.instance
 
         if get_graph() is empty_graph:
             return super().__le__(other)
@@ -430,9 +414,6 @@ class FunctionFuture(NodeBaseMixin):
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
 
-        if isinstance(other, (Connection, FunctionFuture)):
-            return self.instance == other.instance
-
         if get_graph() is empty_graph:
             return super().__gt__(other)
         return resolve(self).__gt__(other)
@@ -440,9 +421,6 @@ class FunctionFuture(NodeBaseMixin):
     def __ge__(self, other) -> bool:
         """Overwrite for dynamic break points."""
         from znflow import resolve, get_graph, empty_graph
-
-        if isinstance(other, (Connection, FunctionFuture)):
-            return self.instance == other.instance
 
         if get_graph() is empty_graph:
             return super().__ge__(other)

@@ -4,8 +4,6 @@ import znflow
 import pytest
 
 
-# TODO: test typeerror for things that do nos support le/lt/lt/gt/ge
-
 @dataclasses.dataclass
 class ComputeMean(znflow.Node):
     inp1: int
@@ -42,7 +40,7 @@ def to_tuple(inp1: int, inp2: int) -> tuple:
     return (inp1, inp2)
 
 
-def test_node_equal():
+def test_connection_equal():
     graph = znflow.DiGraph()
 
     with graph:
@@ -56,7 +54,7 @@ def test_node_equal():
     assert node2.out == 1.5
     assert mean.out == 1.5
 
-def test_node_lt():
+def test_connection_lt():
     graph = znflow.DiGraph()
 
     with graph:
@@ -73,7 +71,7 @@ def test_node_lt():
     assert node2.out == 1.5
     assert mean.out == 1.5
 
-def test_node_le():
+def test_connection_le():
     graph = znflow.DiGraph()
 
     with graph:
@@ -90,7 +88,7 @@ def test_node_le():
     assert node2.out == 1.5
     assert mean.out == 1.5
 
-def test_node_gt():
+def test_connection_gt():
     graph = znflow.DiGraph()
 
     with graph:
@@ -108,7 +106,7 @@ def test_node_gt():
     assert mean.out == 1.5
 
 
-def test_node_ge():
+def test_connection_ge():
     graph = znflow.DiGraph()
 
     with graph:
@@ -125,7 +123,7 @@ def test_node_ge():
     assert node2.out == 1.5
     assert mean.out == 1.5
 
-def test_node_iter():
+def test_connection_iter():
     graph = znflow.DiGraph()
 
     with graph:
@@ -143,7 +141,7 @@ def test_node_iter():
     assert lst.out == [1.5, 1.5]
 
 
-def test_nodify_equal():
+def test_function_future_equal():
     graph = znflow.DiGraph()
 
     with graph:
@@ -152,7 +150,7 @@ def test_nodify_equal():
 
     assert mean.result == 1.5
 
-def test_nodify_lt():
+def test_function_future_lt():
     graph = znflow.DiGraph()
 
     with graph:
@@ -164,7 +162,7 @@ def test_nodify_lt():
 
     assert mean.result == 1.5
 
-def test_nodify_le():
+def test_function_future_le():
     graph = znflow.DiGraph()
 
     with graph:
@@ -176,7 +174,7 @@ def test_nodify_le():
 
     assert mean.result == 1.5
 
-def test_nodify_gt():
+def test_function_future_gt():
     graph = znflow.DiGraph()
 
     with graph:
@@ -188,7 +186,7 @@ def test_nodify_gt():
 
     assert mean.result == 1.5
 
-def test_nodify_ge():
+def test_function_future_ge():
     graph = znflow.DiGraph()
 
     with graph:
@@ -200,7 +198,7 @@ def test_nodify_ge():
 
     assert mean.result == 1.5
 
-def test_nodify_iter():
+def test_function_future_iter():
     graph = znflow.DiGraph()
 
     with graph:
@@ -213,4 +211,3 @@ def test_nodify_iter():
 
     assert mean.result == 1.5
     assert lst.result == [1, 2]
-
