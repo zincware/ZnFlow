@@ -15,6 +15,7 @@ if typing.TYPE_CHECKING:
 class _NOT_RESVOLED_TYPE:
     pass
 
+
 NOT_RESVOLED = _NOT_RESVOLED_TYPE()
 
 
