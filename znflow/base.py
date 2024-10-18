@@ -177,9 +177,6 @@ class Connection:
     def __getitem__(self, item):
         return dataclasses.replace(self, instance=self, attribute=None, item=item)
 
-    def __iter__(self):
-        raise TypeError(f"Can not iterate over {self}.")
-
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
@@ -366,9 +363,6 @@ class FunctionFuture(NodeBaseMixin):
 
     def __getitem__(self, item):
         return Connection(instance=self, attribute=None, item=item)
-
-    def __iter__(self):
-        raise TypeError(f"Can not iterate over {self}.")
 
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]

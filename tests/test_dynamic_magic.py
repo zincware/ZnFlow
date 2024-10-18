@@ -1,4 +1,4 @@
-"""Test dynamic conenction resolving using magic methods."""
+"""Test dynamic connection resolving using magic methods."""
 
 import dataclasses
 import znflow
