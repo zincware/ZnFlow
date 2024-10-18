@@ -150,7 +150,9 @@ class DiGraph(nx.MultiDiGraph):
             self._update_function_future_arguments(node_for_adding)
 
     def add_connections(self, u_of_edge, v_of_edge, **attr):
-        log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
+        with contextlib.suppress(TypeError):
+            # zninit does not like __repr__
+            log.debug(f"Add edge between {u_of_edge=} and {v_of_edge=}.")
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             if u_of_edge.uuid not in self:
                 if u_of_edge._external_:
