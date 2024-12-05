@@ -43,6 +43,7 @@ class DepsNode(znflow.Node):
     def run(self):
         pass
 
+
 @znflow.nodify
 def add_one(x):
     return x + 1

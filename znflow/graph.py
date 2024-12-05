@@ -121,7 +121,10 @@ class DiGraph(nx.MultiDiGraph):
             if attribute.startswith("_") or attribute in Node._protected_:
                 # We do not allow connections to private attributes.
                 continue
-            if isinstance(getattr(type(node_instance), attribute, None), (property, functools.cached_property)):
+            if isinstance(
+                getattr(type(node_instance), attribute, None),
+                (property, functools.cached_property),
+            ):
                 # We do not want to call getter of properties.
                 continue
             try:
