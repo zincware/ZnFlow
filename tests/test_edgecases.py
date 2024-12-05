@@ -1,6 +1,7 @@
 import functools
-
+import warnings
 import pytest
+import dataclasses
 
 import znflow
 
@@ -31,6 +32,17 @@ class ConnectResults(znflow.Node):
         pass
 
 
+@dataclasses.dataclass
+class DepsNode(znflow.Node):
+    x: int
+
+    @property
+    def result(self):
+        return self.x
+
+    def run(self):
+        pass
+
 @znflow.nodify
 def add_one(x):
     return x + 1
@@ -48,9 +60,12 @@ def test_PlainNode():
 
 
 def test_NodeCachedProperty():
-    with znflow.DiGraph():
-        node1 = NodeCachedProperty()
-        con = node1.result
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with znflow.DiGraph():
+            node1 = NodeCachedProperty()
+            con = node1.result
+            DepsNode(x=con)
 
     assert isinstance(con, znflow.Connection)
 
@@ -59,10 +74,13 @@ def test_NodeCachedProperty():
 
 
 def test_ConnectResults():
-    with znflow.DiGraph() as graph:
-        node1 = ConnectResults()
-        con = node1.result
-        outs = add_one(con)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with znflow.DiGraph() as graph:
+            node1 = ConnectResults()
+            con = node1.result
+            outs = add_one(con)
+            DepsNode(x=con)
 
     assert isinstance(con, znflow.Connection)
 
@@ -84,10 +102,12 @@ class PropertyAddsValue(znflow.Node):
 
 
 def test_PropertyAddsValue():
-    with znflow.DiGraph() as graph:
-        node1 = PropertyAddsValue(1)
-        con = node1.result
-        outs = add_one(con)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with znflow.DiGraph() as graph:
+            node1 = PropertyAddsValue(1)
+            con = node1.result
+            outs = add_one(con)
 
     assert isinstance(con, znflow.Connection)
 
