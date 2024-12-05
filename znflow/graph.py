@@ -97,9 +97,12 @@ class DiGraph(nx.MultiDiGraph):
                 pass  # moved to add_node
             elif isinstance(node_instance, Node):
                 # TODO only update Nodes if the graph is not empty
+                if node_instance._znflow_resolved:
+                    continue
                 self._update_node_attributes(
                     node_instance, handler.AttributeToConnection()
                 )
+                node_instance._znflow_resolved = True
 
     def _update_function_future_arguments(self, node_instance: FunctionFuture) -> None:
         """Apply an update to args and kwargs of a FunctionFuture."""
