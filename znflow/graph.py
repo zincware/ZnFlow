@@ -122,7 +122,8 @@ class DiGraph(nx.MultiDiGraph):
                 # We do not want to call getter of properties.
                 continue
             try:
-                value = getattr(node_instance, attribute)
+                value = node_instance.__dict__[attribute]
+                # TODO: how to handle properties?
             except Exception:
                 # It might be, that the value is currently not available.
                 #  For example, it could be a property that is not yet set.
