@@ -108,6 +108,7 @@ class NodeBaseMixin:
     _graph_ = empty_graph
     _external_ = False
     _uuid: UUID = None
+    _znflow_resolved: bool = False
 
     _protected_ = [
         "_graph_",
