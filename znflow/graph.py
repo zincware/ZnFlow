@@ -103,7 +103,6 @@ class DiGraph(nx.MultiDiGraph):
             elif isinstance(node_instance, FunctionFuture):
                 pass  # moved to add_node
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")
-                
 
     def _update_function_future_arguments(self, node_instance: FunctionFuture) -> None:
         """Apply an update to args and kwargs of a FunctionFuture."""
