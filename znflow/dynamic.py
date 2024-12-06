@@ -1,6 +1,6 @@
 import typing as t
 
-from znflow.base import Connection, disable_graph, get_graph, FunctionFuture
+from znflow.base import Connection, disable_graph, get_graph, FunctionFuture, NOT_RESVOLED
 
 
 def resolve(value: t.Union[Connection, t.Any]) -> t.Any:
@@ -25,7 +25,7 @@ def resolve(value: t.Union[Connection, t.Any]) -> t.Any:
     # get the actual value
     with disable_graph():
         result = value.result
-    if result is not None:
+    if result is not NOT_RESVOLED:
         return result
     # we assume, that if the result is None, the node has not been run yet
     graph = get_graph()
