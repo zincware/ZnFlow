@@ -92,14 +92,17 @@ class DiGraph(nx.MultiDiGraph):
         set_graph(empty_graph)
         for node in list(self.nodes):  # create a copy of the keys
             node_instance = self.nodes[node]["value"]
-            log.debug(f"Node {node} ({node_instance}) was added to the graph.")
-            if isinstance(node_instance, FunctionFuture):
-                pass  # moved to add_node
-            elif isinstance(node_instance, Node):
+            if isinstance(node_instance, Node):
                 # TODO only update Nodes if the graph is not empty
+                if node_instance._znflow_resolved:
+                    continue
                 self._update_node_attributes(
                     node_instance, handler.AttributeToConnection()
                 )
+                node_instance._znflow_resolved = True
+            elif isinstance(node_instance, FunctionFuture):
+                pass  # moved to add_node
+            log.debug(f"Node {node} ({node_instance}) was added to the graph.")
 
     def _update_function_future_arguments(self, node_instance: FunctionFuture) -> None:
         """Apply an update to args and kwargs of a FunctionFuture."""
@@ -118,11 +121,17 @@ class DiGraph(nx.MultiDiGraph):
             if attribute.startswith("_") or attribute in Node._protected_:
                 # We do not allow connections to private attributes.
                 continue
-            if isinstance(getattr(type(node_instance), attribute, None), property):
+            if isinstance(
+                getattr(type(node_instance), attribute, None),
+                (property, functools.cached_property),
+            ):
                 # We do not want to call getter of properties.
                 continue
             try:
-                value = getattr(node_instance, attribute)
+                if dataclasses.is_dataclass(node_instance):
+                    value = node_instance.__dict__[attribute]
+                else:
+                    value = getattr(node_instance, attribute)
             except Exception:
                 # It might be, that the value is currently not available.
                 #  For example, it could be a property that is not yet set.
