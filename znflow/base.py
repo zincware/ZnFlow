@@ -268,6 +268,24 @@ class Connection:
         except AttributeError:
             raise TypeError(f"'{self}' object is not iterable")
 
+    def extend(self, *args) -> None:
+        """
+        Raises
+        ------
+        TypeError
+            If the method is called.
+        """
+        raise TypeError("Connections can not be extended. Use 'self += other' instead.")
+
+    def append(self, *args) -> None:
+        """
+        Raises
+        ------
+        TypeError
+            If the method is called.
+        """
+        raise TypeError("Connections can not be appended.")
+
 
 @dataclasses.dataclass(frozen=True)
 class CombinedConnections:
@@ -349,6 +367,26 @@ class CombinedConnections:
                 f"The value {connection.result} is of type {type(connection.result)}. The"
                 f" only supported type is list. Please change {connection}"
             ) from err
+
+    def extend(self, *args) -> None:
+        """
+        Raises
+        ------
+        TypeError
+            If the method is called.
+        """
+        raise TypeError(
+            "CombinedConnections can not be extended. Use 'self += other' instead."
+        )
+
+    def append(self, *args) -> None:
+        """
+        Raises
+        ------
+        TypeError
+            If the method is called.
+        """
+        raise TypeError("CombinedConnections can not be appended.")
 
 
 @dataclasses.dataclass

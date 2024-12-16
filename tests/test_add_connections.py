@@ -463,3 +463,39 @@ def test_combine_error():
         znflow.combine([1, 2, 3], attribute="outs", only_getattr_on_nodes=False)
 
     assert znflow.combine([1, 2, 3], attribute="outs") == [1, 2, 3]
+
+
+def test_append_connection():
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+
+        with pytest.raises(TypeError):
+            a.append(b)
+
+
+def test_extend_connection():
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+
+        with pytest.raises(TypeError):
+            a.extend(b)
+
+
+def test_append_combined_connection():
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+
+        with pytest.raises(TypeError):
+            a.append(a + b)
+
+
+def test_extend_combined_connection():
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+
+        with pytest.raises(TypeError):
+            a.extend(a + b)
