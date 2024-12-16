@@ -474,3 +474,23 @@ class FunctionFuture(NodeBaseMixin):
             return resolve(self).__iter__()
         except AttributeError:
             raise TypeError(f"'{self}' object is not iterable")
+
+    def extend(self, *args) -> None:
+        """
+        Raises
+        ------
+        TypeError
+            If the method is called.
+        """
+        raise TypeError(
+            "FunctionFuture can not be extended. Use 'self += other' instead."
+        )
+
+    def append(self, *args) -> None:
+        """
+        Raises
+        ------
+        TypeError
+            If the method is called.
+        """
+        raise TypeError("FunctionFuture can not be appended.")
