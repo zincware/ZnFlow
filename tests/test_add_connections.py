@@ -470,6 +470,8 @@ def test_append_connection():
         a = CreateList(size=5)
         b = CreateList(size=4)
 
+        assert isinstance(a.outs, znflow.Connection)
+
         with pytest.raises(TypeError):
             a.outs.append(b.outs)
 
@@ -488,6 +490,8 @@ def test_append_function_future():
         a = create_list(5)
         b = create_list(5)
 
+        assert isinstance(a, znflow.FunctionFuture)
+
         with pytest.raises(TypeError):
             a.append(b)
 
@@ -505,6 +509,8 @@ def test_append_combined_connection():
     with znflow.DiGraph():
         a = create_list(5)
         b = create_list(5)
+
+        assert isinstance(a + b, znflow.CombinedConnections)
 
         with pytest.raises(TypeError):
             a.append(a + b)
