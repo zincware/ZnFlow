@@ -2,6 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/zincware/ZnFlow/badge.svg?branch=main)](https://coveralls.io/github/zincware/ZnFlow?branch=main)
 [![PyPI version](https://badge.fury.io/py/znflow.svg)](https://badge.fury.io/py/znflow)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/zincware/ZnFlow/HEAD)
+[![Discord](https://img.shields.io/discord/1034511611802689557)](https://discord.gg/7ncfwhsnm4)
 
 # ZnFlow
 
