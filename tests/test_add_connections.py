@@ -467,6 +467,24 @@ def test_combine_error():
 
 def test_append_connection():
     with znflow.DiGraph():
+        a = CreateList(size=5)
+        b = CreateList(size=4)
+
+        with pytest.raises(TypeError):
+            a.outs.append(b.outs)
+
+
+def test_extend_connection():
+    with znflow.DiGraph():
+        a = CreateList(size=5)
+        b = CreateList(size=4)
+
+        with pytest.raises(TypeError):
+            a.outs.extend(b.outs)
+
+
+def test_append_function_future():
+    with znflow.DiGraph():
         a = create_list(5)
         b = create_list(5)
 
@@ -474,7 +492,7 @@ def test_append_connection():
             a.append(b)
 
 
-def test_extend_connection():
+def test_extend_function_future():
     with znflow.DiGraph():
         a = create_list(5)
         b = create_list(5)
