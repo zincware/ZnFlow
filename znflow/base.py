@@ -331,6 +331,9 @@ class CombinedConnections:
     def __getitem__(self, item):
         return dataclasses.replace(self, item=item)
 
+    def __len__(self) -> int:
+        return len(self.connections)
+
     def __iter__(self):
         raise TypeError(f"Can not iterate over {self}.")
 
