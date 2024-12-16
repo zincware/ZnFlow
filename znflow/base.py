@@ -167,9 +167,9 @@ class Connection:
             any slice or list index to be applied to the result
     """
 
-    instance: any
+    instance: Any = dataclasses.field(repr=False)
     attribute: str
-    item: any = None
+    item: Any = None
 
     def __post_init__(self):
         if self.attribute is not None and self.attribute.startswith("_"):
