@@ -463,3 +463,63 @@ def test_combine_error():
         znflow.combine([1, 2, 3], attribute="outs", only_getattr_on_nodes=False)
 
     assert znflow.combine([1, 2, 3], attribute="outs") == [1, 2, 3]
+
+
+def test_append_connection():
+    with znflow.DiGraph():
+        a = CreateList(size=5)
+        b = CreateList(size=4)
+
+        assert isinstance(a.outs, znflow.Connection)
+
+        with pytest.raises(TypeError):
+            a.outs.append(b.outs)
+
+
+def test_extend_connection():
+    with znflow.DiGraph():
+        a = CreateList(size=5)
+        b = CreateList(size=4)
+
+        with pytest.raises(TypeError):
+            a.outs.extend(b.outs)
+
+
+def test_append_function_future():
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+
+        assert isinstance(a, znflow.FunctionFuture)
+
+        with pytest.raises(TypeError):
+            a.append(b)
+
+
+def test_extend_function_future():
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+
+        with pytest.raises(TypeError):
+            a.extend(b)
+
+
+def test_append_combined_connection():
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+
+        assert isinstance(a + b, znflow.CombinedConnections)
+
+        with pytest.raises(TypeError):
+            a.append(a + b)
+
+
+def test_extend_combined_connection():
+    with znflow.DiGraph():
+        a = create_list(5)
+        b = create_list(5)
+
+        with pytest.raises(TypeError):
+            a.extend(a + b)
