@@ -44,6 +44,7 @@ def test_AddLists(use_graph):
             outs = AddOne(lst1.outs + lst2.outs)
 
         assert isinstance(outs.value, CombinedConnections)
+        assert len(outs.value) == 2
         assert len(outs.value.connections) == 2
         assert outs.value.connections[0].instance is lst1
         assert outs.value.connections[0].attribute == "outs"
