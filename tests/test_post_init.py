@@ -1,6 +1,7 @@
 import dataclasses
-import znflow
 import typing as t
+
+import znflow
 
 
 @dataclasses.dataclass

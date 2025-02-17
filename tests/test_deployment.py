@@ -1,6 +1,6 @@
 import dataclasses
-
 import random
+
 import pytest
 
 import znflow
