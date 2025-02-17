@@ -1,66 +1,42 @@
-[tool.poetry]
+[project]
 name = "znflow"
-version = "0.2.4"
+version = "0.2.5"
 description = "A general purpose framework for building and running computational graphs."
-authors = ["zincwarecode <zincwarecode@gmail.com>"]
-license = "Apache-2.0"
+authors = [
+    { name = "Fabian Zills", email = "fzills@icp.uni-stuttgart.de" },
+]
 readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+dependencies = [
+    "networkx>=3.4.2",
+]
 
-[tool.poetry.urls]
-repository = "https://github.com/zincware/znflow"
-
-[tool.poetry.dependencies]
-python = ">=3.9,<4.0"
-networkx = "^3"
-
-dask = { version = "^2024", optional = true }
-distributed = { version = "^2024", optional = true }
-
-
-[tool.poetry.group.tests.dependencies]
-pytest = "^7"
-coverage = "^6"
-zninit = "^0.1"
-attrs = "^22"
-pydantic = "^2.6.2"
-
-[tool.poetry.group.notebook.dependencies]
-jupyterlab = "^3"
-
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3"
-
-[tool.poetry.extras]
-dask = ["dask", "distributed", "dask-jobqueue", "bokeh"]
+[dependency-groups]
+dev = [
+    "attrs>=25.1.0",
+    "dask>=2025.2.0",
+    "distributed>=2025.2.0",
+    "pydantic>=2.10.6",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "zninit>=0.1.11",
+]
 
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.coverage.report]
-exclude_lines = [
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:"
-]
-ignore_errors = true
-
-[tool.black]
-line-length = 90
-preview = true
-
-[tool.isort]
-profile = 'black'
-multi_line_output = 3
-
+[project.urls]
+Repository = "https://github.com/zincware/znflow"
+Releases = "https://github.com/zincware/znflow/releases"
+Discord = "https://discord.gg/7ncfwhsnm4"
 [tool.ruff]
 line-length = 90
 
 [tool.ruff.lint]
-select = ["E", "F"] #, "D"] #, "N", "C", "ANN"]
+select = ["E", "F", "I"] #, "D"] #, "N", "C", "ANN"]
 extend-ignore = [
     "D213", "D203"
 ]

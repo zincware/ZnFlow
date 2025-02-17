@@ -1,6 +1,6 @@
 import typing as t
 
-from znflow.base import Connection, disable_graph, get_graph, FunctionFuture
+from znflow.base import Connection, FunctionFuture, disable_graph, get_graph
 
 
 def resolve(value: t.Union[Connection, t.Any]) -> t.Any:

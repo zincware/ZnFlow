@@ -1,7 +1,8 @@
+import dataclasses
 import functools
 import warnings
+
 import pytest
-import dataclasses
 
 import znflow
 
