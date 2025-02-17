@@ -1,8 +1,10 @@
 """Test dynamic connection resolving using magic methods."""
 
 import dataclasses
-import znflow
+
 import pytest
+
+import znflow
 
 
 @dataclasses.dataclass

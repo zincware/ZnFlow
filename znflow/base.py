@@ -217,7 +217,7 @@ class Connection:
 
     def __eq__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if isinstance(other, (Connection)):
             return self.instance == other.instance
@@ -230,7 +230,7 @@ class Connection:
 
     def __lt__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if get_graph() is empty_graph:
             return super().__lt__(other)
@@ -238,7 +238,7 @@ class Connection:
 
     def __le__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if get_graph() is empty_graph:
             return super().__le__(other)
@@ -246,7 +246,7 @@ class Connection:
 
     def __gt__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if get_graph() is empty_graph:
             return super().__gt__(other)
@@ -254,7 +254,7 @@ class Connection:
 
     def __ge__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if get_graph() is empty_graph:
             return super().__ge__(other)
@@ -419,7 +419,7 @@ class FunctionFuture(NodeBaseMixin):
 
     def __eq__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if isinstance(other, (Connection)):
             return False
@@ -437,7 +437,7 @@ class FunctionFuture(NodeBaseMixin):
 
     def __lt__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if get_graph() is empty_graph:
             return super().__lt__(other)
@@ -445,7 +445,7 @@ class FunctionFuture(NodeBaseMixin):
 
     def __le__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if get_graph() is empty_graph:
             return super().__le__(other)
@@ -453,7 +453,7 @@ class FunctionFuture(NodeBaseMixin):
 
     def __gt__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if get_graph() is empty_graph:
             return super().__gt__(other)
@@ -461,7 +461,7 @@ class FunctionFuture(NodeBaseMixin):
 
     def __ge__(self, other) -> bool:
         """Overwrite for dynamic break points."""
-        from znflow import resolve, get_graph, empty_graph
+        from znflow import empty_graph, get_graph, resolve
 
         if get_graph() is empty_graph:
             return super().__ge__(other)
