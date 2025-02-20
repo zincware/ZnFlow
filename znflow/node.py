@@ -67,7 +67,7 @@ class Node(NodeBaseMixin):
         # Connect the Node to the Graph
         graph = get_graph()
         if graph is not empty_graph:
-            graph.add_node(instance, this_uuid=this_uuid)
+            graph.add_znflow_node(instance, this_uuid=this_uuid)
         return instance
 
     def __getattribute__(self, item: str):
@@ -94,7 +94,7 @@ class Node(NodeBaseMixin):
                 raise ValueError(f"'{self.uuid=}' not in '{self._graph_=}'")
             if value.uuid not in self._graph_:
                 if value._external_:
-                    self._graph_.add_node(value.instance)
+                    self._graph_.add_znflow_node(value.instance)
                 else:
                     raise ValueError(f"'{value.uuid=}' not in '{self._graph_=}'")
 
@@ -123,7 +123,7 @@ def nodify(function):
             future = FunctionFuture(function, args, kwargs)
             future.uuid = uuid.uuid4()
 
-            graph.add_node(future)
+            graph.add_znflow_node(future)
             return future
         return function(*args, **kwargs)
 

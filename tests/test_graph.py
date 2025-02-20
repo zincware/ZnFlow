@@ -82,7 +82,7 @@ def test_add_others():
     graph = znflow.DiGraph()
     with pytest.raises(ValueError):
         # it is only possible to add classes inheriting from NodeBaseMixin
-        graph.add_node(42)
+        graph.add_znflow_node(42)
 
 
 def test_add_connections():

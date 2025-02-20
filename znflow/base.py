@@ -103,12 +103,18 @@ class NodeBaseMixin:
             If true, the node is allowed to be created outside of a graph context.
             In this case connections can be created to this node, otherwise
             an exception is raised.
+        _primary_key : str
+            The unique identifier of this node. Default is the 'uuid'.
+        _protected_ : list[str]
+            A list of attributes that are not allowed to be connected to /
+            which are not converted to a Connection.
     """
 
     _graph_ = empty_graph
     _external_ = False
     _uuid: UUID = None
     _znflow_resolved: bool = False
+    _primary_key: str = "uuid"
 
     _protected_ = [
         "_graph_",
@@ -191,7 +197,10 @@ class Connection:
 
     @property
     def uuid(self):
-        return self.instance.uuid
+        try:
+            return getattr(self.instance, self.instance._primary_key)
+        except AttributeError:
+            return self.instance.uuid
 
     @property
     def _external_(self):

@@ -147,7 +147,7 @@ class DiGraph(nx.MultiDiGraph):
                 value, node_instance=node_instance, attribute=attribute
             )
 
-    def add_node(self, node_for_adding, this_uuid=None, **attr):
+    def add_znflow_node(self, node_for_adding, this_uuid=None, **attr):
         if isinstance(node_for_adding, NodeBaseMixin):
             if this_uuid is None:
                 this_uuid = node_for_adding.uuid
@@ -165,14 +165,14 @@ class DiGraph(nx.MultiDiGraph):
         if isinstance(u_of_edge, Connection) and isinstance(v_of_edge, NodeBaseMixin):
             if u_of_edge.uuid not in self:
                 if u_of_edge._external_:
-                    self.add_node(u_of_edge.instance)
+                    self.add_znflow_node(u_of_edge.instance)
                 else:
                     raise ValueError(
                         f"The source node (uuid={u_of_edge.uuid}, connection={u_of_edge})"
                         " is not in the graph."
                     )
             if (
-                v_of_edge.uuid not in self
+                getattr(v_of_edge, v_of_edge._primary_key) not in self
             ):  # this might be impossible to reach. Let me know if you found a way.
                 raise ValueError(
                     f"The target node (uuid={v_of_edge.uuid}, connection={v_of_edge}) is"
@@ -216,7 +216,7 @@ class DiGraph(nx.MultiDiGraph):
             if isinstance(node, (list, tuple)):
                 self.write_graph(*node)
             else:
-                self.add_node(node)
+                self.add_znflow_node(node)
         with self:
             pass
 
