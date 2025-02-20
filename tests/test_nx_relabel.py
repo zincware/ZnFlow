@@ -32,7 +32,7 @@ def test_nx_relabel_nodes():
         a = DataclassNode(value=42)
         b = DataclassNode(value=a.value) # testing the connection
 
-    # assert "custom" in graph
-    # assert b.uuid in graph
-    # assert a.uuid not in graph
-    # assert len(graph) == 2
+    assert "custom" in graph
+    assert b.uuid in graph
+    assert a.uuid not in graph
+    assert len(graph) == 2
