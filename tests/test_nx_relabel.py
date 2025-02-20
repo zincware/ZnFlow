@@ -16,7 +16,6 @@ class DataclassNode(znflow.Node):
             nx.relabel_nodes(self._graph_, {self.uuid: "custom"}, copy=False)
             self.__dict__["name"] = "custom"
 
-
     def run(self):
         self.value += 1
 
@@ -30,7 +29,7 @@ def test_nx_relabel_nodes():
 
     with graph:
         a = DataclassNode(value=42)
-        b = DataclassNode(value=a.value) # testing the connection
+        b = DataclassNode(value=a.value)  # testing the connection
 
     # assert "custom" in graph
     # assert b.uuid in graph

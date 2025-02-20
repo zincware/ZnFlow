@@ -106,7 +106,7 @@ class NodeBaseMixin:
         _primary_key : str
             The unique identifier of this node. Default is the 'uuid'.
         _protected_ : list[str]
-            A list of attributes that are not allowed to be connected to / 
+            A list of attributes that are not allowed to be connected to /
             which are not converted to a Connection.
     """
 
