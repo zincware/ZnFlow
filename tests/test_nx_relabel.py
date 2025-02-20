@@ -1,6 +1,9 @@
 import dataclasses
-import znflow
+
 import networkx as nx
+
+import znflow
+
 
 @dataclasses.dataclass
 class DataclassNode(znflow.Node):
@@ -15,7 +18,7 @@ def test_nx_relabel_nodes():
 
     with graph:
         node = DataclassNode(value=42)
-    
+
     assert node.uuid in graph
     nx.relabel_nodes(graph, {node.uuid: "custom"}, copy=False)
     assert "custom" in graph
