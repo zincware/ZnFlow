@@ -1,6 +1,6 @@
 [project]
 name = "znflow"
-version = "0.2.5"
+version = "0.2.6"
 description = "A general purpose framework for building and running computational graphs."
 authors = [
     { name = "Fabian Zills", email = "fzills@icp.uni-stuttgart.de" },
