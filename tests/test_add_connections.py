@@ -558,7 +558,8 @@ def test_connection_plus_combined_connection(use_graph):
 
 
 def test_no_nested_combined_connections():
-    """Test that Connection + CombinedConnection doesn't create nested CombinedConnections"""
+    """Test that Connection + CombinedConnection
+    doesn't create nested CombinedConnections"""
     with znflow.DiGraph():
         lst1 = CreateList(2)
         lst2 = CreateList(3)
