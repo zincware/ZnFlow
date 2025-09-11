@@ -187,7 +187,9 @@ class Connection:
     def __add__(
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
-        if isinstance(other, (Connection, FunctionFuture, CombinedConnections)):
+        if isinstance(other, CombinedConnections):
+            return CombinedConnections(connections=[self] + other.connections)
+        if isinstance(other, (Connection, FunctionFuture)):
             return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")
 
