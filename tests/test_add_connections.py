@@ -579,6 +579,7 @@ def test_no_nested_combined_connections():
         for conn in result.connections:
             assert not isinstance(conn, CombinedConnections)
 
+
 def test_add_sliced_combined_connections_error():
     """Test that slicing a CombinedConnection raises an error when adding"""
     with znflow.DiGraph():
