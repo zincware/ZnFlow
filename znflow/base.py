@@ -188,7 +188,9 @@ class Connection:
         self, other: typing.Union[Connection, FunctionFuture, CombinedConnections]
     ) -> CombinedConnections:
         if isinstance(other, CombinedConnections):
-            return CombinedConnections(connections=[self] + other.connections)
+            if other.item is not None:
+                raise ValueError("Can not combine multiple slices")
+            return CombinedConnections(connections=[self, *other.connections])
         if isinstance(other, (Connection, FunctionFuture)):
             return CombinedConnections(connections=[self, other])
         raise TypeError(f"Can not add {type(other)} to {type(self)}.")

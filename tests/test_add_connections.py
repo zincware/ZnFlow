@@ -578,3 +578,15 @@ def test_no_nested_combined_connections():
         # Verify no nested CombinedConnections in the connections list
         for conn in result.connections:
             assert not isinstance(conn, CombinedConnections)
+
+def test_add_sliced_combined_connections_error():
+    """Test that slicing a CombinedConnection raises an error when adding"""
+    with znflow.DiGraph():
+        lst1 = CreateList(5)
+        lst2 = CreateList(5)
+
+        combined = lst1.outs + lst2.outs
+        assert isinstance(combined, CombinedConnections)
+
+        with pytest.raises(ValueError, match="Can not combine multiple slices"):
+            _ = combined[::2] + combined[1::2]
