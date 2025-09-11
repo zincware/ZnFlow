@@ -523,3 +523,71 @@ def test_extend_combined_connection():
 
         with pytest.raises(TypeError):
             a.extend(a + b)
+
+
+@pytest.mark.parametrize("use_graph", [True, False])
+def test_connection_plus_combined_connection(use_graph):
+    """Test Connection + CombinedConnection operation"""
+    if use_graph:
+        with znflow.DiGraph() as graph:
+            lst1 = CreateList(3)
+            lst2 = CreateList(4)
+            lst3 = CreateList(5)
+
+            # Create CombinedConnection first
+            combined = lst2.outs + lst3.outs
+            # Then add Connection to it
+            result = lst1.outs + combined
+
+        assert isinstance(result, CombinedConnections)
+        assert len(result.connections) == 3
+        graph.run()
+        result_value = result.result
+    else:
+        lst1 = CreateList(3)
+        lst2 = CreateList(4)
+        lst3 = CreateList(5)
+        lst1.run()
+        lst2.run()
+        lst3.run()
+
+        combined = lst2.outs + lst3.outs
+        result_value = lst1.outs + combined
+
+    assert result_value == [0, 1, 2] + [0, 1, 2, 3] + [0, 1, 2, 3, 4]
+
+
+def test_no_nested_combined_connections():
+    """Test that Connection + CombinedConnection
+    doesn't create nested CombinedConnections"""
+    with znflow.DiGraph():
+        lst1 = CreateList(2)
+        lst2 = CreateList(3)
+        lst3 = CreateList(4)
+
+        # Create initial CombinedConnection
+        combined = lst1.outs + lst2.outs
+        assert isinstance(combined, CombinedConnections)
+        assert len(combined.connections) == 2
+
+        # Add another Connection - should flatten, not nest
+        result = lst3.outs + combined
+        assert isinstance(result, CombinedConnections)
+        assert len(result.connections) == 3
+
+        # Verify no nested CombinedConnections in the connections list
+        for conn in result.connections:
+            assert not isinstance(conn, CombinedConnections)
+
+
+def test_add_sliced_combined_connections_error():
+    """Test that slicing a CombinedConnection raises an error when adding"""
+    with znflow.DiGraph():
+        lst1 = CreateList(5)
+        lst2 = CreateList(5)
+
+        combined = lst1.outs + lst2.outs
+        assert isinstance(combined, CombinedConnections)
+
+        with pytest.raises(ValueError, match="Can not combine multiple slices"):
+            _ = combined[::2] + combined[1::2]
