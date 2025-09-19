@@ -1,6 +1,6 @@
 [project]
 name = "znflow"
-version = "0.2.6"
+version = "0.2.7"
 description = "A general purpose framework for building and running computational graphs."
 authors = [
     { name = "Fabian Zills", email = "fzills@icp.uni-stuttgart.de" },
@@ -17,6 +17,7 @@ dev = [
     "attrs>=25.1.0",
     "dask>=2025.2.0",
     "distributed>=2025.2.0",
+    "ipykernel>=6.30.1",
     "pydantic>=2.10.6",
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",

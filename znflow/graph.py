@@ -182,12 +182,26 @@ class DiGraph(nx.MultiDiGraph):
             # TODO what if 'v_attr' is a list/dict/... that contains multiple connections?
             #  Is this relevant? We could do `v_attr.<dict_key>` or `v_attr.<list_index>`
             #  See test_node.test_ListConnection and test_node.test_DictionaryConnection
-            self.add_edge(
-                u_of_edge.uuid,
-                v_of_edge.uuid,
-                u_attr=u_of_edge.attribute,
-                **attr,
-            )
+            # Check if this exact edge already exists to prevent duplicates
+            edge_exists = False
+            u_attr = u_of_edge.attribute
+            v_attr = attr.get("v_attr")
+            if self.has_edge(u_of_edge.uuid, v_of_edge.uuid):
+                for edge_data in self[u_of_edge.uuid][v_of_edge.uuid].values():
+                    if (
+                        edge_data.get("u_attr") == u_attr
+                        and edge_data.get("v_attr") == v_attr
+                    ):
+                        edge_exists = True
+                        break
+
+            if not edge_exists:
+                self.add_edge(
+                    u_of_edge.uuid,
+                    v_of_edge.uuid,
+                    u_attr=u_of_edge.attribute,
+                    **attr,
+                )
         else:
             raise ValueError("Only Connections and Nodes are supported.")
 
