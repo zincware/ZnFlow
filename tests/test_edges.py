@@ -26,15 +26,10 @@ def test_no_duplicate_edges():
     assert len(project.edges) == 2
 
     # Verify the edges are what we expect
-    edges_with_attrs = list(project.edges(data=True))
-    edge_descriptions = []
-    for edge in edges_with_attrs:
-        u_attr = edge[2]["u_attr"]
-        v_attr = edge[2]["v_attr"]
-        edge_descriptions.append(f"{u_attr}->{v_attr}")
-
-    assert "c->a" in edge_descriptions
-    assert "c->b" in edge_descriptions
+    edge_descriptions = {
+        f"{d['u_attr']}->{d['v_attr']}" for _, _, d in project.edges(data=True)
+    }
+    assert edge_descriptions == {"c->a", "c->b"}
 
 
 def test_multiple_connections_same_nodes():
@@ -56,15 +51,10 @@ def test_multiple_connections_same_nodes():
     assert len(project.edges) == 2
 
     # Verify the edges are what we expect
-    edges_with_attrs = list(project.edges(data=True))
-    edge_descriptions = []
-    for edge in edges_with_attrs:
-        u_attr = edge[2]["u_attr"]
-        v_attr = edge[2]["v_attr"]
-        edge_descriptions.append(f"{u_attr}->{v_attr}")
-
-    assert "x->x" in edge_descriptions
-    assert "y->y" in edge_descriptions
+    edge_descriptions = {
+        f"{d['u_attr']}->{d['v_attr']}" for _, _, d in project.edges(data=True)
+    }
+    assert edge_descriptions == {"x->x", "y->y"}
 
 
 def test_no_duplicate_edges_group():
@@ -87,6 +77,11 @@ def test_no_duplicate_edges_group():
     # Should have 2 unique edges: a.c -> c.a and b.c -> c.b
     assert len(project.edges) == 2
 
+    edge_descriptions = {
+        f"{d['u_attr']}->{d['v_attr']}" for _, _, d in project.edges(data=True)
+    }
+    assert edge_descriptions == {"c->a", "c->b"}
+
 
 def test_no_duplicate_edges_iterable():
     project = znflow.DiGraph()
@@ -106,13 +101,7 @@ def test_no_duplicate_edges_iterable():
     assert len(project.nodes) == 4
     assert len(project.edges) == 3
 
-    edges_with_attrs = list(project.edges(data=True))
-    edge_descriptions = []
-    for edge in edges_with_attrs:
-        u_attr = edge[2]["u_attr"]
-        v_attr = edge[2]["v_attr"]
-        edge_descriptions.append(f"{u_attr}->{v_attr}")
-
-    assert "a->a" in edge_descriptions
-    assert "b->b" in edge_descriptions
-    assert "c->b" in edge_descriptions
+    edge_descriptions = {
+        f"{d['u_attr']}->{d['v_attr']}" for _, _, d in project.edges(data=True)
+    }
+    assert edge_descriptions == {"a->a", "b->b", "c->b"}
