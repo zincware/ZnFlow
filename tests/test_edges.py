@@ -86,3 +86,33 @@ def test_no_duplicate_edges_group():
 
     # Should have 2 unique edges: a.c -> c.a and b.c -> c.b
     assert len(project.edges) == 2
+
+
+def test_no_duplicate_edges_iterable():
+    project = znflow.DiGraph()
+
+    with project.group("subgraph"):
+        a = Node(a=1, b=2)
+        b = Node(a=3, b=4)
+        c = Node(a=5, b=6)
+        _ = Node(a=[a.a], b=[b.b, c.c])
+
+    with project:
+        pass
+
+    with project.group("other-subgraph"):
+        pass
+
+    assert len(project.nodes) == 4
+    assert len(project.edges) == 3
+
+    edges_with_attrs = list(project.edges(data=True))
+    edge_descriptions = []
+    for edge in edges_with_attrs:
+        u_attr = edge[2]["u_attr"]
+        v_attr = edge[2]["v_attr"]
+        edge_descriptions.append(f"{u_attr}->{v_attr}")
+
+    assert "a->a" in edge_descriptions
+    assert "b->b" in edge_descriptions
+    assert "c->b" in edge_descriptions
