@@ -273,8 +273,8 @@ which see connections just like a `__post_init__` does.
 
 #### Computed fields
 
-> [!Warning]
-> Do not use `from pydantic import computed_field` but use `from znflow.pydantic import computed_field` instead.
+> [!Warning] Do not use `from pydantic import computed_field` but use
+> `from znflow.pydantic import computed_field` instead.
 
 ```python
 from znflow.pydantic import computed_field
