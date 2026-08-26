@@ -92,7 +92,7 @@ class Node(NodeBaseMixin):
                     )
 
             if item not in self._protected_:
-                if self._in_construction:
+                if self._in_construction or self._in_validation:
                     return super().__getattribute__(item)
                 return Connection(instance=self, attribute=item)
         return super().__getattribute__(item)

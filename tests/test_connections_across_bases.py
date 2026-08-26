@@ -111,6 +111,15 @@ class PydanticDataclassSink(znflow.Node):
         self.outs = _received(self)
 
 
+@pydantic.dataclasses.dataclass(config=pydantic.ConfigDict(validate_assignment=True))
+class ValidateAssignmentDataclassSink(znflow.Node):
+    deps: list = dataclasses.field(default_factory=list)
+    outs: list = dataclasses.field(default_factory=list)
+
+    def run(self):
+        self.outs = _received(self)
+
+
 SINKS = [
     PlainSink,
     DataclassSink,
@@ -121,6 +130,7 @@ SINKS = [
     ValidateAssignmentModelSink,
     InheritedModelSink,
     PydanticDataclassSink,
+    ValidateAssignmentDataclassSink,
 ]
 
 
@@ -299,3 +309,16 @@ def test_carries_connection():
         assert znflow.carries_connection(source("future"))
     assert not znflow.carries_connection([1, 2])
     assert not znflow.carries_connection({"a": "b"})
+
+
+def test_validated_assignment_keeps_the_graph_acyclic():
+    """Pydantic reads the remaining fields while it validates an assignment."""
+    with znflow.DiGraph() as graph:
+        sink = ValidateAssignmentDataclassSink()
+        sink.deps = Source().outs
+
+    assert graph.number_of_edges() == 1
+    assert [(u == v) for u, v in graph.edges()] == [False]
+    assert isinstance(sink.__dict__["outs"], list)
+    graph.run()
+    assert sink.outs == ["got(seed)"]

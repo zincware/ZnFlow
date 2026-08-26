@@ -158,6 +158,9 @@ class NodeBaseMixin:
         _in_construction : bool
             True while '__init__' is running. Attribute access returns the
             value itself as long as this is set, and a 'Connection' afterwards.
+        _in_validation : bool
+            True while a framework validates an assignment. Attribute access
+            returns the value itself as long as this is set.
         _primary_key : str
             The unique identifier of this node. Default is the 'uuid'.
         _protected_ : list[str]
@@ -169,6 +172,7 @@ class NodeBaseMixin:
     _external_ = False
     _uuid = NodeState(None)
     _in_construction = NodeState(True)
+    _in_validation = NodeState(False)
     _znflow_resolved = NodeState(False)
     _primary_key: str = "uuid"
 
