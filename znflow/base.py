@@ -3,8 +3,8 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import typing
+import weakref
 from typing import Any
-from uuid import UUID
 
 from znflow import exceptions
 
@@ -87,6 +87,58 @@ class EmptyGraph:
 empty_graph = EmptyGraph()
 
 
+_node_state: typing.Dict[int, typing.Dict[str, Any]] = {}
+
+
+class NodeState:
+    """Node state that outlives a replaced instance '__dict__'.
+
+    The value is mirrored into the instance '__dict__', so it travels with the
+    node through 'pickle'. Pydantic hands '__dict__' to its validator, which
+    replaces the dictionary in '__init__' and on every validated assignment, so
+    for a pydantic class the value is also kept in a table keyed by the instance.
+
+    Attributes
+    ----------
+    default : any
+        The value to return before the first assignment. Reading the
+        attribute from the class returns this default.
+    name : str
+        The attribute name, filled in by '__set_name__'.
+    """
+
+    def __init__(self, default):
+        self.default = default
+        self.name = None
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self.default
+        try:
+            return obj.__dict__[self.name]
+        except (AttributeError, KeyError):
+            return _node_state.get(id(obj), {}).get(self.name, self.default)
+
+    def __set__(self, obj, value):
+        try:
+            obj.__dict__[self.name] = value
+        except (AttributeError, TypeError):
+            pass
+        else:
+            if not hasattr(type(obj), "__pydantic_validator__"):
+                return
+
+        key = id(obj)
+        state = _node_state.get(key)
+        if state is None:
+            state = _node_state[key] = {}
+            weakref.finalize(obj, _node_state.pop, key, None)
+        state[self.name] = value
+
+
 class NodeBaseMixin:
     """A Parent for all Nodes.
 
@@ -103,6 +155,9 @@ class NodeBaseMixin:
             If true, the node is allowed to be created outside of a graph context.
             In this case connections can be created to this node, otherwise
             an exception is raised.
+        _in_construction : bool
+            True while '__init__' is running. Attribute access returns the
+            value itself as long as this is set, and a 'Connection' afterwards.
         _primary_key : str
             The unique identifier of this node. Default is the 'uuid'.
         _protected_ : list[str]
@@ -112,8 +167,9 @@ class NodeBaseMixin:
 
     _graph_ = empty_graph
     _external_ = False
-    _uuid: UUID = None
-    _znflow_resolved: bool = False
+    _uuid = NodeState(None)
+    _in_construction = NodeState(True)
+    _znflow_resolved = NodeState(False)
     _primary_key: str = "uuid"
 
     _protected_ = [

@@ -14,21 +14,20 @@ from znflow.base import (
 )
 
 
-def _mark_init_in_construction(cls, this_uuid=None):
+def _mark_init_in_construction(cls):
     if "__init__" in dir(cls):
 
         def wrap_init(func):
             if hasattr(func, "_znflow_func"):
-                # we wrap the original function, thereby updating the
-                # uuid to be unique.
                 func = func._znflow_func
 
             @functools.wraps(cls.__init__)
             def wrapper(self, *args, **kwargs):
                 func(self, *args, **kwargs)
-                self._in_construction = False
+                object.__setattr__(self, "_in_construction", False)
+                this_uuid = getattr(self, "_uuid", None)
                 if this_uuid is not None:
-                    self._uuid = this_uuid
+                    object.__setattr__(self, "_uuid", this_uuid)
 
             wrapper._znflow_func = func
 
@@ -39,8 +38,6 @@ def _mark_init_in_construction(cls, this_uuid=None):
 
 
 class Node(NodeBaseMixin):
-    _in_construction = True
-
     def run(self):
         raise NotImplementedError
 
@@ -57,12 +54,8 @@ class Node(NodeBaseMixin):
             # print("TypeError: ...")
             instance = super().__new__(cls)
 
-        try:
-            instance.uuid = this_uuid
-            _mark_init_in_construction(cls, None)
-        except AttributeError:
-            # pydantic edge case
-            _mark_init_in_construction(cls, this_uuid)
+        object.__setattr__(instance, "_uuid", this_uuid)
+        _mark_init_in_construction(cls)
 
         # Connect the Node to the Graph
         graph = get_graph()
