@@ -9,6 +9,7 @@ a pydantic Node the same way it reaches a dataclass or a plain class.
 """
 
 import copy
+import functools
 import typing
 
 from znflow.base import (
@@ -104,4 +105,31 @@ def allow_connections(cls) -> None:
             for name, annotation in annotations.items():
                 cls.__dataclass_fields__[name].type = annotation
 
+    _wrap_setattr(cls)
     setattr(cls, _VALIDATOR, cls.__pydantic_validator__)
+
+
+def _wrap_setattr(cls) -> None:
+    """Keep the graph out of the pydantic validation of an assignment.
+
+    'validate_assignment' makes pydantic install a '__setattr__' on the class
+    which validates through 'validate_assignment'. Pydantic reads the remaining
+    fields with 'getattr' on the way, which inside a graph yields a 'Connection'
+    to the instance itself. The instance is marked for the length of the call, so
+    that 'Node.__getattribute__' hands back the stored value.
+    """
+    func = cls.__dict__.get("__setattr__")
+    if func is None or hasattr(func, "_znflow_func"):
+        return
+
+    @functools.wraps(func)
+    def wrapper(self, item, value):
+        object.__setattr__(self, "_in_validation", True)
+        try:
+            func(self, item, value)
+        finally:
+            object.__setattr__(self, "_in_validation", False)
+
+    wrapper._znflow_func = func
+
+    cls.__setattr__ = wrapper
