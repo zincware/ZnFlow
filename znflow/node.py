@@ -4,6 +4,7 @@ import functools
 import inspect
 import uuid
 
+from znflow._pydantic import allow_connections
 from znflow.base import (
     Connection,
     FunctionFuture,
@@ -71,6 +72,7 @@ class Node(NodeBaseMixin):
             instance = super().__new__(cls)
 
         object.__setattr__(instance, "_uuid", this_uuid)
+        allow_connections(cls)
         _mark_init_in_construction(cls)
 
         # Connect the Node to the Graph
