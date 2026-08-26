@@ -1,6 +1,6 @@
 [project]
 name = "znflow"
-version = "0.2.7"
+dynamic = ["version"]
 description = "A general purpose framework for building and running computational graphs."
 authors = [
     { name = "Fabian Zills", email = "fzills@icp.uni-stuttgart.de" },
@@ -26,8 +26,14 @@ dev = [
 
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "znflow/_version.py"
 
 [project.urls]
 Repository = "https://github.com/zincware/znflow"
