@@ -1260,6 +1260,7 @@ wheels = [
 
 [[package]]
 name = "znflow"
+version = "0.2.7"
 source = { editable = "." }
 dependencies = [
     { name = "networkx" },
