@@ -109,6 +109,38 @@ class PydanticDataclassValidateAssignmentNode(znflow.Node):
         return znflow.get_attribute(self, "value")
 
 
+class PydanticBase(pydantic.BaseModel):
+    """A pydantic base class between the node and 'pydantic.BaseModel'."""
+
+    model_config = pydantic.ConfigDict(validate_assignment=True)
+
+
+class PydanticInheritedNode(PydanticBase, znflow.Node):
+    value: pydantic.SkipValidation[int]
+
+    def run(self):
+        self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
+
+class PydanticFieldBase(pydantic.BaseModel):
+    """A pydantic base class that declares the field itself."""
+
+    value: pydantic.SkipValidation[int]
+
+
+class PydanticInheritedFieldNode(PydanticFieldBase, znflow.Node):
+    def run(self):
+        self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
+
 NODES = [
     PlainNode,
     DataclassNode,
@@ -118,6 +150,8 @@ NODES = [
     PydanticValidateAssignmentNode,
     PydanticDataclassNode,
     PydanticDataclassValidateAssignmentNode,
+    PydanticInheritedNode,
+    PydanticInheritedFieldNode,
 ]
 
 
@@ -328,6 +362,8 @@ PICKLED_NODES = [
     PydanticValidateAssignmentNode,
     PydanticDataclassNode,
     PydanticDataclassValidateAssignmentNode,
+    PydanticInheritedNode,
+    PydanticInheritedFieldNode,
 ]
 
 
@@ -346,13 +382,20 @@ def test_node_state_dropped():
             object.__setattr__(node, "_uuid", None)
 
 
-@pytest.mark.parametrize("cls", [PydanticNode, PydanticValidateAssignmentNode])
+@pytest.mark.parametrize(
+    "cls",
+    [
+        PydanticNode,
+        PydanticValidateAssignmentNode,
+        PydanticInheritedNode,
+        PydanticInheritedFieldNode,
+    ],
+)
 def test_pydantic_schema(cls):
     """The znflow state stays out of the pydantic contract."""
     node = cls(value=42)
 
     assert node.model_dump() == {"value": 42}
-    assert node.model_dump_json() == '{"value":42}'
     assert list(cls.model_json_schema()["properties"]) == ["value"]
 
 

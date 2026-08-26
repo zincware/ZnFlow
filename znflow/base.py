@@ -90,31 +90,13 @@ empty_graph = EmptyGraph()
 _node_state: typing.Dict[int, typing.Dict[str, Any]] = {}
 
 
-def _replaces_dict(cls) -> bool:
-    """Check if a class replaces the instance '__dict__'.
-
-    Pydantic builds an instance by handing '__dict__' to its validator, which
-    replaces the dictionary in '__init__' and on every validated assignment.
-
-    Parameters
-    ----------
-    cls : type
-        The class to check.
-
-    Returns
-    -------
-    bool
-        True for pydantic models and pydantic dataclasses.
-    """
-    return hasattr(cls, "__pydantic_validator__")
-
-
 class NodeState:
     """Node state that outlives a replaced instance '__dict__'.
 
     The value is mirrored into the instance '__dict__', so it travels with the
-    node through 'pickle'. For classes that replace '__dict__' the value is
-    additionally kept in a table on the class, keyed by the instance.
+    node through 'pickle'. Pydantic hands '__dict__' to its validator, which
+    replaces the dictionary in '__init__' and on every validated assignment, so
+    for a pydantic class the value is also kept in a table keyed by the instance.
 
     Attributes
     ----------
@@ -146,7 +128,7 @@ class NodeState:
         except (AttributeError, TypeError):
             pass
         else:
-            if not _replaces_dict(type(obj)):
+            if not hasattr(type(obj), "__pydantic_validator__"):
                 return
 
         key = id(obj)

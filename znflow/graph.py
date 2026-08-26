@@ -105,8 +105,6 @@ class DiGraph(nx.MultiDiGraph):
                 self._update_node_attributes(
                     node_instance, handler.AttributeToConnection()
                 )
-                # 'object.__setattr__' reaches the 'NodeState' descriptor while
-                # bypassing the validated '__setattr__' of a pydantic class.
                 object.__setattr__(node_instance, "_znflow_resolved", True)
             elif isinstance(node_instance, FunctionFuture):
                 pass  # moved to add_node
