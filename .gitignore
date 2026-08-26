@@ -161,3 +161,6 @@ cython_debug/
 .vscode/
 
 tmp/
+
+# hatch-vcs generated version file
+znflow/_version.py
