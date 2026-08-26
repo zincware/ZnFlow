@@ -508,3 +508,13 @@ def test_ListConnection(deployment, request):
     assert isinstance(edge2, dict)
     assert edge2[0]["u_attr"] == "value"
     assert edge2[0]["v_attr"] == "nodes"
+
+
+def test_init_of_a_base_class():
+    """A base class keeps its '__init__' after 'znflow.Node' was instantiated."""
+    znflow.Node()
+
+    class Sink(znflow.Node, pydantic.BaseModel):
+        value: int = 0
+
+    assert Sink(value=42).value == 42
