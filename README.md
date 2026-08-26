@@ -273,10 +273,8 @@ which see connections just like a `__post_init__` does.
 
 #### Computed fields
 
-`znflow.pydantic.computed_field` turns a method into a graph visible port:
-inside the graph reading it yields a `znflow.Connection`, so another `Node` can
-be connected to it, and outside the graph it is computed and part of
-`model_dump()`.
+> [!Warning]
+> Do not use `from pydantic import computed_field` but use `from znflow.pydantic import computed_field` instead.
 
 ```python
 from znflow.pydantic import computed_field
@@ -291,8 +289,3 @@ class Frames(znflow.Node, pydantic.BaseModel):
 
     def run(self): ...
 ```
-
-The getter runs with the graph disabled, so a plain field it reads is the value
-itself. Reading a field that is connected to another `Node` raises
-`znflow.exceptions.UnresolvedConnectionError`, because that value only exists
-once the graph has run.
