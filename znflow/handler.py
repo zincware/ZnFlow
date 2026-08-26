@@ -16,6 +16,13 @@ class AttributeToConnection(utils.IterableHandler):
 
 class AddConnectionToGraph(utils.IterableHandler):
     def default(self, value, **kwargs):
+        if isinstance(value, CombinedConnections):
+            # every connection that was combined gets its own edge.
+            for connection in value.connections:
+                if isinstance(connection, FunctionFuture):
+                    connection = Connection(instance=connection, attribute=None)
+                self.default(connection, **kwargs)
+            return
         if isinstance(value, Connection):
             graph = kwargs["graph"]
             v_attr = kwargs.get("attribute")

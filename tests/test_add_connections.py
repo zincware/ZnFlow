@@ -591,3 +591,81 @@ def test_add_sliced_combined_connections_error():
 
         with pytest.raises(ValueError, match="Can not combine multiple slices"):
             _ = combined[::2] + combined[1::2]
+
+
+def _edges(graph) -> list:
+    return [data for _, _, data in graph.edges(data=True)]
+
+
+def test_combined_connections_edges():
+    """A Node that is created before its dependencies runs after them."""
+    with znflow.DiGraph() as graph:
+        outs = AddOne(None)
+        lst1 = CreateList(5)
+        lst2 = CreateList(10)
+        outs.value = lst1.outs + lst2.outs
+
+    assert graph.number_of_edges() == 2
+    assert _edges(graph) == [
+        {"u_attr": "outs", "v_attr": "value"},
+        {"u_attr": "outs", "v_attr": "value"},
+    ]
+    graph.run()
+    assert outs.outs == [x + 1 for x in list(range(5)) + list(range(10))]
+
+
+def test_combined_connections_edges_from_init():
+    with znflow.DiGraph() as graph:
+        lst1 = CreateList(5)
+        lst2 = CreateList(10)
+        outs = AddOne(lst1.outs + lst2.outs)
+
+    assert graph.number_of_edges() == 2
+    graph.run()
+    assert outs.outs == [x + 1 for x in list(range(5)) + list(range(10))]
+
+
+def test_combine_edges():
+    with znflow.DiGraph() as graph:
+        lst1 = CreateList(5)
+        lst2 = CreateList(10)
+        outs = AddOne(znflow.combine([lst1, lst2], attribute="outs"))
+
+    assert graph.number_of_edges() == 2
+    graph.run()
+    assert outs.outs == [x + 1 for x in list(range(5)) + list(range(10))]
+
+
+def test_combined_connections_edges_to_function_future():
+    with znflow.DiGraph() as graph:
+        outs = add_one(create_list(5) + create_list(10))
+
+    assert graph.number_of_edges() == 2
+    assert _edges(graph) == [{"u_attr": None}, {"u_attr": None}]
+    graph.run()
+    assert outs.result == [x + 1 for x in list(range(5)) + list(range(10))]
+
+
+def test_nested_combined_connections_edges():
+    """'FunctionFuture + CombinedConnections' keeps the combination nested."""
+    with znflow.DiGraph() as graph:
+        lst1 = CreateList(5)
+        lst2 = CreateList(10)
+        combined = create_list(2) + (lst1.outs + lst2.outs)
+        assert isinstance(combined.connections[1], CombinedConnections)
+        outs = AddOne(combined)
+
+    assert graph.number_of_edges() == 3
+    graph.run()
+    assert outs.outs == [x + 1 for x in list(range(2)) + list(range(5)) + list(range(10))]
+
+
+def test_sliced_combined_connections_edges():
+    with znflow.DiGraph() as graph:
+        lst1 = CreateList(5)
+        lst2 = CreateList(10)
+        outs = AddOne((lst1.outs + lst2.outs)[::2])
+
+    assert graph.number_of_edges() == 2
+    graph.run()
+    assert outs.outs == [x + 1 for x in (list(range(5)) + list(range(10)))[::2]]
