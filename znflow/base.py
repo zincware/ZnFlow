@@ -575,10 +575,13 @@ class FunctionFuture(NodeBaseMixin):
         raise TypeError("FunctionFuture can not be appended.")
 
 
-_UNRESOLVED = (Connection, CombinedConnections, FunctionFuture)
+# The types that stand in for a value the graph has not computed yet. A 'Node' is
+# not one of them: a field that holds a 'Node' holds the object itself, so a
+# getter can read it.
+UNRESOLVED = (Connection, CombinedConnections, FunctionFuture)
 
 
-def _carries(value, types) -> bool:
+def carries(value, types) -> bool:
     """Check if the value is or contains one of the given types.
 
     Parameters
@@ -598,27 +601,7 @@ def _carries(value, types) -> bool:
     if isinstance(value, types):
         return True
     if isinstance(value, (list, tuple, set)):
-        return any(_carries(item, types) for item in value)
+        return any(carries(item, types) for item in value)
     if isinstance(value, dict):
-        return any(_carries(item, types) for item in value.values())
+        return any(carries(item, types) for item in value.values())
     return False
-
-
-def carries_unresolved(value) -> bool:
-    """Check if the value holds a connection that has no result yet.
-
-    A 'Node' is not counted here. A field that holds a 'Node' holds the object
-    itself, so a getter can read it, while a 'Connection' stands for a value
-    that only exists once the graph has run.
-
-    Parameters
-    ----------
-    value : any
-        The value to inspect.
-
-    Returns
-    -------
-    bool
-        True if the value is an unresolved connection or holds one.
-    """
-    return _carries(value, _UNRESOLVED)

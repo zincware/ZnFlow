@@ -12,15 +12,16 @@ so reading it inside a getter raises 'UnresolvedConnectionError'.
 
 Examples
 --------
->>> import znflow
 >>> import pydantic
+>>> import znflow
+>>> from znflow.pydantic import computed_field
 >>> class Source(znflow.Node, pydantic.BaseModel):
 ...     out: list = []
 ...     def run(self):
 ...         self.out = [1, 2, 3]
 >>> class Frames(znflow.Node, pydantic.BaseModel):
 ...     data: list = []
-...     @znflow.pydantic.computed_field
+...     @computed_field
 ...     def frames(self) -> list:
 ...         return [f"x({value})" for value in self.data]
 ...     def run(self): ...
@@ -140,19 +141,14 @@ def computed_field(func=None, /, **kwargs):
         The decorated attribute, or the decorator itself when called with
         keywords.
 
-    Raises
-    ------
-    TypeError
-        If the getter has no return annotation and no 'return_type' is given.
-        Pydantic needs the type to build the serialization schema.
-
     Examples
     --------
-    >>> import znflow
     >>> import pydantic
+    >>> import znflow
+    >>> from znflow.pydantic import computed_field
     >>> class Frames(znflow.Node, pydantic.BaseModel):
     ...     data: list = []
-    ...     @znflow.pydantic.computed_field
+    ...     @computed_field
     ...     def frames(self) -> list:
     ...         return [f"x({value})" for value in self.data]
     ...     def run(self): ...
@@ -163,15 +159,4 @@ def computed_field(func=None, /, **kwargs):
         return functools.partial(computed_field, **kwargs)
 
     kwargs.setdefault("repr", False)
-    getter = _getter(func)
-    if "return_type" not in kwargs:
-        annotation = getattr(getter, "__annotations__", {}).get("return")
-        if annotation is None:
-            raise TypeError(
-                f"'{getattr(getter, '__qualname__', getter)}' has no return"
-                " annotation. Annotate the getter, e.g. 'def frames(self) ->"
-                " list:', or pass 'return_type' to 'computed_field'."
-            )
-        kwargs["return_type"] = annotation
-
-    return pydantic.computed_field(GraphProperty(getter), **kwargs)
+    return pydantic.computed_field(GraphProperty(_getter(func)), **kwargs)

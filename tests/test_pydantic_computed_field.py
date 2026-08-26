@@ -7,6 +7,7 @@ import pytest
 from pydantic_core import PydanticSerializationError
 
 import znflow
+from znflow.pydantic import computed_field
 
 
 class Source(znflow.Node, pydantic.BaseModel):
@@ -19,7 +20,7 @@ class Source(znflow.Node, pydantic.BaseModel):
 class Frames(znflow.Node, pydantic.BaseModel):
     data: list = []
 
-    @znflow.pydantic.computed_field
+    @computed_field
     def frames(self) -> list:
         return [f"x({value})" for value in self.data]
 
@@ -38,7 +39,7 @@ class Scaled(znflow.Node, pydantic.BaseModel):
     factor: float = 2.0
     data: list = []
 
-    @znflow.pydantic.computed_field
+    @computed_field
     def scaled(self) -> float:
         return self.factor * 10
 
@@ -112,10 +113,11 @@ def test_reads_plain_attribute_in_graph():
 
 
 def test_missing_return_annotation():
-    with pytest.raises(TypeError, match="has no return annotation"):
+    """Pydantic asks for the type it needs to build the schema."""
+    with pytest.raises(pydantic.errors.PydanticUserError, match="return type"):
 
         class Broken(znflow.Node, pydantic.BaseModel):
-            @znflow.pydantic.computed_field
+            @computed_field
             def value(self):
                 return 1
 
@@ -126,7 +128,7 @@ def test_return_type_keyword():
     """'return_type' replaces the annotation, and keywords reach pydantic."""
 
     class Titled(znflow.Node, pydantic.BaseModel):
-        @znflow.pydantic.computed_field(return_type=int, title="Answer")
+        @computed_field(return_type=int, title="Answer")
         def value(self):
             return 42
 
@@ -176,7 +178,7 @@ def test_property_as_getter():
     class FromProperty(znflow.Node, pydantic.BaseModel):
         data: list = []
 
-        @znflow.pydantic.computed_field
+        @computed_field
         @property
         def size(self) -> int:
             return len(self.data)
@@ -201,7 +203,7 @@ def test_guard_covers_another_node():
     other = None
 
     class Reader(znflow.Node, pydantic.BaseModel):
-        @znflow.pydantic.computed_field
+        @computed_field
         def size(self) -> int:
             return len(other.data)
 
@@ -224,7 +226,7 @@ def test_a_connected_node_field_is_guarded():
     class Reader(znflow.Node, pydantic.BaseModel):
         other: Frames = None
 
-        @znflow.pydantic.computed_field
+        @computed_field
         def size(self) -> int:
             return len(self.other.data)
 
@@ -261,7 +263,7 @@ def test_getter_is_not_called_while_the_graph_is_built():
     class Counted(znflow.Node, pydantic.BaseModel):
         data: list = []
 
-        @znflow.pydantic.computed_field
+        @computed_field
         def frames(self) -> list:
             calls.append(1)
             return list(self.data)
@@ -285,7 +287,7 @@ def test_cached_property_is_rejected():
     with pytest.raises(TypeError, match="cached_property"):
 
         class Cached(znflow.Node, pydantic.BaseModel):
-            @znflow.pydantic.computed_field
+            @computed_field
             @functools.cached_property
             def value(self) -> int:
                 return 1
@@ -294,6 +296,8 @@ def test_cached_property_is_rejected():
 
 
 def test_module_is_not_pydantic():
+    import znflow.pydantic
+
     assert znflow.pydantic is not pydantic
-    assert znflow.pydantic.computed_field is not pydantic.computed_field
+    assert computed_field is not pydantic.computed_field
     assert znflow.pydantic.carries_connection is znflow.carries_connection

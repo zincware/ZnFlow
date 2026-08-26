@@ -17,7 +17,7 @@ from znflow.base import (
     Connection,
     FunctionFuture,
     NodeBaseMixin,
-    _carries,
+    carries,
 )
 
 _CONNECTION = (Connection, CombinedConnections, FunctionFuture, NodeBaseMixin)
@@ -39,7 +39,7 @@ def carries_connection(value) -> bool:
     bool
         True if the value is a connection or holds one.
     """
-    return _carries(value, _CONNECTION)
+    return carries(value, _CONNECTION)
 
 
 def _skip_connections(value, handler):
