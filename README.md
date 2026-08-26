@@ -270,3 +270,22 @@ validation of every field, so `Node(x=other.results)` behaves the same way it
 does on a dataclass. Every other value is validated as usual. Use
 `znflow.carries_connection` inside a `field_validator` or a `model_validator`,
 which see connections just like a `__post_init__` does.
+
+#### Computed fields
+
+> [!Warning] Do not use `from pydantic import computed_field` but use
+> `from znflow.pydantic import computed_field` instead.
+
+```python
+from znflow.pydantic import computed_field
+
+
+class Frames(znflow.Node, pydantic.BaseModel):
+    data: list = []
+
+    @computed_field
+    def frames(self) -> list:
+        return [f"x({value})" for value in self.data]
+
+    def run(self): ...
+```
