@@ -43,7 +43,20 @@ __all__ = [
     "resolve",
     "Group",
     "deployment",
+    "pydantic",
 ]
+
+
+def __getattr__(name):
+    """Import 'znflow.pydantic' on first use.
+
+    'pydantic' is an optional dependency, so the module is not imported with
+    the package.
+    """
+    if name == "pydantic":
+        return importlib.import_module("znflow.pydantic")
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)

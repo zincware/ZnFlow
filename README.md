@@ -270,3 +270,53 @@ validation of every field, so `Node(x=other.results)` behaves the same way it
 does on a dataclass. Every other value is validated as usual. Use
 `znflow.carries_connection` inside a `field_validator` or a `model_validator`,
 which see connections just like a `__post_init__` does.
+
+#### Computed fields
+
+`znflow.pydantic.computed_field` turns a method into a graph visible port:
+inside the graph reading it yields a `znflow.Connection`, so another `Node` can
+be connected to it, and outside the graph it is computed and part of
+`model_dump()` and of `model_json_schema(mode="serialization")`.
+
+```python
+import pydantic
+
+import znflow
+
+
+class Source(znflow.Node, pydantic.BaseModel):
+    out: list = []
+
+    def run(self):
+        self.out = [1, 2, 3]
+
+
+class Frames(znflow.Node, pydantic.BaseModel):
+    data: list = []
+
+    @znflow.pydantic.computed_field
+    def frames(self) -> list:
+        return [f"x({value})" for value in self.data]
+
+    def run(self): ...
+
+
+with znflow.DiGraph() as graph:
+    source = Source()
+    frames = Frames(data=source.out)
+    assert isinstance(frames.frames, znflow.Connection)
+
+graph.run()
+assert frames.frames == ["x(1)", "x(2)", "x(3)"]
+assert frames.model_dump() == {"data": [1, 2, 3], "frames": ["x(1)", "x(2)", "x(3)"]}
+```
+
+The getter runs with the graph disabled, so a plain field it reads is the value
+itself. Reading a field that is connected to another `Node` raises
+`znflow.exceptions.UnresolvedConnectionError`, because that value only exists
+once the graph has run.
+
+Serializing while the graph is being built dumps the connections, since there
+are no computed values yet. `model_dump_json()` is not available there: a
+computed field yields a connection back to the `Node` it belongs to, which JSON
+cannot represent.

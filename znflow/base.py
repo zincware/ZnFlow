@@ -161,6 +161,11 @@ class NodeBaseMixin:
         _in_validation : bool
             True while a framework validates an assignment. Attribute access
             returns the value itself as long as this is set.
+        _in_property_ : bool
+            True while the getter of a graph aware property runs. Attribute
+            access returns the value itself as long as this is set, and raises
+            'UnresolvedConnectionError' if that value is still a connection.
+            Set on the class, so that it has the same reach as 'disable_graph'.
         _primary_key : str
             The unique identifier of this node. Default is the 'uuid'.
         _protected_ : list[str]
@@ -173,6 +178,7 @@ class NodeBaseMixin:
     _uuid = NodeState(None)
     _in_construction = NodeState(True)
     _in_validation = NodeState(False)
+    _in_property_ = False
     _znflow_resolved = NodeState(False)
     _primary_key: str = "uuid"
 
@@ -567,3 +573,52 @@ class FunctionFuture(NodeBaseMixin):
             If the method is called.
         """
         raise TypeError("FunctionFuture can not be appended.")
+
+
+_UNRESOLVED = (Connection, CombinedConnections, FunctionFuture)
+
+
+def _carries(value, types) -> bool:
+    """Check if the value is or contains one of the given types.
+
+    Parameters
+    ----------
+    value : any
+        The value to inspect. Lists, tuples, sets and dicts are inspected
+        recursively, matching the containers 'znflow.utils.IterableHandler'
+        walks when it collects connections and replaces them by their results.
+    types : tuple
+        The types to look for.
+
+    Returns
+    -------
+    bool
+        True if the value is one of the types or holds one.
+    """
+    if isinstance(value, types):
+        return True
+    if isinstance(value, (list, tuple, set)):
+        return any(_carries(item, types) for item in value)
+    if isinstance(value, dict):
+        return any(_carries(item, types) for item in value.values())
+    return False
+
+
+def carries_unresolved(value) -> bool:
+    """Check if the value holds a connection that has no result yet.
+
+    A 'Node' is not counted here. A field that holds a 'Node' holds the object
+    itself, so a getter can read it, while a 'Connection' stands for a value
+    that only exists once the graph has run.
+
+    Parameters
+    ----------
+    value : any
+        The value to inspect.
+
+    Returns
+    -------
+    bool
+        True if the value is an unresolved connection or holds one.
+    """
+    return _carries(value, _UNRESOLVED)

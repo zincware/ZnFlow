@@ -17,6 +17,7 @@ from znflow.base import (
     Connection,
     FunctionFuture,
     NodeBaseMixin,
+    _carries,
 )
 
 _CONNECTION = (Connection, CombinedConnections, FunctionFuture, NodeBaseMixin)
@@ -38,13 +39,7 @@ def carries_connection(value) -> bool:
     bool
         True if the value is a connection or holds one.
     """
-    if isinstance(value, _CONNECTION):
-        return True
-    if isinstance(value, (list, tuple, set)):
-        return any(carries_connection(item) for item in value)
-    if isinstance(value, dict):
-        return any(carries_connection(item) for item in value.values())
-    return False
+    return _carries(value, _CONNECTION)
 
 
 def _skip_connections(value, handler):
@@ -81,6 +76,7 @@ def allow_connections(cls) -> None:
     wrap = pydantic.WrapValidator(_skip_connections)
 
     if issubclass(cls, pydantic.BaseModel):
+        _protect_pydantic_api(cls, pydantic)
         for name, field in fields.items():
             patched = copy.copy(field)
             patched.metadata = [*field.metadata, wrap]
@@ -107,6 +103,32 @@ def allow_connections(cls) -> None:
 
     _wrap_setattr(cls)
     setattr(cls, _VALIDATOR, cls.__pydantic_validator__)
+
+
+def _protect_pydantic_api(cls, pydantic) -> None:
+    """Keep the public API of a pydantic model callable inside a graph.
+
+    Inside a graph 'Node.__getattribute__' hands back a 'Connection' for every
+    public attribute, which turns 'node.model_dump()' into a call of a
+    'Connection'. The names are read from 'pydantic.BaseModel', so they follow
+    the installed version, and they are added to the class instead of to
+    'NodeBaseMixin._protected_', which every Node shares.
+
+    Parameters
+    ----------
+    cls : type
+        The 'pydantic.BaseModel' subclass to prepare.
+    pydantic : module
+        The imported 'pydantic' module.
+    """
+    protected = cls._protected_
+    missing = [
+        name
+        for name in dir(pydantic.BaseModel)
+        if name.startswith("model_") and name not in protected
+    ]
+    if missing:
+        cls._protected_ = [*protected, *missing]
 
 
 def _wrap_setattr(cls) -> None:

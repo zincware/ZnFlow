@@ -4,11 +4,13 @@ import functools
 import inspect
 import uuid
 
+from znflow import exceptions
 from znflow._pydantic import allow_connections
 from znflow.base import (
     Connection,
     FunctionFuture,
     NodeBaseMixin,
+    carries_unresolved,
     disable_graph,
     empty_graph,
     get_graph,
@@ -84,6 +86,14 @@ class Node(NodeBaseMixin):
     def __getattribute__(self, item: str):
         if item.startswith("_"):
             return super().__getattribute__(item)
+        if NodeBaseMixin._in_property_:
+            value = super().__getattribute__(item)
+            if carries_unresolved(value):
+                raise exceptions.UnresolvedConnectionError(
+                    f"'{type(self).__name__}.{item}' is connected to another Node"
+                    " and has no value yet. Run the graph before reading it."
+                )
+            return value
         if self._graph_ not in [empty_graph, None]:
             with disable_graph():
                 if item not in set(dir(self)):
