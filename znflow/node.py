@@ -4,6 +4,7 @@ import functools
 import inspect
 import uuid
 
+from znflow._pydantic import allow_connections
 from znflow.base import (
     Connection,
     FunctionFuture,
@@ -14,33 +15,46 @@ from znflow.base import (
 )
 
 
-def _mark_init_in_construction(cls, this_uuid=None):
-    if "__init__" in dir(cls):
+def _get_init(cls):
+    """Get the '__init__' of the class without any znflow wrapper.
 
-        def wrap_init(func):
-            if hasattr(func, "_znflow_func"):
-                # we wrap the original function, thereby updating the
-                # uuid to be unique.
-                func = func._znflow_func
+    A class without an own '__init__' is wrapped as well, so that
+    '_in_construction' is unset. Such a wrapper is skipped here, because a base
+    class of 'cls' may define the '__init__' that is to be wrapped.
+    """
+    for klass in cls.__mro__:
+        func = klass.__dict__.get("__init__")
+        if func is None:
+            continue
+        func = getattr(func, "_znflow_func", func)
+        if func is object.__init__ and klass is not object:
+            continue
+        return func
+    return None
 
-            @functools.wraps(cls.__init__)
-            def wrapper(self, *args, **kwargs):
+
+def _mark_init_in_construction(cls):
+    func = _get_init(cls)
+    if func is not None:
+
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            if func is object.__init__:
+                func(self)
+            else:
                 func(self, *args, **kwargs)
-                self._in_construction = False
-                if this_uuid is not None:
-                    self._uuid = this_uuid
+            object.__setattr__(self, "_in_construction", False)
+            this_uuid = getattr(self, "_uuid", None)
+            if this_uuid is not None:
+                object.__setattr__(self, "_uuid", this_uuid)
 
-            wrapper._znflow_func = func
+        wrapper._znflow_func = func
 
-            return wrapper
-
-        cls.__init__ = wrap_init(cls.__init__)
+        cls.__init__ = wrapper
     return cls
 
 
 class Node(NodeBaseMixin):
-    _in_construction = True
-
     def run(self):
         raise NotImplementedError
 
@@ -57,12 +71,9 @@ class Node(NodeBaseMixin):
             # print("TypeError: ...")
             instance = super().__new__(cls)
 
-        try:
-            instance.uuid = this_uuid
-            _mark_init_in_construction(cls, None)
-        except AttributeError:
-            # pydantic edge case
-            _mark_init_in_construction(cls, this_uuid)
+        object.__setattr__(instance, "_uuid", this_uuid)
+        allow_connections(cls)
+        _mark_init_in_construction(cls)
 
         # Connect the Node to the Graph
         graph = get_graph()
@@ -81,7 +92,7 @@ class Node(NodeBaseMixin):
                     )
 
             if item not in self._protected_:
-                if self._in_construction:
+                if self._in_construction or self._in_validation:
                     return super().__getattribute__(item)
                 return Connection(instance=self, attribute=item)
         return super().__getattribute__(item)
