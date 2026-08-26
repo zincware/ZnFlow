@@ -93,13 +93,21 @@ class DiGraph(nx.MultiDiGraph):
         for node in list(self.nodes):  # create a copy of the keys
             node_instance = self.nodes[node]["value"]
             if isinstance(node_instance, Node):
+                if exc_type is None and node_instance._uuid is None:
+                    raise TypeError(
+                        f"'{type(node_instance).__name__}' dropped its znflow state"
+                        " during '__init__'. Please use one of the supported node"
+                        " bases, e.g. 'pydantic.BaseModel' or a dataclass."
+                    )
                 # TODO only update Nodes if the graph is not empty
                 if node_instance._znflow_resolved:
                     continue
                 self._update_node_attributes(
                     node_instance, handler.AttributeToConnection()
                 )
-                node_instance._znflow_resolved = True
+                # 'object.__setattr__' reaches the 'NodeState' descriptor while
+                # bypassing the validated '__setattr__' of a pydantic class.
+                object.__setattr__(node_instance, "_znflow_resolved", True)
             elif isinstance(node_instance, FunctionFuture):
                 pass  # moved to add_node
             log.debug(f"Node {node} ({node_instance}) was added to the graph.")

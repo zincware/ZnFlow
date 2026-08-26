@@ -1,4 +1,6 @@
 import dataclasses
+import pickle
+import uuid
 
 import attrs
 import pydantic
@@ -70,6 +72,55 @@ class PydanticNode(pydantic.BaseModel, znflow.Node):
         return znflow.get_attribute(self, "value")
 
 
+class PydanticValidateAssignmentNode(pydantic.BaseModel, znflow.Node):
+    model_config = pydantic.ConfigDict(validate_assignment=True)
+
+    value: pydantic.SkipValidation[int]
+
+    def run(self):
+        self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
+
+@pydantic.dataclasses.dataclass
+class PydanticDataclassNode(znflow.Node):
+    value: pydantic.SkipValidation[int]
+
+    def run(self):
+        self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
+
+@pydantic.dataclasses.dataclass(config=pydantic.ConfigDict(validate_assignment=True))
+class PydanticDataclassValidateAssignmentNode(znflow.Node):
+    value: pydantic.SkipValidation[int]
+
+    def run(self):
+        self.value += 1
+
+    @property
+    def output(self):
+        return znflow.get_attribute(self, "value")
+
+
+NODES = [
+    PlainNode,
+    DataclassNode,
+    ZnInitNode,
+    AttrsNode,
+    PydanticNode,
+    PydanticValidateAssignmentNode,
+    PydanticDataclassNode,
+    PydanticDataclassValidateAssignmentNode,
+]
+
+
 @znflow.nodify
 def add(value):
     return value
@@ -80,9 +131,7 @@ def compute_sum(*args):
     return sum(args)
 
 
-@pytest.mark.parametrize(
-    "cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode, PydanticNode]
-)
+@pytest.mark.parametrize("cls", NODES + [add])
 def test_Node_init(cls):
     with pytest.raises((TypeError, AttributeError, pydantic.ValidationError)):
         # TODO only raise TypeError and not AttributeError when TypeError is expected.
@@ -91,9 +140,7 @@ def test_Node_init(cls):
             cls()
 
 
-@pytest.mark.parametrize(
-    "cls", [PlainNode, DataclassNode, ZnInitNode, add, AttrsNode, PydanticNode]
-)
+@pytest.mark.parametrize("cls", NODES + [add])
 def test_Node(cls):
     with znflow.DiGraph() as graph:
         node = cls(value=42)
@@ -111,12 +158,8 @@ def test_Node(cls):
     assert graph.nodes[node.uuid]["value"] is node
 
 
-@pytest.mark.parametrize(
-    "cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
-)
-@pytest.mark.parametrize(
-    "cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
-)
+@pytest.mark.parametrize("cls2", NODES)
+@pytest.mark.parametrize("cls1", NODES)
 def test_ConnectionNodeNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -153,9 +196,7 @@ def test_ConnectionNodifyNodify(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls1", [add])
-@pytest.mark.parametrize(
-    "cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
-)
+@pytest.mark.parametrize("cls2", NODES)
 def test_ConnectionNodeNodify(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -174,9 +215,7 @@ def test_ConnectionNodeNodify(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls2", [add])
-@pytest.mark.parametrize(
-    "cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
-)
+@pytest.mark.parametrize("cls1", NODES)
 def test_ConnectionNodifyNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -192,9 +231,7 @@ def test_ConnectionNodifyNode(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls2", [compute_sum])
-@pytest.mark.parametrize(
-    "cls1", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
-)
+@pytest.mark.parametrize("cls1", NODES)
 def test_ConnectionNodifyMultiNode(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(value=42)
@@ -217,9 +254,7 @@ def test_ConnectionNodifyMultiNode(cls1, cls2):
 
 
 @pytest.mark.parametrize("cls1", [compute_sum])
-@pytest.mark.parametrize(
-    "cls2", [PlainNode, DataclassNode, ZnInitNode, AttrsNode, PydanticNode]
-)
+@pytest.mark.parametrize("cls2", NODES)
 def test_ConnectionNodeMultiNodify(cls1, cls2):
     with znflow.DiGraph() as graph:
         node1 = cls1(42)
@@ -259,6 +294,66 @@ def test_Connection():
     assert edge is not None
     assert edge[0]["u_attr"] is None
     assert edge[0]["v_attr"] == "value"
+
+
+@pytest.mark.parametrize("cls", NODES)
+def test_uuid_outside_graph(cls):
+    """Every node base keeps the uuid written by 'Node.__new__'."""
+    node = cls(value=42)
+    assert isinstance(node.uuid, uuid.UUID)
+
+
+@pytest.mark.parametrize("cls", NODES)
+def test_uuid_after_run(cls):
+    with znflow.DiGraph() as graph:
+        node1 = cls(value=42)
+        node2 = cls(value=node1.value)
+
+    uuids = (node1.uuid, node2.uuid)
+    graph.run()
+
+    assert (node1.uuid, node2.uuid) == uuids
+    assert node1.uuid in graph
+    assert node2.uuid in graph
+    assert znflow.get_attribute(node1, "value") == 43
+    assert znflow.get_attribute(node2, "value") == 44
+
+
+# 'pickle' carries the node state inside the instance '__dict__'.
+PICKLED_NODES = [
+    PlainNode,
+    DataclassNode,
+    ZnInitNode,
+    PydanticNode,
+    PydanticValidateAssignmentNode,
+    PydanticDataclassNode,
+    PydanticDataclassValidateAssignmentNode,
+]
+
+
+@pytest.mark.parametrize("cls", PICKLED_NODES)
+def test_pickle_keeps_uuid(cls):
+    node = cls(value=42)
+    restored = pickle.loads(pickle.dumps(node))
+    assert restored.uuid == node.uuid
+
+
+def test_node_state_dropped():
+    """A base that drops the znflow state fails where the graph closes."""
+    with pytest.raises(TypeError, match="dropped its znflow state"):
+        with znflow.DiGraph():
+            node = DataclassNode(value=42)
+            object.__setattr__(node, "_uuid", None)
+
+
+@pytest.mark.parametrize("cls", [PydanticNode, PydanticValidateAssignmentNode])
+def test_pydantic_schema(cls):
+    """The znflow state stays out of the pydantic contract."""
+    node = cls(value=42)
+
+    assert node.model_dump() == {"value": 42}
+    assert node.model_dump_json() == '{"value":42}'
+    assert list(cls.model_json_schema()["properties"]) == ["value"]
 
 
 def test_CheckWrapInit():
