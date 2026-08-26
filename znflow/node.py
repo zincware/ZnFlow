@@ -4,6 +4,7 @@ import functools
 import inspect
 import uuid
 
+from znflow._pydantic import allow_connections
 from znflow.base import (
     Connection,
     FunctionFuture,
@@ -14,26 +15,42 @@ from znflow.base import (
 )
 
 
+def _get_init(cls):
+    """Get the '__init__' of the class without any znflow wrapper.
+
+    A class without an own '__init__' is wrapped as well, so that
+    '_in_construction' is unset. Such a wrapper is skipped here, because a base
+    class of 'cls' may define the '__init__' that is to be wrapped.
+    """
+    for klass in cls.__mro__:
+        func = klass.__dict__.get("__init__")
+        if func is None:
+            continue
+        func = getattr(func, "_znflow_func", func)
+        if func is object.__init__ and klass is not object:
+            continue
+        return func
+    return None
+
+
 def _mark_init_in_construction(cls):
-    if "__init__" in dir(cls):
+    func = _get_init(cls)
+    if func is not None:
 
-        def wrap_init(func):
-            if hasattr(func, "_znflow_func"):
-                func = func._znflow_func
-
-            @functools.wraps(cls.__init__)
-            def wrapper(self, *args, **kwargs):
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            if func is object.__init__:
+                func(self)
+            else:
                 func(self, *args, **kwargs)
-                object.__setattr__(self, "_in_construction", False)
-                this_uuid = getattr(self, "_uuid", None)
-                if this_uuid is not None:
-                    object.__setattr__(self, "_uuid", this_uuid)
+            object.__setattr__(self, "_in_construction", False)
+            this_uuid = getattr(self, "_uuid", None)
+            if this_uuid is not None:
+                object.__setattr__(self, "_uuid", this_uuid)
 
-            wrapper._znflow_func = func
+        wrapper._znflow_func = func
 
-            return wrapper
-
-        cls.__init__ = wrap_init(cls.__init__)
+        cls.__init__ = wrapper
     return cls
 
 
@@ -55,6 +72,7 @@ class Node(NodeBaseMixin):
             instance = super().__new__(cls)
 
         object.__setattr__(instance, "_uuid", this_uuid)
+        allow_connections(cls)
         _mark_init_in_construction(cls)
 
         # Connect the Node to the Graph

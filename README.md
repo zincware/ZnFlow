@@ -260,4 +260,13 @@ ZnFlow includes tests to ensure compatibility with:
 - `dataclasses`
 - `ZnInit`
 - `attrs`
-- `pydantic` (experimental)
+- `pydantic`
+
+### Pydantic
+
+Between building the graph and `graph.run()` a field holds a `znflow.Connection`
+in place of the actual value. ZnFlow lets these connections pass the pydantic
+validation of every field, so `Node(x=other.results)` behaves the same way it
+does on a dataclass. Every other value is validated as usual. Use
+`znflow.carries_connection` inside a `field_validator` or a `model_validator`,
+which see connections just like a `__post_init__` does.

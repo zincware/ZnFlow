@@ -5,6 +5,7 @@ import logging
 import sys
 
 from znflow import deployment, exceptions
+from znflow._pydantic import carries_connection
 from znflow.base import (
     CombinedConnections,
     Connection,
@@ -35,6 +36,7 @@ __all__ = [
     "Property",
     "CombinedConnections",
     "combine",
+    "carries_connection",
     "exceptions",
     "get_graph",
     "empty_graph",
