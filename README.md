@@ -33,9 +33,11 @@ function.
 ```python
 import znflow
 
+
 @znflow.nodify
 def compute_mean(x, y):
     return (x + y) / 2
+
 
 print(compute_mean(2, 8))
 # >>> 5
@@ -71,9 +73,11 @@ classes that inherit from `znflow.Node`.
 import znflow
 import dataclasses
 
+
 @znflow.nodify
 def compute_mean(x, y):
     return (x + y) / 2
+
 
 @dataclasses.dataclass
 class ComputeMean(znflow.Node):
@@ -84,6 +88,7 @@ class ComputeMean(znflow.Node):
 
     def run(self):
         self.results = (self.x + self.y) / 2
+
 
 with znflow.DiGraph() as graph:
     n1 = ComputeMean(2, 8)
@@ -114,9 +119,11 @@ import znflow
 import dataclasses
 from dask.distributed import Client
 
+
 @znflow.nodify
 def compute_mean(x, y):
     return (x + y) / 2
+
 
 @dataclasses.dataclass
 class ComputeMean(znflow.Node):
@@ -197,8 +204,10 @@ Here's an example of how to use `znflow.get_attribute`:
 ```python
 import znflow
 
+
 class POW2(znflow.Node):
     """Compute the square of x."""
+
     x_factor: float = 0.5
     results: float = None
     _x: float = None
@@ -217,13 +226,13 @@ class POW2(znflow.Node):
     def run(self):
         self.results = self.x**2
 
+
 with znflow.DiGraph() as graph:
     n1 = POW2()
     n1.x = 4.0
 
 graph.run()
 assert n1.results == 4.0
-
 ```
 
 Instead, you can also use the `znflow.disable_graph` decorator / context manager
@@ -240,9 +249,11 @@ from the graph structure. To create a group you can use
 ```python
 import znflow
 
+
 @znflow.nodify
 def compute_mean(x, y):
     return (x + y) / 2
+
 
 graph = znflow.DiGraph()
 
